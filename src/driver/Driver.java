@@ -44,86 +44,12 @@ public class Driver{
         jframe.setVisible(true);
         //jframe.setTitle(Integer.toString(id));
 
-        PipelineBuilder builder = Pipeline.builder();
+        Mat m = webcam.getOneFrame();
 
-        PipelineFunction<Void, Mat> take_image = (t) -> {
-            //System.out.println("Going to get an image");
-    		Mat m = webcam.getOneFrame();
-            //System.out.println("Got an image");
-    		return m;
-		};
-        PipelineFunction<Mat, Mat> process_top = (t) -> {
-            List<Mat> mats = matCollectionToList(t);
-            assert mats.size() == 1 : "Incorrect number of mats.";
-            Mat src = mats.get(0);
-            Mat filtered = LineImpose.filterWithClose(src, 130, 180);
-            Mat out = LineImpose.mask(src, filtered);
-            Mat lines = LineImpose.findLines(out);
-            //lines = LineFilter.removeLines(lines);
-
-            /*setMatrix(filtered);
-            jframe.repaint();*/
-            //add src and lines
-            /*Mat destination = new Mat();
-            org.opencv.core.Core.merge(Arrays.asList(src, lines), destination);
-            //LineImpose.draw(t, lines);*/
-            return lines;
-		};
-		PipelineFunction<Mat, Mat> process_bot = (t) -> {
-    		List<Mat> mats = matCollectionToList(t);
-            assert mats.size() == 1 : "Incorrect number of mats.";
-            Mat src = mats.get(0);
-            Mat filtered = LineImpose.filterWithClose(src, 165, 175);
-            Mat out = LineImpose.mask(src, filtered);
-            Mat lines = LineImpose.findLines(out);
-            lines = LineFilter.removeLines(lines);
-
-            /*setMatrix(filtered);
-            jframe.repaint();*/
-            //add src and lines
-            /*Mat destination = new Mat();
-            org.opencv.core.Core.merge(Arrays.asList(src, lines), destination);
-            //LineImpose.draw(t, lines);*/
-            return lines;
-		};
-        PipelineFunction<Mat, Mat> dummy = (t) -> {
-            List<Mat> mats = matCollectionToList(t);
-            assert mats.size() == 1 : "Incorrect number of mats.";
-            return mats.get(0);
-        };
-		PipelineFunction<Mat, Void> cast_image = (t) -> {
-			List<Mat> mats = matCollectionToList(t);
-            int originalIndex = -1;
-            for(int i = 0; i < mats.size(); i++){
-                if(mats.get(i).channels() == 3){
-                    originalIndex = i;
-                    break;
-                }
-            }
-            assert originalIndex != -1 : "No orignal matrix received.";
-            Mat original = mats.get(originalIndex);
-            for(int i = 0; i < mats.size(); i++){
-                if(i == originalIndex){
-                    continue;
-                }
-                LineImpose.draw(original, mats.get(i));
-            }
-			setMatrix(original);
-            jframe.repaint();
-			return null;
-		};
-        Thread.UncaughtExceptionHandler handler = (th, ex) ->{
-            ex.printStackTrace();
-            System.exit(1);
-        };
-        builder.setFramerate(50);
-        builder.setDefaultUncaughtExceptionHandler(handler);
-        builder.addThreads(Void.class, Mat.class, NodeBehavior.REPLACING, take_image);
-        builder.addThreads(Mat.class, Mat.class, NodeBehavior.BLOCKING, process_top, process_bot, dummy);
-        builder.addThreads(Mat.class, Void.class, cast_image);
-		Pipeline p = builder.build();
-		Thread.sleep(1000);
-		p.start();
+        //Might want some more preprocessing on this one, like using a CLI library or ensuring that the file exists.
+        String arucoConfigFilePath = args[0];
+        Detector detector = new Detector(arucoConfigFilePath);
+        Pair<Mat, Mat> matrices = Detector.detectMarkers(m);
 	}
 
 	public void paint(Graphics g){
