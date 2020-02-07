@@ -16,15 +16,10 @@ import java.awt.image.*;
 import java.util.*;
 
 public class Driver{
-	/*
-		1. Initialize videocap
-		2. Spawn threads for 
-	*/
 	private static VideoCap webcam = new VideoCap();
     private static JFrame jframe;
 	private static JPanel contentPane;
     private static Mat matrix;
-	public static void setMatrix(Mat mat) {matrix = mat;}
 
 	public static void main(String[] args) throws InterruptedException {
         jframe = new JFrame(){
@@ -44,13 +39,24 @@ public class Driver{
         jframe.setVisible(true);
         //jframe.setTitle(Integer.toString(id));
 
-        Mat m = webcam.getOneFrame();
-
         //Might want some more preprocessing on this one, like using a CLI library or ensuring that the file exists.
         String arucoConfigFilePath = args[0];
         Detector detector = new Detector(arucoConfigFilePath);
-        Pair<Mat, Mat> matrices = Detector.detectMarkers(m);
+        //Or something like this. This class may be named differently, take arguments in its constructor, or use a producer method.
+        Simulation s = new CrossectionalSimulation();
+        SimulationFrame frame = new SimulationFrame(s);
+
+        while(true){
+            Mat m = webcam.getOneFrame();
+            Pair<Mat, Mat> matrices = detector.detectMarkers(m);
+            frame.simulate(m, matrices.first(), matrices.second());
+            frame.repaint();
+        }
 	}
+
+    public static void setMatrix(Mat mat) {
+        matrix = mat;
+    }
 
 	public void paint(Graphics g){
         g = contentPane.getGraphics();
@@ -60,7 +66,7 @@ public class Driver{
 	/**
     Not sure what this does to be honest.
     */
-    private static BufferedImage getSpace(Mat mat) {
+    private static BufferedImage matToBufferedImage(Mat mat) {
         int type = 0;
         if (mat.channels() == 1) {
             type = BufferedImage.TYPE_BYTE_GRAY;
@@ -81,19 +87,11 @@ public class Driver{
     */
     private static BufferedImage getImage(Mat lined){
         // Initialize global img to buffered image
-        BufferedImage img = getSpace(lined);
+        BufferedImage img = matToBufferedImage(lined);
         WritableRaster raster = img.getRaster();
         DataBufferByte dataBuffer = (DataBufferByte) raster.getDataBuffer();
         byte[] data = dataBuffer.getData();
         lined.get(0, 0, data);
         return img;
-    }
-
-    private static List<Mat> matCollectionToList(Collection<? extends Mat> t){
-        List<Mat> answer = new LinkedList<Mat>();
-        for(Mat element : t){
-            answer.add(element.clone());
-        }
-        return answer;
-    }   
+    } 
 }
