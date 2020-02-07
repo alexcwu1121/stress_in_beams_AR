@@ -42,8 +42,7 @@ public class Driver{
         //Might want some more preprocessing on this one, like using a CLI library or ensuring that the file exists.
         String arucoConfigFilePath = args[0];
         Detector detector = new Detector(arucoConfigFilePath);
-        //Or something like this. This class may be named differently, take arguments in its constructor, or use a producer method.
-        Simulation s = new CrossectionalSimulation();
+        Simulation s = NullSimulation.get();
         SimulationFrame frame = new SimulationFrame(s);
 
         while(true){
