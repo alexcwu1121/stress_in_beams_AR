@@ -21,7 +21,7 @@ public class Detector {
     private static DetectorParameters params;
 
     public Detector(String detectorConfig) {
-        params = new DetectorParameters();
+        params = DetectorParameters.create();
         readDetectorParameters(detectorConfig);
     }
 
@@ -32,13 +32,13 @@ public class Detector {
             params.set_adaptiveThreshWinSizeMin(obj.getInt("adaptiveThreshWinSizeMin"));
             params.set_adaptiveThreshWinSizeMax(obj.getInt("adaptiveThreshWinSizeMax"));
             params.set_adaptiveThreshWinSizeStep(obj.getInt("adaptiveThreshWinSizeStep"));
-            params.set_adaptiveThreshConstant(obj.getDouble("params.adaptiveThreshConstant"));
+            params.set_adaptiveThreshConstant(obj.getDouble("adaptiveThreshConstant"));
             params.set_minMarkerPerimeterRate(obj.getDouble("minMarkerPerimeterRate"));
             params.set_maxMarkerPerimeterRate(obj.getDouble("maxMarkerPerimeterRate"));
             params.set_polygonalApproxAccuracyRate(obj.getDouble("polygonalApproxAccuracyRate"));
-            params.set_minCornerDistanceRate(obj.getDouble("minCornerDistanceRate"));
+            params.set_minCornerDistanceRate(obj.getDouble("minCornerDistance"));
             params.set_minDistanceToBorder(obj.getInt("minDistanceToBorder"));
-            params.set_minMarkerDistanceRate(obj.getDouble("minMarkerDistanceRate"));
+            params.set_minMarkerDistanceRate(obj.getDouble("minMarkerDistance"));
             params.set_cornerRefinementMethod(obj.getInt("cornerRefinementMethod"));
             params.set_cornerRefinementWinSize(obj.getInt("cornerRefinementWinSize"));
             params.set_cornerRefinementMaxIterations(obj.getInt("cornerRefinementMaxIterations"));
@@ -64,6 +64,7 @@ public class Detector {
     }
 
     public static void main(String[] args){
+        System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
         Detector test = new Detector("detector_params.json");
     }
 
