@@ -57,8 +57,29 @@ public class Detector {
         }
     }
 
-    public static Mat detectMarkers(Mat src){
+
+    public static readCameraParameters(string filename, Mat camMatrix, Mat distCoeffs) {
+        FileStorage fs(filename, FileStorage::READ);
+        if(!fs.isOpened()){
+            return false;
+        }
+        fs["camera_matrix"] >> camMatrix;
+        fs["distortion_coefficients"] >> distCoeffs;
+        return true;
+    }
+
+    public static Mat detectMarkers(Mat src, int dict_id, boolean estimatePose){
         // return an empty mat containing all lines
+        markers = getPredefinedDictionary(Aruco.PREDEFINED_DICTIONARY_NAME(dict_id));
+
+        Mat camMatrix, distCoeffs;
+        if(estimatePose) {
+            boolean readOk = readCameraParameters(parser.get<string>("c"), camMatrix, distCoeffs);
+            if(!readOk) {
+                cerr << "Invalid camera file" << endl;
+                return 0;
+            }
+        }
         //detectMarkers(image, dictionary, corners, ids, detectorParams, rejected);
         return src;
     }
