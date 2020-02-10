@@ -5,6 +5,7 @@ import org.opencv.core.*;
 import org.opencv.core.Point;
 import org.opencv.imgproc.Imgproc;
 import org.opencv.aruco.*;
+import java.io.FileInputStream;
 import org.opencv.imgcodecs.*;
 import java.io.*;
 import java.util.Scanner;
@@ -99,6 +100,10 @@ public class Detector {
 
     public static void main(String[] args){
         System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
+        Detector test = new Detector("detector_params.json");
+    }
+
+    public static void main(String[] args){
         Detector test = new Detector("detector_params.json");
     }
 
