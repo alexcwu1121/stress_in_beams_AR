@@ -103,9 +103,4 @@ public class Detector {
         Detector test = new Detector("detector_params.json");
     }
 
-    public static void main(String[] args){
-        System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
-        Detector test = new Detector("detector_params.json");
-    }
-
 }
