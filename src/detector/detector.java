@@ -5,52 +5,66 @@ import org.opencv.core.*;
 import org.opencv.core.Point;
 import org.opencv.imgproc.Imgproc;
 import org.opencv.aruco.*;
+import java.io.FileInputStream;
 import org.opencv.imgcodecs.*;
+import java.io.File;
+import java.util.Scanner;
+
+import org.json.JSONArray;
+import org.json.JSONObject;
+import java.io.FileReader;
 
 public class Detector {
 
     // no idea if these types are right
     private static Dictionary markers;
-    private List<Integer> r_ids;
-    private List<Integer> l_ids;
-    private Ptr<aruco::DetectorParameters> params;
+    private static DetectorParameters params;
 
-    public Detector(File detector_config) {
-        params = aruco.DetectorParameters.create();
-        readDetectorParameters();
+    public Detector(String detectorConfig) {
+        params = new DetectorParameters();
+        readDetectorParameters(detectorConfig);
     }
 
-    private static readDetectorParameters(string filename, Ptr<aruco::DetectorParameters> params) {
-        FileStorage fs(filename, FileStorage::READ);
-        if(!fs.isOpened())
-            return false;
-        fs["adaptiveThreshWinSizeMin"] >> params->adaptiveThreshWinSizeMin;
-        fs["adaptiveThreshWinSizeMax"] >> params->adaptiveThreshWinSizeMax;
-        fs["adaptiveThreshWinSizeStep"] >> params->adaptiveThreshWinSizeStep;
-        fs["adaptiveThreshConstant"] >> params->adaptiveThreshConstant;
-        fs["minMarkerPerimeterRate"] >> params->minMarkerPerimeterRate;
-        fs["maxMarkerPerimeterRate"] >> params->maxMarkerPerimeterRate;
-        fs["polygonalApproxAccuracyRate"] >> params->polygonalApproxAccuracyRate;
-        fs["minCornerDistanceRate"] >> params->minCornerDistanceRate;
-        fs["minDistanceToBorder"] >> params->minDistanceToBorder;
-        fs["minMarkerDistanceRate"] >> params->minMarkerDistanceRate;
-        fs["cornerRefinementMethod"] >> params->cornerRefinementMethod;
-        fs["cornerRefinementWinSize"] >> params->cornerRefinementWinSize;
-        fs["cornerRefinementMaxIterations"] >> params->cornerRefinementMaxIterations;
-        fs["cornerRefinementMinAccuracy"] >> params->cornerRefinementMinAccuracy;
-        fs["markerBorderBits"] >> params->markerBorderBits;
-        fs["perspectiveRemovePixelPerCell"] >> params->perspectiveRemovePixelPerCell;
-        fs["perspectiveRemoveIgnoredMarginPerCell"] >> params->perspectiveRemoveIgnoredMarginPerCell;
-        fs["maxErroneousBitsInBorderRate"] >> params->maxErroneousBitsInBorderRate;
-        fs["minOtsuStdDev"] >> params->minOtsuStdDev;
-        fs["errorCorrectionRate"] >> params->errorCorrectionRate;
-        return true;
-}
+    public static boolean readDetectorParameters(String filename){
+        try{
+            String content = new Scanner(new File(filename)).useDelimiter("\\Z").next();
+            JSONObject obj = new JSONObject(content);
+            params.set_adaptiveThreshWinSizeMin(obj.getInt("adaptiveThreshWinSizeMin"));
+            params.set_adaptiveThreshWinSizeMax(obj.getInt("adaptiveThreshWinSizeMax"));
+            params.set_adaptiveThreshWinSizeStep(obj.getInt("adaptiveThreshWinSizeStep"));
+            params.set_adaptiveThreshConstant(obj.getDouble("params.adaptiveThreshConstant"));
+            params.set_minMarkerPerimeterRate(obj.getDouble("minMarkerPerimeterRate"));
+            params.set_maxMarkerPerimeterRate(obj.getDouble("maxMarkerPerimeterRate"));
+            params.set_polygonalApproxAccuracyRate(obj.getDouble("polygonalApproxAccuracyRate"));
+            params.set_minCornerDistanceRate(obj.getDouble("minCornerDistanceRate"));
+            params.set_minDistanceToBorder(obj.getInt("minDistanceToBorder"));
+            params.set_minMarkerDistanceRate(obj.getDouble("minMarkerDistanceRate"));
+            params.set_cornerRefinementMethod(obj.getInt("cornerRefinementMethod"));
+            params.set_cornerRefinementWinSize(obj.getInt("cornerRefinementWinSize"));
+            params.set_cornerRefinementMaxIterations(obj.getInt("cornerRefinementMaxIterations"));
+            params.set_cornerRefinementMinAccuracy(obj.getDouble("cornerRefinementMinAccuracy"));
+            params.set_markerBorderBits(obj.getInt("markerBorderBits"));
+            params.set_perspectiveRemovePixelPerCell(obj.getInt("perspectiveRemovePixelPerCell"));
+            params.set_perspectiveRemoveIgnoredMarginPerCell(obj.getDouble("perspectiveRemoveIgnoredMarginPerCell"));
+            params.set_maxErroneousBitsInBorderRate(obj.getDouble("maxErroneousBitsInBorderRate"));
+            params.set_minOtsuStdDev(obj.getDouble("minOtsuStdDev"));
+            params.set_errorCorrectionRate(obj.getDouble("errorCorrectionRate"));
 
-    public static Mat detectMarkers(){
+            return true;
+        }catch (Exception ex) {
+            ex.printStackTrace();
+            return false;
+        }
+    }
+
+    public static Mat detectMarkers(Mat src){
         // return an empty mat containing all lines
-        detectMarkers(image, dictionary, corners, ids, detectorParams, rejected);
+        //detectMarkers(image, dictionary, corners, ids, detectorParams, rejected);
         return src;
+    }
+
+    public static void main(String[] args){
+        Detector test = new Detector("detector_params.json");
     }
 
 }
