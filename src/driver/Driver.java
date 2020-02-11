@@ -1,10 +1,11 @@
 package driver;
 
-import concurrency.*;
-import imageprocessing.*;
-import configs.*;
+//import concurrency.*;
+//import imageprocessing.*;
+//import configs.*;
 import java.lang.Math;
 import org.opencv.core.*;
+import org.opencv.aruco.*;
 import org.opencv.core.Point;
 import org.opencv.imgproc.Imgproc;
 
@@ -22,33 +23,35 @@ public class Driver{
     private static Mat matrix;
 
 	public static void main(String[] args) throws InterruptedException {
-        jframe = new JFrame(){
+        /*jframe = new JFrame(){
             @Override
             public void paint(Graphics g){
                 if(matrix != null){
                     g.drawImage(getImage(matrix), 0, 0, this);
                 }
             }
-        };
-		jframe.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        };*/
+		/*jframe.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         jframe.setBounds(0, 0, 1280, 720);
         contentPane = new JPanel();
         contentPane.setBorder(new EmptyBorder(0, 0, 0, 0));
         jframe.setContentPane(contentPane);
         contentPane.setLayout(null);
-        jframe.setVisible(true);
+        jframe.setVisible(true);*/
         //jframe.setTitle(Integer.toString(id));
 
         //Might want some more preprocessing on this one, like using a CLI library or ensuring that the file exists.
-        String arucoConfigFilePath = args[0];
-        Detector detector = new Detector(arucoConfigFilePath);
+        //String arucoConfigFilePath = args[0];
+        //Detector detector = new Detector(arucoConfigFilePath);
         Simulation s = NullSimulation.get();
         SimulationFrame frame = new SimulationFrame(s);
 
         while(true){
             Mat m = webcam.getOneFrame();
-            Pair<Mat, Mat> matrices = detector.detectMarkers(m);
-            frame.simulate(m, matrices.first(), matrices.second());
+            //Pair<Mat, Mat> matrices = detector.detectMarkers(m);
+            //Pair<Mat, Mat> cameraInfo = detector.getCameraInfo(m);
+            //frame.simulate(m, matrices.first(), matrices.second(), cameraInfo.first(), cameraInfo.second());
+            frame.simulate(m, new Mat(), new Mat(), new Mat(), new Mat());
             frame.repaint();
         }
 	}
