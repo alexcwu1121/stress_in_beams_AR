@@ -31,11 +31,11 @@ public class SimulationFrame extends JFrame {
 		simulation = s;
 	}
 
-	public void simulate(Mat base, Mat rotationMatrix, Mat translationMatrix){
-		matrix = simulation.run(base, rotationMatrix, translationMatrix);
+	public void simulate(Mat base, Mat rotationMatrix, Mat translationMatrix, Mat cameraMatrix, Mat distCoeffs){
+		matrix = simulation.run(base, rotationMatrix, translationMatrix, cameraMatrix, distCoeffs);
 	}
 
-	public void Paint(Graphics g){
+	public void paint(Graphics g){
 		if(matrix != null){
             g.drawImage(getImage(matrix), 0, 0, this);
         }

@@ -1,5 +1,7 @@
 package driver;
 
+import org.opencv.core.*;
+
 /**Simulation class made entirely for example/test purposes.
 This simulation's run method simply returns the base matrix.
 */
@@ -13,11 +15,11 @@ public class NullSimulation implements Simulation {
 
 	private NullSimulation(){}
 
-	public NullSimulation get(){
+	public static NullSimulation get(){
 		return singleton;
 	}
 
-	public Mat run(Mat baseMatrix, Mat rotationMatrix, Mat translationMatrix){
+	public Mat run(Mat baseMatrix, Mat rotationMatrix, Mat translationMatrix, Mat cameraMatrix, Mat distCoeffs){
 		return baseMatrix;
 	}
 }
