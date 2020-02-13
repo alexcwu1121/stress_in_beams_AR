@@ -1,6 +1,5 @@
 package driver;
 
-
 import org.opencv.core.*;
 
 /**Interface representing a specific type of simulation.
