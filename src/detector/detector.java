@@ -5,13 +5,13 @@ import org.opencv.core.*;
 import org.opencv.core.Point;
 import org.opencv.imgproc.Imgproc;
 import org.opencv.aruco.*;
-import java.io.FileInputStream;
 import org.opencv.imgcodecs.*;
 import java.io.*;
 import java.util.Scanner;
 
 import org.json.*;
 import java.io.FileWriter;
+
 
 public class Detector {
 
