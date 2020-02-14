@@ -12,7 +12,6 @@ import java.util.Scanner;
 import org.json.*;
 import java.io.FileWriter;
 
-
 public class Detector {
 
     // no idea if these types are right
