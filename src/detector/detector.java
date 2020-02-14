@@ -8,6 +8,9 @@ import org.opencv.aruco.*;
 import org.opencv.imgcodecs.*;
 import java.io.*;
 import java.util.Scanner;
+import util.*;
+import java.util.List;
+import java.util.LinkedList;
 
 import org.json.*;
 import java.io.FileWriter;
@@ -23,6 +26,12 @@ public class Detector {
     public Detector(String detectorConfig, String cameraConfig) throws IOException {
         this.readDetectorParameters(detectorConfig);
         this.readCameraParameters(cameraConfig);
+    }
+
+    public Detector(String detectorConfig) throws IOException {
+        this.readDetectorParameters(detectorConfig);
+        //calibrate/save camera parameters
+        //this.readCameraParameters(cameraConfig);
     }
 
     private void readDetectorParameters(String filename) throws IOException {
@@ -90,16 +99,20 @@ public class Detector {
         List<Mat> corners = new LinkedList<Mat>();
         Mat ids = new Mat();
         List<Mat> rejectedImgPoints = new LinkedList<Mat>();
-        Aruco.detectMarkers(src, markers, corners, ids, this.parameters, rejectedImgPoints, this.cameraMatrix, this.distCoeffs);
+        Aruco.detectMarkers(src, markers, corners, ids, this.params, rejectedImgPoints, this.cameraMatrix, this.distCoeffs);
         Mat rvecs = new Mat();
         Mat tvecs = new Mat();
-        Aruco.estimatePoseSingleMarkers(corners, 1.0, this.cameraMatrix, this.distCoeffs, rvecs, tvecs);
+        Aruco.estimatePoseSingleMarkers(corners, 1.0f, this.cameraMatrix, this.distCoeffs, rvecs, tvecs);
         return new Pair<Mat, Mat>(rvecs, tvecs);
     }
 
     public static void main(String[] args){
         System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
-        Detector test = new Detector("detector_params.json");
+        try{
+            Detector test = new Detector("detector_params.json");
+        }catch (Exception ex) {
+            ex.printStackTrace();
+        }
     }
 
 }
