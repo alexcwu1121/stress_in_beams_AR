@@ -10,6 +10,7 @@ import java.io.*;
 import java.util.Scanner;
 
 import org.json.*;
+import java.io.FileWriter;
 
 public class Detector {
 
@@ -49,15 +50,35 @@ public class Detector {
         params.set_errorCorrectionRate(obj.getDouble("errorCorrectionRate"));
     }
 
+    public static boolean saveCameraParams(String filename, Size imageSize, float aspectRatio, int flags, Mat cameraMatrix, Mat distCoeffs, double totalAvgErr){
+        JSONObject jsonObject = new JSONObject();
+
+        jsonObject.put("image_width", imageSize.width);
+        jsonObject.put("image_height", imageSize.height);
+        jsonObject.put("flags", flags);
+        jsonObject.put("camera_matrix", cameraMatrix);
+        jsonObject.put("distortion_coefficients", distCoeffs);
+        jsonObject.put("avg_reprojection_error", totalAvgErr);
+
+        try{
+            FileWriter file = new FileWriter(filename);
+            file.write(jsonObject.toString());
+            file.close();
+            return true;
+            
+        }catch (Exception ex) {
+            ex.printStackTrace();
+            return false;
+        }
+    }
 
     public void readCameraParameters(String filename) throws IOException {
         String content = new Scanner(new File(filename)).useDelimiter("\\Z").next();
         JSONObject obj = new JSONObject(content);
         //?????
-        fs["camera_matrix"] >> this.cameraMatrix;
+        //fs["camera_matrix"] >> this.cameraMatrix;
         //?????
-        fs["distortion_coefficients"] >> this.distCoeffs;
-        return true;
+        //fs["distortion_coefficients"] >> this.distCoeffs;
     }
 
     public Pair<Mat, Mat> getCameraInfomation(){
@@ -69,10 +90,10 @@ public class Detector {
         List<Mat> corners = new LinkedList<Mat>();
         Mat ids = new Mat();
         List<Mat> rejectedImgPoints = new LinkedList<Mat>();
-        Aruco.detectMarkers​(src, markers, corners, ids, this.parameters, rejectedImgPoints, this.cameraMatrix, this.distCoeffs);
+        Aruco.detectMarkers(src, markers, corners, ids, this.parameters, rejectedImgPoints, this.cameraMatrix, this.distCoeffs);
         Mat rvecs = new Mat();
         Mat tvecs = new Mat();
-        Aruco.estimatePoseSingleMarkers​(corners, 1.0, this.cameraMatrix, this.distCoeffs, rvecs, tvecs);
+        Aruco.estimatePoseSingleMarkers(corners, 1.0, this.cameraMatrix, this.distCoeffs, rvecs, tvecs);
         return new Pair<Mat, Mat>(rvecs, tvecs);
     }
 
