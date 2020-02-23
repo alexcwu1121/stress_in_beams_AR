@@ -20,18 +20,9 @@ public class Detector {
     // no idea if these types are right
     private Dictionary markers;
     private DetectorParameters params = DetectorParameters.create();
-    private Mat cameraMatrix;
-    private Mat distCoeffs;
 
     public Detector(String detectorConfig, String cameraConfig) throws IOException {
         this.readDetectorParameters(detectorConfig);
-        this.readCameraParameters(cameraConfig);
-    }
-
-    public Detector(String detectorConfig) throws IOException {
-        this.readDetectorParameters(detectorConfig);
-        //calibrate/save camera parameters
-        //this.readCameraParameters(cameraConfig);
     }
 
     private void readDetectorParameters(String filename) throws IOException {
@@ -57,41 +48,6 @@ public class Detector {
         params.set_maxErroneousBitsInBorderRate(obj.getDouble("maxErroneousBitsInBorderRate"));
         params.set_minOtsuStdDev(obj.getDouble("minOtsuStdDev"));
         params.set_errorCorrectionRate(obj.getDouble("errorCorrectionRate"));
-    }
-
-    public static boolean saveCameraParams(String filename, Size imageSize, float aspectRatio, int flags, Mat cameraMatrix, Mat distCoeffs, double totalAvgErr){
-        JSONObject jsonObject = new JSONObject();
-
-        jsonObject.put("image_width", imageSize.width);
-        jsonObject.put("image_height", imageSize.height);
-        jsonObject.put("flags", flags);
-        jsonObject.put("camera_matrix", cameraMatrix);
-        jsonObject.put("distortion_coefficients", distCoeffs);
-        jsonObject.put("avg_reprojection_error", totalAvgErr);
-
-        try{
-            FileWriter file = new FileWriter(filename);
-            file.write(jsonObject.toString());
-            file.close();
-            return true;
-            
-        }catch (Exception ex) {
-            ex.printStackTrace();
-            return false;
-        }
-    }
-
-    public void readCameraParameters(String filename) throws IOException {
-        String content = new Scanner(new File(filename)).useDelimiter("\\Z").next();
-        JSONObject obj = new JSONObject(content);
-        //?????
-        //fs["camera_matrix"] >> this.cameraMatrix;
-        //?????
-        //fs["distortion_coefficients"] >> this.distCoeffs;
-    }
-
-    public Pair<Mat, Mat> getCameraInfomation(){
-        return new Pair<Mat, Mat>(cameraMatrix, distCoeffs);
     }
 
     public Pair<Mat, Mat> detectMarkers(Mat src, int dict_id, boolean estimatePose){
