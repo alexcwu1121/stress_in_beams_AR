@@ -24,15 +24,17 @@ public class Detector {
     private Mat distCoeffs;
 
     public Detector(String detectorConfig, String cameraConfig) throws IOException {
-        this.readDetectorParameters(detectorConfig);
+        //this.readDetectorParameters(detectorConfig);
         this.readCameraParameters(cameraConfig);
+        //cameraMatrix = Mat.eye(3, 3, 1);
+        //distCoeffs = new Mat();
     }
 
-    public Detector(String detectorConfig) throws IOException {
+    /**public Detector(String detectorConfig) throws IOException {
         this.readDetectorParameters(detectorConfig);
         //calibrate/save camera parameters
         //this.readCameraParameters(cameraConfig);
-    }
+    }*/
 
     private void readDetectorParameters(String filename) throws IOException {
         String content = new Scanner(new File(filename)).useDelimiter("\\Z").next();
@@ -84,14 +86,32 @@ public class Detector {
     public void readCameraParameters(String filename) throws IOException {
         String content = new Scanner(new File(filename)).useDelimiter("\\Z").next();
         JSONObject obj = new JSONObject(content);
-        //?????
-        //fs["camera_matrix"] >> this.cameraMatrix;
-        //?????
-        //fs["distortion_coefficients"] >> this.distCoeffs;
+        this.cameraMatrix = parseMat(obj.getJSONObject("camera_matrix"));
+        this.distCoeffs = parseMat(obj.getJSONObject("distortion_coefficients"));
     }
 
-    public Pair<Mat, Mat> getCameraInfomation(){
-        return new Pair<Mat, Mat>(cameraMatrix, distCoeffs);
+    private static Mat parseMat(JSONObject obj){
+        int rows = obj.getInt("rows");
+        int columns = obj.getInt("cols");
+        Mat answer = new Mat(rows, columns, 5);
+        JSONArray ja = obj.getJSONArray("data");
+        for(int i = 0; i < ja.length(); i++){
+            //System.out.println(ja.getDouble(i));
+            answer.put(i/columns, i%columns, ja.getDouble(i));
+        }
+        /*System.out.println(answer);
+        for(int i = 0; i < rows; i++){
+            for(int j = 0; j < columns; j++){
+                System.out.print(answer.get(i, j)[0] + ", ");
+            }
+            System.out.println();
+        }*/
+        return answer;
+        //return new Mat();
+    }
+
+    public Pair<Mat, Mat> getCameraInformation(){
+        return new Pair<Mat, Mat>(this.cameraMatrix, this.distCoeffs);
     }
 
     public Pair<Mat, Mat> detectMarkers(Mat src, int dict_id, boolean estimatePose){
@@ -100,19 +120,38 @@ public class Detector {
         Mat ids = new Mat();
         List<Mat> rejectedImgPoints = new LinkedList<Mat>();
         Aruco.detectMarkers(src, markers, corners, ids, this.params, rejectedImgPoints, this.cameraMatrix, this.distCoeffs);
+        //System.out.println(corners.size());
+        //System.out.println(rejectedImgPoints.size());
         Mat rvecs = new Mat();
         Mat tvecs = new Mat();
         Aruco.estimatePoseSingleMarkers(corners, 1.0f, this.cameraMatrix, this.distCoeffs, rvecs, tvecs);
+        /*System.out.println(tvecs);
+        for(int i = 0; i < tvecs.rows(); i++){
+            for(int j = 0; j < tvecs.cols(); j++){
+                System.out.print(tvecs.get(i, j)[0] + ", ");
+            }
+            System.out.println();
+        }
+        System.out.println(rvecs);
+        for(int i = 0; i < rvecs.rows(); i++){
+            for(int j = 0; j < rvecs.cols(); j++){
+                System.out.print(rvecs.get(i, j)[0] + ", ");
+            }
+            System.out.println();
+        }*/
+        System.out.println();
+        System.out.println();
+        System.out.println();
         return new Pair<Mat, Mat>(rvecs, tvecs);
     }
 
     public static void main(String[] args){
-        System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
+        /*System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
         try{
             Detector test = new Detector("detector_params.json");
         }catch (Exception ex) {
             ex.printStackTrace();
-        }
+        }*/
     }
 
 }

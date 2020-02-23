@@ -10,9 +10,7 @@ public interface Simulation {
 	@param basePicture The base picture to draw on.
 	@param rotationMatrix The rotation matrix.
 	@param translationMatrix The translation matrix.
-	@param cameraMatrix The camera matrix.
-	@param distCoeffs The distortion coefficients.
 	@return A mat consisting of the base picture with the gradient drawn on it.
 	*/
-	Mat run(Mat basePicture, Mat rotationMatrix, Mat translationMatrix, Mat cameraMatrix, Mat distCoeffs);
+	Mat run(Mat basePicture, Mat rotationMatrix, Mat translationMatrix);
 }

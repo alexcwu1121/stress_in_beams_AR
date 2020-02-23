@@ -19,7 +19,7 @@ public class NullSimulation implements Simulation {
 		return singleton;
 	}
 
-	public Mat run(Mat baseMatrix, Mat rotationMatrix, Mat translationMatrix, Mat cameraMatrix, Mat distCoeffs){
+	public Mat run(Mat baseMatrix, Mat rotationMatrix, Mat translationMatrix){
 		return baseMatrix;
 	}
 }
