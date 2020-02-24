@@ -114,7 +114,7 @@ public class Detector {
         return new Pair<Mat, Mat>(this.cameraMatrix, this.distCoeffs);
     }
 
-    public Pair<Mat, Mat> detectMarkers(Mat src, int dict_id, boolean estimatePose){
+    public Pair<Mat, Mat> detectMarkers(Mat src, int dict_id){
         Dictionary markers = Aruco.getPredefinedDictionary(dict_id);
         List<Mat> corners = new LinkedList<Mat>();
         Mat ids = new Mat();

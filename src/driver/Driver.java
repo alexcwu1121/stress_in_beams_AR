@@ -32,7 +32,7 @@ public class Driver{
         SimulationFrame frame = new SimulationFrame(s);
         while(true){
             Mat m = webcam.getOneFrame();
-            Pair<Mat, Mat> matrices = detector.detectMarkers(m, Aruco.DICT_4X4_50, true);
+            Pair<Mat, Mat> matrices = detector.detectMarkers(m, 4);
             frame.simulate(m, matrices.first(), matrices.second());
             //frame.simulate(m, new Mat(), new Mat());
             frame.repaint();
