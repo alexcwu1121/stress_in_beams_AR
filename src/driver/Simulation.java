@@ -1,16 +1,15 @@
 package driver;
 
 import org.opencv.core.*;
+import detector.*;
 
 /**Interface representing a specific type of simulation.
 */
 
 public interface Simulation {
-	/**"Runs" this simulation by drawing a gradient on the given base picture using the given matrices.
-	@param basePicture The base picture to draw on.
-	@param rotationMatrix The rotation matrix.
-	@param translationMatrix The translation matrix.
+	/**"Runs" this simulation by drawing a gradient on the given base picture using the given DetectorResults.
+	@param results the results of a detection.
 	@return A mat consisting of the base picture with the gradient drawn on it.
 	*/
-	Mat run(Mat basePicture, Mat rotationMatrix, Mat translationMatrix);
+	Mat run(DetectorResults results);
 }

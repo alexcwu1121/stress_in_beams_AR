@@ -17,8 +17,8 @@ import java.awt.image.*;
 import java.util.*;
 import java.io.*;
 
-import detector.Detector;
 import util.Pair;
+import detector.*;
 
 public class Driver{
 	private static VideoCap webcam = new VideoCap();
@@ -28,12 +28,12 @@ public class Driver{
         String arucoConfigFilePath = args[0];
         Detector detector = new Detector(arucoConfigFilePath, arucoConfigFilePath);
         Pair<Mat, Mat> cameraInfo = detector.getCameraInformation();
-        Simulation s = new SimpleSimulation(cameraInfo.first(), cameraInfo.second());
+        Simulation s = new DividedSimulation(cameraInfo.first(), cameraInfo.second(), new Pair<Integer, Integer>(0, 9), new Pair<Integer, Integer>(10, 19));
         SimulationFrame frame = new SimulationFrame(s);
         while(true){
             Mat m = webcam.getOneFrame();
-            Pair<Mat, Mat> matrices = detector.detectMarkers(m, 4);
-            frame.simulate(m, matrices.first(), matrices.second());
+            DetectorResults results = detector.detectMarkers(m, 4);
+            frame.simulate(results);
             //frame.simulate(m, new Mat(), new Mat());
             frame.repaint();
         }

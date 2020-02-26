@@ -61,29 +61,7 @@ public class Detector {
         params.set_errorCorrectionRate(obj.getDouble("errorCorrectionRate"));
     }
 
-    public static boolean saveCameraParams(String filename, Size imageSize, float aspectRatio, int flags, Mat cameraMatrix, Mat distCoeffs, double totalAvgErr){
-        JSONObject jsonObject = new JSONObject();
-
-        jsonObject.put("image_width", imageSize.width);
-        jsonObject.put("image_height", imageSize.height);
-        jsonObject.put("flags", flags);
-        jsonObject.put("camera_matrix", cameraMatrix);
-        jsonObject.put("distortion_coefficients", distCoeffs);
-        jsonObject.put("avg_reprojection_error", totalAvgErr);
-
-        try{
-            FileWriter file = new FileWriter(filename);
-            file.write(jsonObject.toString());
-            file.close();
-            return true;
-            
-        }catch (Exception ex) {
-            ex.printStackTrace();
-            return false;
-        }
-    }
-
-    public void readCameraParameters(String filename) throws IOException {
+    private void readCameraParameters(String filename) throws IOException {
         String content = new Scanner(new File(filename)).useDelimiter("\\Z").next();
         JSONObject obj = new JSONObject(content);
         this.cameraMatrix = parseMat(obj.getJSONObject("camera_matrix"));
@@ -114,12 +92,19 @@ public class Detector {
         return new Pair<Mat, Mat>(this.cameraMatrix, this.distCoeffs);
     }
 
-    public Pair<Mat, Mat> detectMarkers(Mat src, int dict_id){
+    public DetectorResults detectMarkers(Mat src, int dict_id){
         Dictionary markers = Aruco.getPredefinedDictionary(dict_id);
         List<Mat> corners = new LinkedList<Mat>();
         Mat ids = new Mat();
         List<Mat> rejectedImgPoints = new LinkedList<Mat>();
         Aruco.detectMarkers(src, markers, corners, ids, this.params, rejectedImgPoints, this.cameraMatrix, this.distCoeffs);
+        /*System.out.println(ids);
+        for(int i = 0; i < ids.rows(); i++){
+            for(int j = 0; j < ids.cols(); j++){
+                System.out.print(ids.get(i, j)[0] + ", ");
+            }
+            System.out.println();
+        }*/
         //System.out.println(corners.size());
         //System.out.println(rejectedImgPoints.size());
         Mat rvecs = new Mat();
@@ -142,7 +127,8 @@ public class Detector {
         System.out.println();
         System.out.println();
         System.out.println();
-        return new Pair<Mat, Mat>(rvecs, tvecs);
+        //return new Pair<Mat, Mat>(rvecs, tvecs);
+        return new DetectorResults(src, markers, ids, corners, rejectedImgPoints, rvecs, tvecs);
     }
 
     public static void main(String[] args){
