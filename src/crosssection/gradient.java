@@ -14,7 +14,7 @@ import crosssection.plane;
 public class gradient extends JPanel{
 
   	/**
-	Class which creates the crosssection shape <br>
+	Class which creates the crosssection plane
 	@author Nicholas Mataczynski
   	*/
 	public static void main(String[] args) {
@@ -24,13 +24,13 @@ public class gradient extends JPanel{
 
 	    JFrame frame = new JFrame("Crosssection");
 	    frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-	    frame.setSize(400, 400);
+	    frame.setSize(600, 600);
 	    frame.setLocationRelativeTo(null);
 
-	    int vec1[] = {0, 2, 0};
-	    int vec2[] = {5, 5, 0};
+	    int vec1[] = {0, 0, 0};
+	    int vec2[] = {0, 0, 0};
 
-	    plane cross = new plane(frame, 21, 21);
+	    plane cross = new plane(frame, 200, 125, 0.2, 3);
 	    frame.add(cross);
 
 	    int vecx = 0;
@@ -44,12 +44,15 @@ public class gradient extends JPanel{
   
 			try
 			{
-			    Thread.sleep(1000);
+			    Thread.sleep(25);
 			}
 			catch(InterruptedException ex)
 			{
 			    Thread.currentThread().interrupt();
 			}
+
+			//System.out.println(vecx - vecx2);
+			//System.out.println(vecy - vecy2);
 
 		   	vec1[0] = vecx;
 		   	vec1[1] = vecy;
@@ -57,28 +60,28 @@ public class gradient extends JPanel{
 	    	vec2[1] = vecy2;
 
 	    	if(Math.random() < 0.5) {
-			    vecx++;
+			    vecx += 10;
 			}
 			if(Math.random() < 0.5) {
-			    vecx2++;
+			    vecx2 += 10;
 			}
 			if(Math.random() < 0.5) {
-			    vecy++;
+			    vecy += 10;
 			}
 			if(Math.random() < 0.5) {
-			    vecy2++;
+			    vecy2 += 10;
 			}
 			if(Math.random() < 0.5) {
-			    vecx--;
+			    vecx -= 10;
 			}
 			if(Math.random() < 0.5) {
-			    vecx2--;
+			    vecx2 -= 10;
 			}
 			if(Math.random() < 0.5) {
-			    vecy--;
+			    vecy -= 10;
 			}
 			if(Math.random() < 0.5) {
-			    vecy2--;
+			    vecy2 -= 10;
 			}
 	    }
   	}
