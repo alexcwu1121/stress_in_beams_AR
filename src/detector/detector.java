@@ -23,6 +23,10 @@ public class Detector {
     private Mat cameraMatrix;
     private Mat distCoeffs;
 
+    /**Constructs a detector.
+    @param detectorConfig Path to a file containing the detector options.
+    @param cameraConfig Path to a file containing the camera matrix and distortion coefficients.
+    */
     public Detector(String detectorConfig, String cameraConfig) throws IOException {
         //this.readDetectorParameters(detectorConfig);
         this.readCameraParameters(cameraConfig);
@@ -85,59 +89,29 @@ public class Detector {
             System.out.println();
         }*/
         return answer;
-        //return new Mat();
     }
 
+    /**Returns the camera information for this camera.
+    @return a Pair of mats, the first is the camera matrix, the second is the distortion coefficients.
+    */
     public Pair<Mat, Mat> getCameraInformation(){
         return new Pair<Mat, Mat>(this.cameraMatrix, this.distCoeffs);
     }
 
+    /**Detects all markers within the source mat.
+    @param src The mat to detect markers from.
+    @param dict_id The dictionary to get markers from.
+    @return a DetectorResults object containing the results of this detection.
+    */
     public DetectorResults detectMarkers(Mat src, int dict_id){
         Dictionary markers = Aruco.getPredefinedDictionary(dict_id);
         List<Mat> corners = new LinkedList<Mat>();
         Mat ids = new Mat();
         List<Mat> rejectedImgPoints = new LinkedList<Mat>();
         Aruco.detectMarkers(src, markers, corners, ids, this.params, rejectedImgPoints, this.cameraMatrix, this.distCoeffs);
-        /*System.out.println(ids);
-        for(int i = 0; i < ids.rows(); i++){
-            for(int j = 0; j < ids.cols(); j++){
-                System.out.print(ids.get(i, j)[0] + ", ");
-            }
-            System.out.println();
-        }*/
-        //System.out.println(corners.size());
-        //System.out.println(rejectedImgPoints.size());
         Mat rvecs = new Mat();
         Mat tvecs = new Mat();
         Aruco.estimatePoseSingleMarkers(corners, 1.0f, this.cameraMatrix, this.distCoeffs, rvecs, tvecs);
-        /*System.out.println(tvecs);
-        for(int i = 0; i < tvecs.rows(); i++){
-            for(int j = 0; j < tvecs.cols(); j++){
-                System.out.print(tvecs.get(i, j)[0] + ", ");
-            }
-            System.out.println();
-        }
-        System.out.println(rvecs);
-        for(int i = 0; i < rvecs.rows(); i++){
-            for(int j = 0; j < rvecs.cols(); j++){
-                System.out.print(rvecs.get(i, j)[0] + ", ");
-            }
-            System.out.println();
-        }*/
-        //System.out.println();
-        //System.out.println();
-        //System.out.println();
-        //return new Pair<Mat, Mat>(rvecs, tvecs);
         return new DetectorResults(src, markers, ids, corners, rejectedImgPoints, rvecs, tvecs);
     }
-
-    public static void main(String[] args){
-        /*System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
-        try{
-            Detector test = new Detector("detector_params.json");
-        }catch (Exception ex) {
-            ex.printStackTrace();
-        }*/
-    }
-
 }

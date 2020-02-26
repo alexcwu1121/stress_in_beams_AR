@@ -4,6 +4,9 @@ import org.opencv.core.*;
 import org.opencv.calib3d.Calib3d;
 import detector.*;
 
+/**Simulation which draws axes on all detected markers.
+*/
+
 public class SimpleSimulation implements Simulation {
 	private Mat cameraMatrix;
 	private Mat distCoeffs;
