@@ -124,9 +124,9 @@ public class Detector {
             }
             System.out.println();
         }*/
-        System.out.println();
-        System.out.println();
-        System.out.println();
+        //System.out.println();
+        //System.out.println();
+        //System.out.println();
         //return new Pair<Mat, Mat>(rvecs, tvecs);
         return new DetectorResults(src, markers, ids, corners, rejectedImgPoints, rvecs, tvecs);
     }
