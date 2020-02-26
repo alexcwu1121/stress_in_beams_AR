@@ -11,16 +11,21 @@ import javax.swing.JPanel;
 import crosssection.gridSpace;
 
 public class plane extends JPanel {
-  	public int stressCap = 5;
-  	public int xSpaces = 10;
-  	public int ySpaces = 10;
+  	public int stressCap = 255;
+  	public int xSpaces;
+  	public int ySpaces;
   	public gridSpace boxes[][];
+  	public gridSpace reference;
   	public JFrame frame;
 
     @Override
     public void paintComponent(Graphics g) {
         super.paintComponent(g);
         Graphics2D g2 = (Graphics2D) g;
+
+        g2.setColor(Color.GREEN);
+        g2.fill(reference.getRect());
+
         for (int i = 0; i < xSpaces; i++){
     		for (int j = 0; j < ySpaces; j++){
     			g2.setColor(boxes[i][j].getColor());
@@ -29,23 +34,39 @@ public class plane extends JPanel {
         }
     }
 
+    //TODO set standard scale that dimesions are readjusted to and implement settings window with it
+
     /**
-    Creates the array of rectangles which make up the crosssection grid
+    Creates the array of gridSpaces which make up the crosssection grid
+    and initializes variables and reference line.
     @param frame_ The JFrame that the drawing is going to take place on.
-    @param xSpaces_ The amount of gridSpaces that will be generated every row.
-    @param ySpaces_ The amount of gridSpaces that will be generated every column.
+    @param xDimension The length of the plane in the x dimension.
+    @param yDimension The length of the plane in the y dimension.
+    @param resolution The higher this variable is, the fewer girdSpaces will be generated.
+    @param scale Determines the scale of the plane.
 	@author Nicholas Mataczynski
     */
-    public plane(JFrame frame_, int xSpaces_, int ySpaces_) {
-    	xSpaces = xSpaces_;
-    	ySpaces = ySpaces_;
+    public plane(JFrame frame_, int xDimension, int yDimension, double resolution, int scale) {
     	frame = frame_;
+    	if ( yDimension > xDimension){
+	    	double ratio = (double)xDimension / (double)yDimension;
+	    	xDimension = (int)(ratio *(double)scale * 100.0);
+	    	yDimension = (int)((double)scale * 100.0);
+	    } else {
+	    	double ratio = (double)yDimension / (double)xDimension;
+	    	xDimension = (int)((double)scale * 100.0);
+	    	yDimension = (int)(ratio * (double)scale * 100.0); 	
+	    }
 
     	Rectangle r = frame.getBounds();
 		int h = r.height;
 		int w = r.width;
-		int xLength = 300 / xSpaces;
-		int yLength = 300 / ySpaces;
+		xSpaces = (int)(xDimension * resolution);
+    	ySpaces = (int)(yDimension * resolution);
+		int xLength = xDimension / xSpaces;
+		int yLength = yDimension / ySpaces;
+
+		reference = new gridSpace(w - xLength * (xSpaces - 1) - 50, 0, xLength * xSpaces, 10);
 
 		boxes = new gridSpace[xSpaces][ySpaces];
 
@@ -67,19 +88,19 @@ public class plane extends JPanel {
 
     	int xStress = vecX[0] - vecY[0];
     	int yStress = vecX[1] - vecY[1];
-    	int middle = xSpaces / 2;
-    	int xMagnifier = (125 / stressCap) / (xSpaces / 2);
-    	int yMagnifier = (125 / stressCap) / (ySpaces / 2);
+    	int xMiddle = xSpaces / 2;
+    	int yMiddle = ySpaces / 2;
+    	int magnifier = 255 / stressCap;
 
     	for (int i = 0; i < xSpaces; i++){
     		for (int j = 0; j < ySpaces; j++){
-    			int xColor = (middle - i) * Math.min(Math.max(xStress, -stressCap), stressCap) * xMagnifier;
-    			int yColor = (middle - j) * Math.min(Math.max(yStress, -stressCap), stressCap) * yMagnifier;
+    			int xColor = (int)(((double)i / (double)xMiddle - 1) * Math.min(Math.max(xStress, -stressCap), stressCap) * magnifier);
+    			int yColor = (int)(((double)j / (double)yMiddle - 1) * Math.min(Math.max(yStress, -stressCap), stressCap) * magnifier);
     			int combinedColor = xColor - yColor;
     			if (combinedColor >= 0){
-    				boxes[i][j].setColor(255, 255 - combinedColor, 255 - combinedColor);
+    				boxes[i][j].setColor(255, Math.max(255 - combinedColor, 0), Math.max(255 - combinedColor, 0));
     			} else {
-    				boxes[i][j].setColor(255 - Math.abs(combinedColor), 255 - Math.abs(combinedColor), 255);
+    				boxes[i][j].setColor(Math.max(255 - Math.abs(combinedColor), 0), Math.max(255 - Math.abs(combinedColor), 0), 255);
     			}
     		}
         }
