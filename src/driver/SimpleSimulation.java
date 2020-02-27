@@ -2,24 +2,28 @@ package driver;
 
 import org.opencv.core.*;
 import org.opencv.calib3d.Calib3d;
+import detector.*;
+
+/**Simulation which draws axes on all detected markers.
+*/
 
 public class SimpleSimulation implements Simulation {
-	private static SimpleSimulation singleton;
+	private Mat cameraMatrix;
+	private Mat distCoeffs;
 
-	static {
-		singleton = new SimpleSimulation();
+	public SimpleSimulation(Mat cameraMatrix, Mat distCoeffs){
+		this.cameraMatrix = cameraMatrix;
+		this.distCoeffs = distCoeffs;
 	}
 
-	private SimpleSimulation(){}
-
-	public SimpleSimulation get(){
-		return singleton;
-	}
-
-	public Mat run(Mat baseMatrix, Mat rotationMatrix, Mat translationMatrix, Mat cameraMatrix, Mat distCoeffs){
+	public Mat run(DetectorResults results){
 		Mat finalMatrix = new Mat();
-		baseMatrix.copyTo(finalMatrix);
-		Calib3d.drawFrameAxes(finalMatrix, cameraMatrix, distCoeffs, rotationMatrix, translationMatrix, 0.1F);
+		results.baseImage().copyTo(finalMatrix);
+		Mat rotationMatrix = results.rotationVectors();
+		Mat translationMatrix = results.translationVectors();
+		for(int i = 0; i < rotationMatrix.rows(); i++){
+			Calib3d.drawFrameAxes(finalMatrix, this.cameraMatrix, this.distCoeffs, rotationMatrix.row(i), translationMatrix.row(i), 0.5F);
+		}
 		return finalMatrix;
 	}
 }

@@ -1,6 +1,7 @@
 package driver;
 
 import org.opencv.core.*;
+import detector.*;
 
 /**Simulation class made entirely for example/test purposes.
 This simulation's run method simply returns the base matrix.
@@ -19,7 +20,7 @@ public class NullSimulation implements Simulation {
 		return singleton;
 	}
 
-	public Mat run(Mat baseMatrix, Mat rotationMatrix, Mat translationMatrix, Mat cameraMatrix, Mat distCoeffs){
-		return baseMatrix;
+	public Mat run(DetectorResults results){
+		return results.baseImage();
 	}
 }

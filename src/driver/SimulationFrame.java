@@ -5,6 +5,7 @@ import javax.swing.border.*;
 import java.awt.image.*;
 import org.opencv.core.*;
 import java.awt.Graphics;
+import detector.*;
 
 /**Simple JFrame class which runs a simulation.
 */
@@ -31,8 +32,8 @@ public class SimulationFrame extends JFrame {
 		simulation = s;
 	}
 
-	public void simulate(Mat base, Mat rotationMatrix, Mat translationMatrix, Mat cameraMatrix, Mat distCoeffs){
-		matrix = simulation.run(base, rotationMatrix, translationMatrix, cameraMatrix, distCoeffs);
+	public void simulate(DetectorResults results){
+		matrix = simulation.run(results);
 	}
 
 	public void paint(Graphics g){

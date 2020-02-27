@@ -1,4 +1,4 @@
-package driver;
+package util;
 
 public class Pair<F, S> {
 	private final F first;
