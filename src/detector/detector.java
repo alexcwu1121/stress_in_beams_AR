@@ -23,6 +23,10 @@ public class Detector {
     private Mat cameraMatrix;
     private Mat distCoeffs;
 
+    /**Constructs a detector.
+    @param detectorConfig Path to a file containing the detector options.
+    @param cameraConfig Path to a file containing the camera matrix and distortion coefficients.
+    */
     public Detector(String detectorConfig, String cameraConfig) throws IOException {
         //this.readDetectorParameters(detectorConfig);
         this.readCameraParameters(cameraConfig);
@@ -61,29 +65,7 @@ public class Detector {
         params.set_errorCorrectionRate(obj.getDouble("errorCorrectionRate"));
     }
 
-    public static boolean saveCameraParams(String filename, Size imageSize, float aspectRatio, int flags, Mat cameraMatrix, Mat distCoeffs, double totalAvgErr){
-        JSONObject jsonObject = new JSONObject();
-
-        jsonObject.put("image_width", imageSize.width);
-        jsonObject.put("image_height", imageSize.height);
-        jsonObject.put("flags", flags);
-        jsonObject.put("camera_matrix", cameraMatrix);
-        jsonObject.put("distortion_coefficients", distCoeffs);
-        jsonObject.put("avg_reprojection_error", totalAvgErr);
-
-        try{
-            FileWriter file = new FileWriter(filename);
-            file.write(jsonObject.toString());
-            file.close();
-            return true;
-            
-        }catch (Exception ex) {
-            ex.printStackTrace();
-            return false;
-        }
-    }
-
-    public void readCameraParameters(String filename) throws IOException {
+    private void readCameraParameters(String filename) throws IOException {
         String content = new Scanner(new File(filename)).useDelimiter("\\Z").next();
         JSONObject obj = new JSONObject(content);
         this.cameraMatrix = parseMat(obj.getJSONObject("camera_matrix"));
@@ -107,51 +89,29 @@ public class Detector {
             System.out.println();
         }*/
         return answer;
-        //return new Mat();
     }
 
+    /**Returns the camera information for this camera.
+    @return a Pair of mats, the first is the camera matrix, the second is the distortion coefficients.
+    */
     public Pair<Mat, Mat> getCameraInformation(){
         return new Pair<Mat, Mat>(this.cameraMatrix, this.distCoeffs);
     }
 
-    public Pair<Mat, Mat> detectMarkers(Mat src, int dict_id){
+    /**Detects all markers within the source mat.
+    @param src The mat to detect markers from.
+    @param dict_id The dictionary to get markers from.
+    @return a DetectorResults object containing the results of this detection.
+    */
+    public DetectorResults detectMarkers(Mat src, int dict_id){
         Dictionary markers = Aruco.getPredefinedDictionary(dict_id);
         List<Mat> corners = new LinkedList<Mat>();
         Mat ids = new Mat();
         List<Mat> rejectedImgPoints = new LinkedList<Mat>();
         Aruco.detectMarkers(src, markers, corners, ids, this.params, rejectedImgPoints, this.cameraMatrix, this.distCoeffs);
-        //System.out.println(corners.size());
-        //System.out.println(rejectedImgPoints.size());
         Mat rvecs = new Mat();
         Mat tvecs = new Mat();
         Aruco.estimatePoseSingleMarkers(corners, 1.0f, this.cameraMatrix, this.distCoeffs, rvecs, tvecs);
-        /*System.out.println(tvecs);
-        for(int i = 0; i < tvecs.rows(); i++){
-            for(int j = 0; j < tvecs.cols(); j++){
-                System.out.print(tvecs.get(i, j)[0] + ", ");
-            }
-            System.out.println();
-        }
-        System.out.println(rvecs);
-        for(int i = 0; i < rvecs.rows(); i++){
-            for(int j = 0; j < rvecs.cols(); j++){
-                System.out.print(rvecs.get(i, j)[0] + ", ");
-            }
-            System.out.println();
-        }*/
-        System.out.println();
-        System.out.println();
-        System.out.println();
-        return new Pair<Mat, Mat>(rvecs, tvecs);
+        return new DetectorResults(src, markers, ids, corners, rejectedImgPoints, rvecs, tvecs);
     }
-
-    public static void main(String[] args){
-        /*System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
-        try{
-            Detector test = new Detector("detector_params.json");
-        }catch (Exception ex) {
-            ex.printStackTrace();
-        }*/
-    }
-
 }
