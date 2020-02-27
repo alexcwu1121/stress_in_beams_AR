@@ -24,7 +24,7 @@ public class DividedSimulation implements Simulation {
 	@param secondRange Pair representing the second range of ids, inclusive.
 	*/
 	public DividedSimulation(Mat cameraMatrix, Mat distCoeffs, Pair<Integer, Integer> firstRange, Pair<Integer, Integer> secondRange){
-		iF(cameraMatrix == null || distCoeffs == null || firstRange == null || secondRange == null){
+		if(cameraMatrix == null || distCoeffs == null || firstRange == null || secondRange == null){
 			throw new NullPointerException();
 		}
 		if(firstRange.first() == null || firstRange.second() == null || secondRange.first() == null || secondRange.second() == null){
