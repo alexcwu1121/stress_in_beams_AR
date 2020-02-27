@@ -28,7 +28,7 @@ public class CalibrateCamera {
     public CalibrateCamera(String detectorConfig, String cameraConfig, int dict_id){
         try{
             System.out.println(detectorConfig);
-            this.readDetectorParameters(detectorConfig);
+            //this.readDetectorParameters(detectorConfig);
         }catch(Exception ex) {
             ex.printStackTrace();
         }
@@ -116,10 +116,10 @@ public class CalibrateCamera {
         markerSeparation - separation between two markers (same unit as markerLength)
         */
 
-        int markersX = 5;
+        int markersX = 4;
         int markersY = 5;
-        float markerLength = .05f;
-        float markerSeparation = .01f;
+        float markerLength = .027f;
+        float markerSeparation = .08f;
 
         Dictionary dictionary = Aruco.getPredefinedDictionary(dict_id);
         GridBoard gridboard = GridBoard.create(markersX, markersY, markerLength, markerSeparation, dictionary);
@@ -160,8 +160,8 @@ public class CalibrateCamera {
 
         Mat cameraMatrix = new Mat();
         Mat distCoeffs = new Mat();
-        List<Mat> rvecs = null;
-        List<Mat> tvecs = null;
+        Vector<Mat> rvecs = new Vector<Mat>();
+        Vector<Mat> tvecs = new Vector<Mat>();
         double repError;
 
         /*
@@ -171,12 +171,12 @@ public class CalibrateCamera {
         }
         */
 
-        List<Mat> allCornersConcatenated = null;
+        Vector<Mat> allCornersConcatenated = new Vector<Mat>();
         Mat allIdsConcatenated = new Mat();
-        Mat markerCounterPerFrame = new Mat();
+        Mat markerCounterPerFrame = new Mat(allCorners.size(), 1, 0);
         //markerCounterPerFrame.reserve(allCorners.size());
         for(int i = 0; i < allCorners.size(); i++) {
-            markerCounterPerFrame.put(i, 0, (int)allCorners.get(i).size());
+            markerCounterPerFrame.put(i, 0, allCorners.get(i).size());
             for(int j = 0; j < allCorners.get(i).size(); j++) {
                 allCornersConcatenated.add(allCorners.get(i).get(j));
                 allIdsConcatenated.push_back(allIds.get(i));
@@ -192,6 +192,6 @@ public class CalibrateCamera {
     }
 
     public static void main(String[] args){
-        CalibrateCamera cal = new CalibrateCamera("detector_params.json", "camera_params.json", 10);
+        CalibrateCamera cal = new CalibrateCamera("detector_params.json", "camera_params.json", 0);
     }
 }
