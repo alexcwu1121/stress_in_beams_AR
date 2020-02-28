@@ -30,7 +30,7 @@ public class gradient extends JPanel{
 	    int vec1[] = {0, 0, 0};
 	    int vec2[] = {0, 0, 0};
 
-	    plane cross = new plane(frame, 200, 125, 0.2, 3);
+	    plane cross = new plane(frame, 3000, 3000, 0.2, 1);
 	    frame.add(cross);
 
 	    int vecx = 0;
