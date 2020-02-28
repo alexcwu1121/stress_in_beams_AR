@@ -25,14 +25,15 @@ public class Driver{
 
 	public static void main(String[] args) throws IOException {
         //Might want some more preprocessing on this one, like using a CLI library or ensuring that the file exists.
-        String arucoConfigFilePath = args[0];
-        Detector detector = new Detector(arucoConfigFilePath, arucoConfigFilePath);
+        String detectorParameters = args[0];
+        String cameraParameters = args[1];
+        Detector detector = new Detector(detectorParameters, cameraParameters);
         Pair<Mat, Mat> cameraInfo = detector.getCameraInformation();
         Simulation s = new DividedSimulation(cameraInfo.first(), cameraInfo.second(), new Pair<Integer, Integer>(0, 9), new Pair<Integer, Integer>(10, 19));
         SimulationFrame frame = new SimulationFrame(s);
         while(true){
             Mat m = webcam.getOneFrame();
-            DetectorResults results = detector.detectMarkers(m, 4);
+            DetectorResults results = detector.detectMarkers(m, 0);
             frame.simulate(results);
             //frame.simulate(m, new Mat(), new Mat());
             frame.repaint();
