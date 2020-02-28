@@ -1,7 +1,7 @@
 package driver;
 
 import org.opencv.core.*;
-import detector.*;
+import markerdetector.*;
 
 /**Simulation class made entirely for example/test purposes.
 This simulation's run method simply returns the base matrix.

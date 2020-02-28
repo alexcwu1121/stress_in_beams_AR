@@ -1,7 +1,7 @@
 package driver;
 
 import org.opencv.core.*;
-import detector.*;
+import markerdetector.*;
 
 /**Interface representing a specific type of simulation.
 */

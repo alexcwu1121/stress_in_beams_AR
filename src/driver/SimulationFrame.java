@@ -5,7 +5,7 @@ import javax.swing.border.*;
 import java.awt.image.*;
 import org.opencv.core.*;
 import java.awt.Graphics;
-import detector.*;
+import markerdetector.*;
 
 /**Simple JFrame class which runs a simulation.
 */
