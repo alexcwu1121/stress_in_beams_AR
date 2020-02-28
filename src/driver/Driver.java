@@ -18,7 +18,7 @@ import java.util.*;
 import java.io.*;
 
 import util.Pair;
-import detector.*;
+import markerdetector.*;
 
 public class Driver{
 	private static VideoCap webcam = new VideoCap();
@@ -27,7 +27,7 @@ public class Driver{
         //Might want some more preprocessing on this one, like using a CLI library or ensuring that the file exists.
         String detectorParameters = args[0];
         String cameraParameters = args[1];
-        Detector detector = new Detector(detectorParameters, cameraParameters);
+        MarkerDetector detector = new MarkerDetector(detectorParameters, cameraParameters);
         Pair<Mat, Mat> cameraInfo = detector.getCameraInformation();
         Simulation s = new DividedSimulation(cameraInfo.first(), cameraInfo.second(), new Pair<Integer, Integer>(0, 9), new Pair<Integer, Integer>(10, 19));
         SimulationFrame frame = new SimulationFrame(s);
