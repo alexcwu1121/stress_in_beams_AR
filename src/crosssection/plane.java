@@ -34,8 +34,6 @@ public class plane extends JPanel {
         }
     }
 
-    //TODO set standard scale that dimesions are readjusted to and implement settings window with it
-
     /**
     Creates the array of gridSpaces which make up the crosssection grid
     and initializes variables and reference line.
