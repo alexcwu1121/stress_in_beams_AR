@@ -2,7 +2,7 @@ package driver;
 
 import org.opencv.core.*;
 import org.opencv.calib3d.Calib3d;
-import detector.*;
+import markerdetector.*;
 
 /**Simulation which draws axes on all detected markers.
 */

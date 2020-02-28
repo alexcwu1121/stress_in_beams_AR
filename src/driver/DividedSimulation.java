@@ -3,7 +3,7 @@ package driver;
 import org.opencv.core.*;
 import org.opencv.aruco.*;
 import org.opencv.calib3d.Calib3d;
-import detector.*;
+import markerdetector.*;
 import util.Pair;
 
 /**Simulation which separates markers into two groups.
