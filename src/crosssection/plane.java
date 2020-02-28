@@ -8,14 +8,14 @@ import java.awt.Rectangle;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 
-import crosssection.gridSpace;
+import crosssection.GridSpace;
 
-public class plane extends JPanel {
+public class Plane extends JPanel {
   	public int stressCap = 255;
   	public int xSpaces;
   	public int ySpaces;
-  	public gridSpace boxes[][];
-  	public gridSpace reference;
+  	public GridSpace boxes[][];
+  	public GridSpace reference;
   	public JFrame frame;
 
     @Override
@@ -35,7 +35,7 @@ public class plane extends JPanel {
     }
 
     /**
-    Creates the array of gridSpaces which make up the crosssection grid
+    Creates the array of GridSpaces which make up the crosssection grid
     and initializes variables and reference line.
     @param frame_ The JFrame that the drawing is going to take place on.
     @param xDimension The length of the plane in the x dimension.
@@ -44,7 +44,7 @@ public class plane extends JPanel {
     @param scale Determines the scale of the plane.
 	@author Nicholas Mataczynski
     */
-    public plane(JFrame frame_, int xDimension, int yDimension, double resolution, int scale) {
+    public Plane(JFrame frame_, int xDimension, int yDimension, double resolution, int scale) {
     	frame = frame_;
     	if ( yDimension > xDimension){
 	    	double ratio = (double)xDimension / (double)yDimension;
@@ -64,19 +64,18 @@ public class plane extends JPanel {
 		int xLength = xDimension / xSpaces;
 		int yLength = yDimension / ySpaces;
 
-		reference = new gridSpace(w - xLength * (xSpaces - 1) - 50, 0, xLength * xSpaces, 10);
-
-		boxes = new gridSpace[xSpaces][ySpaces];
+		reference = new GridSpace(w - xLength * (xSpaces - 1) - 50, 0, xLength * xSpaces, 10);
+		boxes = new GridSpace[xSpaces][ySpaces];
 
     	for (int i = 0; i < xSpaces; i++){
     		for (int j = 0; j < ySpaces; j++){
-    			boxes[i][j] = new gridSpace(w - i * xLength - 50, j * yLength + 10, xLength, yLength);
+    			boxes[i][j] = new GridSpace(w - i * xLength - 50, j * yLength + 10, xLength, yLength);
     		}
         }
     }
 
     /**
-    Updates the colors of all gridSpaces in the grid then repaints the JFrame
+    Updates the colors of all GridSpaces in the grid then repaints the JFrame
     @param frame The JFrame that the drawing is going to take place on.
     @param vecX The X rotational vector
     @param vecY The Y rotational vector

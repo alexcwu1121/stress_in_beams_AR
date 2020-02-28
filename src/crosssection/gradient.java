@@ -9,12 +9,12 @@ import javax.swing.JPanel;
 
 import java.util.concurrent.TimeUnit;
 
-import crosssection.plane;
+import crosssection.Plane;
 
-public class gradient extends JPanel{
+public class Gradient extends JPanel{
 
   	/**
-	Class which creates the crosssection plane
+	Class which creates the crosssection Plane
 	@author Nicholas Mataczynski
   	*/
 	public static void main(String[] args) {
@@ -30,7 +30,7 @@ public class gradient extends JPanel{
 	    int vec1[] = {0, 0, 0};
 	    int vec2[] = {0, 0, 0};
 
-	    plane cross = new plane(frame, 3000, 3000, 0.2, 1);
+	    Plane cross = new Plane(frame, 3000, 3000, 0.2, 1);
 	    frame.add(cross);
 
 	    int vecx = 0;
