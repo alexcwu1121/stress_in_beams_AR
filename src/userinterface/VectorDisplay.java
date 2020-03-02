@@ -35,13 +35,19 @@ public class VectorDisplay implements Simulation{
 		MarkerInformation dynamic = getMarkerInformation(1);
 		Point3D origin = new Point3D(dynamic.translationVector());
 
+		Vector<Point3D> endpoints = new Vector<Point3D>();
+
 		if(drawForce){
 			// normal force applied parallel to the y axis of the beam
 			//ref_plane = reference.rotationVector();
-			Double magnitude = scale * (reference.rotationVector().get(0,0)[0] - origin.rotationVector().get(0,0)[0]);
-			Point3D endpoint = new Point3D(magnitude * Math.cos(reference.rotationVector.get(0, 0)[0]) + origin.x,
-										magnitude * Math.cos(reference.rotationVector.get(0, 0)[1] + origin.y),
-										magnitude * Math.cos(reference.rotationVector.get(0, 0)[2]) + origin.z);
+			for(int i = 0; i < 2; i++){
+				Double magnitude = scale * (reference.rotationVector().get(0,0)[i] - origin.rotationVector().get(0,0)[i]);
+				Point3D endpoint = new Point3D(magnitude * Math.cos(reference.rotationVector.get(0, 0)[0]) + origin.x,
+											magnitude * Math.cos(reference.rotationVector.get(0, 0)[1] + origin.y),
+											magnitude * Math.cos(reference.rotationVector.get(0, 0)[2]) + origin.z);
+
+				endpoints.add(endpoint);
+			}
 		}
 
 		if(drawMoment){
