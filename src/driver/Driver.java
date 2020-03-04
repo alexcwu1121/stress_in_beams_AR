@@ -29,11 +29,12 @@ public class Driver{
         String cameraParameters = args[1];
         MarkerDetector detector = new MarkerDetector(detectorParameters, cameraParameters);
         Pair<Mat, Mat> cameraInfo = detector.getCameraInformation();
-        Simulation s = new DividedSimulation(cameraInfo.first(), cameraInfo.second(), new Pair<Integer, Integer>(0, 9), new Pair<Integer, Integer>(10, 19));
+        //Simulation s = new DividedSimulation(cameraInfo.first(), cameraInfo.second(), new Pair<Integer, Integer>(0, 9), new Pair<Integer, Integer>(10, 19));
+        Simulation s = new CrossSimulation(cameraInfo.first(), cameraInfo.second(), 0, true);
         SimulationFrame frame = new SimulationFrame(s);
         while(true){
             Mat m = webcam.getOneFrame();
-            DetectorResults results = detector.detectMarkers(m, 0);
+            DetectorResults results = detector.detectMarkers(m, 4);
             frame.simulate(results);
             //frame.simulate(m, new Mat(), new Mat());
             frame.repaint();
