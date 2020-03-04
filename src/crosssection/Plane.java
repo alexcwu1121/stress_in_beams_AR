@@ -4,6 +4,7 @@ import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
+import java.awt.image.*;
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;
@@ -11,12 +12,13 @@ import javax.swing.JPanel;
 import crosssection.GridSpace;
 
 public class Plane extends JPanel {
-  	public int stressCap = 255;
-  	public int xSpaces;
-  	public int ySpaces;
-  	public GridSpace boxes[][];
-  	public GridSpace reference;
-  	public JFrame frame;
+  	private final int stressCap = 255;
+  	private final int xSpaces;
+  	private final int ySpaces;
+    private final int xDimension;
+    private final int yDimension;
+  	private final GridSpace boxes[][];
+  	private final GridSpace reference;
 
     @Override
     public void paintComponent(Graphics g) {
@@ -44,44 +46,32 @@ public class Plane extends JPanel {
     @param scale Determines the scale of the plane.
 	@author Nicholas Mataczynski
     */
-    public Plane(JFrame frame_, int xDimension, int yDimension, double resolution, int scale) {
-    	frame = frame_;
-    	if ( yDimension > xDimension){
-	    	double ratio = (double)xDimension / (double)yDimension;
-	    	xDimension = (int)(ratio *(double)scale * 100.0);
-	    	yDimension = (int)((double)scale * 100.0);
-	    } else {
-	    	double ratio = (double)yDimension / (double)xDimension;
-	    	xDimension = (int)((double)scale * 100.0);
-	    	yDimension = (int)(ratio * (double)scale * 100.0); 	
-	    }
+    public Plane(double ratio, double resolution, double scale) {
+	   	xDimension = (int)(ratio *(double)scale * 100.0);
+	 	yDimension = (int)((double)scale * 100.0);
 
-    	Rectangle r = frame.getBounds();
-		int h = r.height;
-		int w = r.width;
 		xSpaces = (int)(xDimension * resolution);
     	ySpaces = (int)(yDimension * resolution);
 		int xLength = xDimension / xSpaces;
 		int yLength = yDimension / ySpaces;
 
-		reference = new GridSpace(w - xLength * (xSpaces - 1) - 50, 0, xLength * xSpaces, 10);
+		reference = new GridSpace(xLength * (xSpaces - 1) - 50, 0, xLength * xSpaces, 10);
 		boxes = new GridSpace[xSpaces][ySpaces];
 
     	for (int i = 0; i < xSpaces; i++){
     		for (int j = 0; j < ySpaces; j++){
-    			boxes[i][j] = new GridSpace(w - i * xLength - 50, j * yLength + 10, xLength, yLength);
+    			boxes[i][j] = new GridSpace(i * xLength, j * yLength, xLength, yLength);
     		}
         }
     }
 
     /**
     Updates the colors of all GridSpaces in the grid then repaints the JFrame
-    @param frame The JFrame that the drawing is going to take place on.
     @param vecX The X rotational vector
     @param vecY The Y rotational vector
 	@author Nicholas Mataczynski
     */
-    public void planeUpdate(JFrame frame,  int vecX[], int vecY[]) {
+    public void planeUpdate(int vecX[], int vecY[]) {
 
     	int xStress = vecX[0] - vecY[0];
     	int yStress = vecX[1] - vecY[1];
@@ -101,6 +91,26 @@ public class Plane extends JPanel {
     			}
     		}
         }
-        frame.repaint();
+        //frame.repaint();
+    }
+
+    /**Returns a BufferedImage representing this Plane. The image is in BufferedImage.TYPE_3BYTE_BGR.
+    @return the image.
+    @author Owen Kulik (NOT nick)
+    */
+    public BufferedImage getImage() {
+        BufferedImage answer = new BufferedImage(xDimension, yDimension, BufferedImage.TYPE_3BYTE_BGR);
+        Graphics2D g2 = (Graphics2D)answer.getGraphics();
+
+        g2.setColor(Color.GREEN);
+        g2.fill(reference.getRect());
+
+        for (int i = 0; i < xSpaces; i++){
+            for (int j = 0; j < ySpaces; j++){
+                g2.setColor(boxes[i][j].getColor());
+                g2.fill(boxes[i][j].getRect());
+            }
+        }
+        return answer;
     }
 }
