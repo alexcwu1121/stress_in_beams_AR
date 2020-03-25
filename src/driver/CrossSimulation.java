@@ -52,12 +52,12 @@ public class CrossSimulation implements Simulation {
 	@return The result mat.
 	*/
 	public Mat run(DetectorResults results){
-
-		//EDIT THIS SECTION OF CODE TO CHANGE THE VALUES PUT INTO THE CROSSSECTION (should probably be put into another method)
 	    MarkerInformation information = results.getMarkerInformation(trackingID);
 	    if(information == null){
 	    	return results.baseImage();
 	    }
+
+	    //Edit this section of code to change the values put into the crossection.
 		Mat rotation = information.rotationVector();
 		Mat translation = information.translationVector();
 		int scale = 10;
@@ -71,25 +71,42 @@ public class CrossSimulation implements Simulation {
   		byte[] data = ((DataBufferByte) bi.getRaster().getDataBuffer()).getData();
   		mat.put(0, 0, data);
 
+  		//Edit this section of code to change where the crossection is drawn on the screen.
   		Mat corners = information.corners();
   		int x; 
-  		int y; 
+  		int y;
+  		int changeInX;
+  		int changeInY;
   		if(tracking){
   			x = (int)corners.get(0, 0)[1];
   			y = (int)corners.get(0, 0)[0];
+  			changeInX = (int)(corners.get(0, 0)[1] - corners.get(0, 1)[1]);
+  			changeInY = (int)(corners.get(0, 0)[0] - corners.get(0, 1)[0]);
   		} else {
   			x = 0;
   			y = 0;
+  			changeInX = 0;
+  			changeInY = 0;
   		}
+  		double angle = Math.atan2(changeInY, changeInX);
+  		//End section
 
   		Mat answer = results.baseImage();
   		for(int i = 0; i < mat.rows(); i++){
   			for(int j = 0; j < mat.cols(); j++){
-  				if(x + i < answer.rows() && y + j < answer.cols()){
-  					answer.put(x + i, y + j, mat.get(i, j));
-  				}
+  				//double theta = Math.atan2((double)j + changeInY, (double)i + changeInX)/* + angle*/;
+  				double theta = Math.atan2((double)j, (double)i) + angle;
+  				double r = Math.sqrt(Math.pow(i, 2) + Math.pow(j, 2));
+  				putSafe(answer, x + (int)Math.round(r*Math.cos(theta)), y + (int)Math.round(r*Math.sin(theta)), mat.get(i, j));
   			}
   		}
 		return answer;
+	}
+
+	private static void putSafe(Mat dest, int x, int y, double[] data){
+		if(x >= dest.rows() || y >= dest.cols() || x < 0 || y < 0){
+			return;
+		}
+		dest.put(x, y, data);
 	}
 }
