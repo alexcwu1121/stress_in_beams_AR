@@ -77,26 +77,41 @@ public class CrossSimulation implements Simulation {
   		int y;
   		int changeInX;
   		int changeInY;
+  		int width;
+  		int height;
+  		int expectedSideLengths = 100;
   		if(tracking){
   			x = (int)corners.get(0, 0)[1];
   			y = (int)corners.get(0, 0)[0];
-  			changeInX = (int)(corners.get(0, 0)[1] - corners.get(0, 1)[1]);
-  			changeInY = (int)(corners.get(0, 0)[0] - corners.get(0, 1)[0]);
+  			changeInX = (int)(corners.get(0, 1)[1] - corners.get(0, 0)[1] + corners.get(0, 2)[1] - corners.get(0, 3)[1])/2;
+  			changeInY = (int)(corners.get(0, 1)[0] - corners.get(0, 0)[0] + corners.get(0, 2)[0] - corners.get(0, 3)[0])/2;
+  			height = (int)Math.round(Math.sqrt(Math.pow(corners.get(0, 3)[1] - corners.get(0, 0)[1], 2) + Math.pow(corners.get(0, 3)[0] - corners.get(0, 0)[0], 2)) + Math.sqrt(Math.pow(corners.get(0, 2)[1] - corners.get(0, 1)[1], 2) + Math.pow(corners.get(0, 2)[0] - corners.get(0, 1)[0], 2)))/2;
+  			width = (int)Math.round(Math.sqrt(Math.pow(corners.get(0, 1)[1] - corners.get(0, 0)[1], 2) + Math.pow(corners.get(0, 1)[0] - corners.get(0, 0)[0], 2)) + Math.sqrt(Math.pow(corners.get(0, 2)[1] - corners.get(0, 3)[1], 2) + Math.pow(corners.get(0, 2)[0] - corners.get(0, 3)[0], 2)))/2;
+
+  			//System.out.println(width);
+  			//System.out.println(height);
+  			//System.out.println();
   		} else {
   			x = 0;
   			y = 0;
   			changeInX = 0;
   			changeInY = 0;
+  			width = expectedSideLengths;
+  			height = expectedSideLengths;
   		}
   		double angle = Math.atan2(changeInY, changeInX);
+  		
   		//End section
 
   		Mat answer = results.baseImage();
   		for(int i = 0; i < mat.rows(); i++){
   			for(int j = 0; j < mat.cols(); j++){
   				//double theta = Math.atan2((double)j + changeInY, (double)i + changeInX)/* + angle*/;
-  				double theta = Math.atan2((double)j, (double)i) + angle;
-  				double r = Math.sqrt(Math.pow(i, 2) + Math.pow(j, 2));
+  				//double proportion = (double)width/height;
+  				double actualX = j * ((double)width/expectedSideLengths);
+  				double actualY =  i * ((double)height/expectedSideLengths);
+  				double theta = Math.atan2(actualY, actualX) + angle;
+  				double r = Math.sqrt(Math.pow(actualX, 2) + Math.pow(actualY, 2));
   				putSafe(answer, x + (int)Math.round(r*Math.cos(theta)), y + (int)Math.round(r*Math.sin(theta)), mat.get(i, j));
   			}
   		}
