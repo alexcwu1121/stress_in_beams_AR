@@ -2,9 +2,11 @@ package driver;
 
 import markerdetector.*;
 import crosssection.*;
+
 import org.opencv.core.*;
 import org.opencv.aruco.*;
 import org.opencv.calib3d.Calib3d;
+import org.opencv.imgproc.Imgproc;
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;
@@ -75,48 +77,68 @@ public class CrossSimulation implements Simulation {
   		Mat corners = information.corners();
   		int x; 
   		int y;
-  		int changeInX;
-  		int changeInY;
+  		int originalX;
+  		int originalY;
+  		double angle;
   		int width;
   		int height;
   		int expectedSideLengths = 100;
   		if(tracking){
-  			x = (int)corners.get(0, 0)[1];
-  			y = (int)corners.get(0, 0)[0];
+  			int offset = 25;
   			changeInX = (int)(corners.get(0, 1)[1] - corners.get(0, 0)[1] + corners.get(0, 2)[1] - corners.get(0, 3)[1])/2;
   			changeInY = (int)(corners.get(0, 1)[0] - corners.get(0, 0)[0] + corners.get(0, 2)[0] - corners.get(0, 3)[0])/2;
+  			angle = Math.atan2(changeInY, changeInX);
   			height = (int)Math.round(Math.sqrt(Math.pow(corners.get(0, 3)[1] - corners.get(0, 0)[1], 2) + Math.pow(corners.get(0, 3)[0] - corners.get(0, 0)[0], 2)) + Math.sqrt(Math.pow(corners.get(0, 2)[1] - corners.get(0, 1)[1], 2) + Math.pow(corners.get(0, 2)[0] - corners.get(0, 1)[0], 2)))/2;
   			width = (int)Math.round(Math.sqrt(Math.pow(corners.get(0, 1)[1] - corners.get(0, 0)[1], 2) + Math.pow(corners.get(0, 1)[0] - corners.get(0, 0)[0], 2)) + Math.sqrt(Math.pow(corners.get(0, 2)[1] - corners.get(0, 3)[1], 2) + Math.pow(corners.get(0, 2)[0] - corners.get(0, 3)[0], 2)))/2;
-
-  			//System.out.println(width);
-  			//System.out.println(height);
-  			//System.out.println();
+  			x = (int)corners.get(0, 0)[1] - (int)Math.round(offset*Math.sin(angle));
+  			y = (int)corners.get(0, 0)[0] + (int)Math.round(offset*Math.cos(angle));
+  			originalX = ((int)corners.get(0, 0)[1] + (int)corners.get(0, 1)[1])/2;
+  			originalY = ((int)corners.get(0, 0)[0] + (int)corners.get(0, 1)[0])/2;
   		} else {
   			x = 0;
   			y = 0;
-  			changeInX = 0;
-  			changeInY = 0;
+  			originalX = 0;
+  			originalY = 0;
+  			angle = 0.0;
   			width = expectedSideLengths;
   			height = expectedSideLengths;
   		}
-  		double angle = Math.atan2(changeInY, changeInX);
-  		
   		//End section
 
   		Mat answer = results.baseImage();
   		for(int i = 0; i < mat.rows(); i++){
   			for(int j = 0; j < mat.cols(); j++){
-  				//double theta = Math.atan2((double)j + changeInY, (double)i + changeInX)/* + angle*/;
-  				//double proportion = (double)width/height;
-  				double actualX = j * ((double)width/expectedSideLengths);
-  				double actualY =  i * ((double)height/expectedSideLengths);
+  				double actualX = (j - (width/2)) * ((double)width/expectedSideLengths);
+  				double actualY = i * ((double)height/expectedSideLengths);
   				double theta = Math.atan2(actualY, actualX) + angle;
   				double r = Math.sqrt(Math.pow(actualX, 2) + Math.pow(actualY, 2));
-  				putSafe(answer, x + (int)Math.round(r*Math.cos(theta)), y + (int)Math.round(r*Math.sin(theta)), mat.get(i, j));
+  				int currentX = x + (int)Math.round(r*Math.cos(theta));
+  				int currentY = y + (int)Math.round(r*Math.sin(theta));
+  				putSafe(answer, currentX, currentY, mat.get(i, j));
+  				if(i == 0 && j == 0 || i == 0 && j == mat.cols() - 1){
+  					Imgproc.line(answer, new Point(currentY, currentX), new Point(originalY, originalX), new Scalar(81.0, 255.0, 0.0), 2, Imgproc.LINE_AA);
+  				}
   			}
   		}
-		return answer;
+  		return answer;
 	}
+
+	/*private static void drawLine(Mat dest, int fromX, int fromY, int toX, int toY, int thickness, double[] color){
+		double slope = (fromY - toY)/(double)(fromX - toX);
+  		int yIntercept = (int)Math.round(-fromX*slope + fromY);
+
+  		int largerX = Math.max(fromX, toX);
+  		int smallerX = Math.min(fromx, toX);
+  		for(int i = smallerX; i <= largerX; i++){
+  			for(int j = 0; j < ((slope != Double.POSITIVE_INFINITY && slope != Double.NEGATIVE_INFINITY) ? Math.abs(slope) : Math.abs(fromY - toY)); j++){
+  				for(int k = -thickness/2; k <= thickness/2; k++){
+  					for(int l = -thickness/2; l <= thickness/2; l++){
+  						putSafe(dest, i + l, (int)Math.round(slope*i) + yIntercept + k + j, color);
+  					}
+  				}
+  			}
+  		}
+	}*/
 
 	private static void putSafe(Mat dest, int x, int y, double[] data){
 		if(x >= dest.rows() || y >= dest.cols() || x < 0 || y < 0){
