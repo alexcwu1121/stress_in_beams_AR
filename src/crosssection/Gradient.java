@@ -30,7 +30,7 @@ public class Gradient extends JPanel{
 	    int vec1[] = {0, 0, 0};
 	    int vec2[] = {0, 0, 0};
 
-	    Plane cross = new Plane(frame, 3000, 3000, 0.2, 1);
+	    Plane cross = new Plane(1.0, 0.2, 10);
 	    frame.add(cross);
 
 	    int vecx = 0;
@@ -40,7 +40,7 @@ public class Gradient extends JPanel{
 
 	    frame.setVisible(true);
 	    while (true){
-		    cross.planeUpdate(frame,vec1,vec2);
+		    cross.planeUpdate(vec1,vec2);
   
 			try
 			{
