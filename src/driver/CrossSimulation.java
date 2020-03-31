@@ -51,14 +51,14 @@ public class CrossSimulation implements Simulation {
 	@return The result mat.
 	*/
 	public Mat run(DetectorResults results){
-        //Edit this section of code to change the conditions on which the simulation does not run, as well as declare variables holding marker information.
-	    MarkerInformation information = results.getMarkerInformation(trackingID);
-	    if(information == null){
-	    	return results.baseImage();
-	    }
-        //End section
+        	//Edit this section of code to change the conditions on which the simulation does not run, as well as declare variables holding marker information.
+		MarkerInformation information = results.getMarkerInformation(trackingID);
+		if(information == null){
+	    		return results.baseImage();
+	    	}
+        	//End section
 
-	    //Edit this section of code to change the values put into the crossection.
+	    	//Edit this section of code to change the values put into the crossection.
 		Mat rotation = information.rotationVector();
 		Mat translation = information.translationVector();
 		int scale = 10;
@@ -73,25 +73,25 @@ public class CrossSimulation implements Simulation {
   		mat.put(0, 0, data);
 
   		//Edit this section of code to change where the crossection is drawn on the screen.
-        //Variables declared before the code block must be filled in by the end of the section.
-        //x and y are the base coordinates where the crossection is drawn.
+        	//Variables declared before the code block must be filled in by the end of the section.
+        	//x and y are the base coordinates where the crossection is drawn.
   		int x; 
   		int y;
-        //originalX and originalY are where the lines are drawn to.
+        	//originalX and originalY are where the lines are drawn to.
   		int originalX;
   		int originalY;
-        //angle of the marker relative to horizontal.
+        	//angle of the marker relative to horizontal.
   		double angle;
-        //Width and height each represent the lengths of one side of the marker.
+        	//Width and height each represent the lengths of one side of the marker.
   		int width;
   		int height;
-        //When width and height are both equal to expectedSideLengths, the crosssection is drawn at full size. 
-        //Increasing this variable decreases the size of the drawn crossection.
-        int expectedSideLengths = 100;
-        //Proportional to the amount that the drawn crosssection is offset from the marker.
-        int offset = 50;
-        {
-            Mat corners = information.corners();
+        	//When width and height are both equal to expectedSideLengths, the crosssection is drawn at full size. 
+        	//Increasing this variable decreases the size of the drawn crossection.
+        	int expectedSideLengths = 100;
+        	//Proportional to the amount that the drawn crosssection is offset from the marker.
+        	int offset = 50;
+        	{
+        		Mat corners = information.corners();
   			int changeInX = (int)(corners.get(0, 1)[1] - corners.get(0, 0)[1] + corners.get(0, 2)[1] - corners.get(0, 3)[1])/2;
   			int changeInY = (int)(corners.get(0, 1)[0] - corners.get(0, 0)[0] + corners.get(0, 2)[0] - corners.get(0, 3)[0])/2;
   			angle = Math.atan2(changeInY, changeInX);
@@ -99,16 +99,16 @@ public class CrossSimulation implements Simulation {
   			width = (int)Math.round(Math.sqrt(Math.pow(corners.get(0, 1)[1] - corners.get(0, 0)[1], 2) + Math.pow(corners.get(0, 1)[0] - corners.get(0, 0)[0], 2)) + Math.sqrt(Math.pow(corners.get(0, 2)[1] - corners.get(0, 3)[1], 2) + Math.pow(corners.get(0, 2)[0] - corners.get(0, 3)[0], 2)))/2;
   			originalX = ((int)corners.get(0, 0)[1] + (int)corners.get(0, 1)[1])/2;
   			originalY = ((int)corners.get(0, 0)[0] + (int)corners.get(0, 1)[0])/2;
-            x = originalX - (int)Math.round(offset*((double)width/expectedSideLengths)*Math.sin(angle));
-            y = originalY + (int)Math.round(offset*((double)height/expectedSideLengths)*Math.cos(angle));
-        }
+        		x = originalX - (int)Math.round(offset*((double)width/expectedSideLengths)*Math.sin(angle));
+        		y = originalY + (int)Math.round(offset*((double)height/expectedSideLengths)*Math.cos(angle));
+        	}
   		//End section
 
   		Mat answer = results.baseImage();
   		for(int i = 0; i < mat.rows(); i++){
   			for(int j = 0; j < mat.cols(); j++){
-                int jmod = j - mat.rows()/2;
-                int imod = i;
+                		int jmod = j - mat.rows()/2;
+               			int imod = i;
   				double actualX = jmod * ((double)width/expectedSideLengths);
   				double actualY = imod * ((double)height/expectedSideLengths);
   				double theta = Math.atan2(actualY, actualX) + angle;
