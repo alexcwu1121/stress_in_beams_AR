@@ -85,9 +85,13 @@ public class CrossSimulation implements Simulation {
         //Width and height each represent the lengths of one side of the marker.
   		int width;
   		int height;
+        //When width and height are both equal to expectedSideLengths, the crosssection is drawn at full size. 
+        //Increasing this variable decreases the size of the drawn crossection.
+        int expectedSideLengths = 100;
+        //Proportional to the amount that the drawn crosssection is offset from the marker.
+        int offset = 50;
         {
             Mat corners = information.corners();
-  			int offset = 25;
   			int changeInX = (int)(corners.get(0, 1)[1] - corners.get(0, 0)[1] + corners.get(0, 2)[1] - corners.get(0, 3)[1])/2;
   			int changeInY = (int)(corners.get(0, 1)[0] - corners.get(0, 0)[0] + corners.get(0, 2)[0] - corners.get(0, 3)[0])/2;
   			angle = Math.atan2(changeInY, changeInX);
@@ -95,10 +99,9 @@ public class CrossSimulation implements Simulation {
   			width = (int)Math.round(Math.sqrt(Math.pow(corners.get(0, 1)[1] - corners.get(0, 0)[1], 2) + Math.pow(corners.get(0, 1)[0] - corners.get(0, 0)[0], 2)) + Math.sqrt(Math.pow(corners.get(0, 2)[1] - corners.get(0, 3)[1], 2) + Math.pow(corners.get(0, 2)[0] - corners.get(0, 3)[0], 2)))/2;
   			originalX = ((int)corners.get(0, 0)[1] + (int)corners.get(0, 1)[1])/2;
   			originalY = ((int)corners.get(0, 0)[0] + (int)corners.get(0, 1)[0])/2;
-            x = originalX - (int)Math.round(offset*Math.sin(angle));
-            y = originalY + (int)Math.round(offset*Math.cos(angle));
+            x = originalX - (int)Math.round(offset*((double)width/expectedSideLengths)*Math.sin(angle));
+            y = originalY + (int)Math.round(offset*((double)height/expectedSideLengths)*Math.cos(angle));
         }
-        int expectedSideLengths = 100;
   		//End section
 
   		Mat answer = results.baseImage();
