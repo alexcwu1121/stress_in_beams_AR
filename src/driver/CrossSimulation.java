@@ -13,13 +13,13 @@ import javax.swing.JPanel;
 import java.awt.image.*;
 
 /**Simulation which draws a crossection on the screen.<br>
-The crossection can either be drawn in the top left corner or it can track the marker being tested.
+The crosssection will follow the marker being tracked. In doing so, it will rotate and scale itself to match the marker.<br>
+Additionally, lines are drawn from the crosssection to the marker as a visual aid.
 @author Owen Kulik
 */
 
 public class CrossSimulation implements Simulation {
 	private final Plane cross;
-
 	private final Mat cameraMatrix;
 	private final Mat distCoeffs;
 	private final int trackingID;
@@ -28,7 +28,6 @@ public class CrossSimulation implements Simulation {
 	@param cameraMatrix the camera matrix to use.
 	@param distCoeffs the distortion coefficients to use.
 	@param idToTrack the marker id to base data off of.
-	@param tracking if true, the crossection will be drawn next to the tracked marker. If false, will be drawn in the top left corner.
 	@throws IllegalArgumentException if idToTrack is negative.
 	*/
 	//Will probably need to change the signature of this constructor to take extra data about which IDs to look for.
@@ -86,9 +85,13 @@ public class CrossSimulation implements Simulation {
         //Width and height each represent the lengths of one side of the marker.
   		int width;
   		int height;
+        //When width and height are both equal to expectedSideLengths, the crosssection is drawn at full size. 
+        //Increasing this variable decreases the size of the drawn crossection.
+        int expectedSideLengths = 100;
+        //Proportional to the amount that the drawn crosssection is offset from the marker.
+        int offset = 50;
         {
             Mat corners = information.corners();
-  			int offset = 25;
   			int changeInX = (int)(corners.get(0, 1)[1] - corners.get(0, 0)[1] + corners.get(0, 2)[1] - corners.get(0, 3)[1])/2;
   			int changeInY = (int)(corners.get(0, 1)[0] - corners.get(0, 0)[0] + corners.get(0, 2)[0] - corners.get(0, 3)[0])/2;
   			angle = Math.atan2(changeInY, changeInX);
@@ -96,10 +99,9 @@ public class CrossSimulation implements Simulation {
   			width = (int)Math.round(Math.sqrt(Math.pow(corners.get(0, 1)[1] - corners.get(0, 0)[1], 2) + Math.pow(corners.get(0, 1)[0] - corners.get(0, 0)[0], 2)) + Math.sqrt(Math.pow(corners.get(0, 2)[1] - corners.get(0, 3)[1], 2) + Math.pow(corners.get(0, 2)[0] - corners.get(0, 3)[0], 2)))/2;
   			originalX = ((int)corners.get(0, 0)[1] + (int)corners.get(0, 1)[1])/2;
   			originalY = ((int)corners.get(0, 0)[0] + (int)corners.get(0, 1)[0])/2;
-            x = originalX - (int)Math.round(offset*Math.sin(angle));
-            y = originalY + (int)Math.round(offset*Math.cos(angle));
+            x = originalX - (int)Math.round(offset*((double)width/expectedSideLengths)*Math.sin(angle));
+            y = originalY + (int)Math.round(offset*((double)height/expectedSideLengths)*Math.cos(angle));
         }
-        int expectedSideLengths = 100;
   		//End section
 
   		Mat answer = results.baseImage();
