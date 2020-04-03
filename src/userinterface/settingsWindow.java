@@ -73,7 +73,7 @@ public class settingsWindow {
             System.exit(0);
          }        
       });
-      mainFrame.setVisible(true);
+      mainFrame.setVisible(true);  
    }
    
    /**
