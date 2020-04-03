@@ -51,77 +51,77 @@ public class CrossSimulation implements Simulation {
 	@return The result mat.
 	*/
 	public Mat run(DetectorResults results){
-        	//Edit this section of code to change the conditions on which the simulation does not run, as well as declare variables holding marker information.
-		MarkerInformation information = results.getMarkerInformation(trackingID);
-		if(information == null){
-	    		return results.baseImage();
-	    	}
-        	//End section
+        //Edit this section of code to change the conditions on which the simulation does not run, as well as declare variables holding marker information.
+        MarkerInformation information = results.getMarkerInformation(trackingID);
+        if(information == null){
+            return results.baseImage();
+        }
+        //End section
 
-	    	//Edit this section of code to change the values put into the crossection.
-		Mat rotation = information.rotationVector();
-		Mat translation = information.translationVector();
-		int scale = 10;
-		int[] vec1 = {scale*(int)rotation.get(0, 0)[0], scale*(int)rotation.get(0, 0)[1], scale*(int)rotation.get(0, 0)[2]};
-		int[] vec2 = {scale*(int)translation.get(0, 0)[0], scale*(int)translation.get(0, 0)[1], scale*(int)translation.get(0, 0)[2]};
-		cross.planeUpdate(vec1, vec2);
-		//End section
+        //Edit this section of code to change the values put into the crossection.
+        Mat rotation = information.rotationVector();
+        Mat translation = information.translationVector();
+        int scale = 10;
+        int[] vec1 = {scale*(int)rotation.get(0, 0)[0], scale*(int)rotation.get(0, 0)[1], scale*(int)rotation.get(0, 0)[2]};
+        int[] vec2 = {scale*(int)translation.get(0, 0)[0], scale*(int)translation.get(0, 0)[1], scale*(int)translation.get(0, 0)[2]};
+        cross.planeUpdate(vec1, vec2);
+        //End section
 
         BufferedImage bi = cross.getImage();
         Mat mat = /*results.baseImage();*/new Mat(bi.getHeight(), bi.getWidth(), CvType.CV_8UC3);
         byte[] data = ((DataBufferByte) bi.getRaster().getDataBuffer()).getData();
         mat.put(0, 0, data);
 
-  		//Edit this section of code to change where the crossection is drawn on the screen.
-        	//Variables declared before the code block must be filled in by the end of the section.
-        	//x and y are the base coordinates where the crossection is drawn.
-  		int x; 
-  		int y;
-        	//originalX and originalY are where the lines are drawn to.
-  		int originalX;
-  		int originalY;
-        	//angle of the marker relative to horizontal.
-  		double angle;
-        	//Width and height each represent the lengths of one side of the marker.
-  		int width;
-  		int height;
-        	//When width and height are both equal to expectedSideLengths, the crosssection is drawn at full size. 
-        	//Increasing this variable decreases the size of the drawn crossection.
-        	int expectedSideLengths = 100;
-        	//Proportional to the amount that the drawn crosssection is offset from the marker.
-        	int offset = 50;
-        	{
-        		Mat corners = information.corners();
-  			int changeInX = (int)(corners.get(0, 1)[1] - corners.get(0, 0)[1] + corners.get(0, 2)[1] - corners.get(0, 3)[1])/2;
-  			int changeInY = (int)(corners.get(0, 1)[0] - corners.get(0, 0)[0] + corners.get(0, 2)[0] - corners.get(0, 3)[0])/2;
-  			angle = Math.atan2(changeInY, changeInX);
-  			height = (int)Math.round(Math.sqrt(Math.pow(corners.get(0, 3)[1] - corners.get(0, 0)[1], 2) + Math.pow(corners.get(0, 3)[0] - corners.get(0, 0)[0], 2)) + Math.sqrt(Math.pow(corners.get(0, 2)[1] - corners.get(0, 1)[1], 2) + Math.pow(corners.get(0, 2)[0] - corners.get(0, 1)[0], 2)))/2;
-  			width = (int)Math.round(Math.sqrt(Math.pow(corners.get(0, 1)[1] - corners.get(0, 0)[1], 2) + Math.pow(corners.get(0, 1)[0] - corners.get(0, 0)[0], 2)) + Math.sqrt(Math.pow(corners.get(0, 2)[1] - corners.get(0, 3)[1], 2) + Math.pow(corners.get(0, 2)[0] - corners.get(0, 3)[0], 2)))/2;
-  			originalX = ((int)corners.get(0, 0)[1] + (int)corners.get(0, 1)[1])/2;
-  			originalY = ((int)corners.get(0, 0)[0] + (int)corners.get(0, 1)[0])/2;
-        		x = originalX - (int)Math.round(offset*((double)width/expectedSideLengths)*Math.sin(angle));
-        		y = originalY + (int)Math.round(offset*((double)height/expectedSideLengths)*Math.cos(angle));
-        	}
-  		//End section
+        //Edit this section of code to change where the crossection is drawn on the screen.
+        //Variables declared before the code block must be filled in by the end of the section.
+        //x and y are the base coordinates where the crossection is drawn.
+        int x; 
+        int y;
+        //originalX and originalY are where the lines are drawn to.
+        int originalX;
+        int originalY;
+        //angle of the marker relative to horizontal.
+        double angle;
+        //Width and height each represent the lengths of one side of the marker.
+        int width;
+        int height;
+        //When width and height are both equal to expectedSideLengths, the crosssection is drawn at full size. 
+        //Increasing this variable decreases the size of the drawn crossection.
+        int expectedSideLengths = 100;
+        //Proportional to the amount that the drawn crosssection is offset from the marker.
+        int offset = 50;
+        {
+            Mat corners = information.corners();
+            int changeInX = (int)(corners.get(0, 1)[1] - corners.get(0, 0)[1] + corners.get(0, 2)[1] - corners.get(0, 3)[1])/2;
+            int changeInY = (int)(corners.get(0, 1)[0] - corners.get(0, 0)[0] + corners.get(0, 2)[0] - corners.get(0, 3)[0])/2;
+            angle = Math.atan2(changeInY, changeInX);
+            height = (int)Math.round(Math.sqrt(Math.pow(corners.get(0, 3)[1] - corners.get(0, 0)[1], 2) + Math.pow(corners.get(0, 3)[0] - corners.get(0, 0)[0], 2)) + Math.sqrt(Math.pow(corners.get(0, 2)[1] - corners.get(0, 1)[1], 2) + Math.pow(corners.get(0, 2)[0] - corners.get(0, 1)[0], 2)))/2;
+            width = (int)Math.round(Math.sqrt(Math.pow(corners.get(0, 1)[1] - corners.get(0, 0)[1], 2) + Math.pow(corners.get(0, 1)[0] - corners.get(0, 0)[0], 2)) + Math.sqrt(Math.pow(corners.get(0, 2)[1] - corners.get(0, 3)[1], 2) + Math.pow(corners.get(0, 2)[0] - corners.get(0, 3)[0], 2)))/2;
+            originalX = ((int)corners.get(0, 0)[1] + (int)corners.get(0, 1)[1])/2;
+            originalY = ((int)corners.get(0, 0)[0] + (int)corners.get(0, 1)[0])/2;
+            x = originalX - (int)Math.round(offset*((double)width/expectedSideLengths)*Math.sin(angle));
+            y = originalY + (int)Math.round(offset*((double)height/expectedSideLengths)*Math.cos(angle));
+        }
+        //End section
 
-  		Mat answer = results.baseImage();
-  		for(int i = 0; i < mat.rows(); i++){
-  			for(int j = 0; j < mat.cols(); j++){
-                		int jmod = j - mat.rows()/2;
-               			int imod = i;
-  				double actualX = jmod * ((double)width/expectedSideLengths);
-  				double actualY = imod * ((double)height/expectedSideLengths);
-  				double theta = Math.atan2(actualY, actualX) + angle;
-  				double r = Math.sqrt(Math.pow(actualX, 2) + Math.pow(actualY, 2));
-  				int currentX = x + (int)Math.round(r*Math.cos(theta));
-  				int currentY = y + (int)Math.round(r*Math.sin(theta));
-  				putSafe(answer, currentX, currentY, mat.get(i, j));
-  				if(i == 0 && j == 0 || i == 0 && j == mat.cols() - 1){
-  					Imgproc.line(answer, new Point(currentY, currentX), new Point(originalY, originalX), new Scalar(81.0, 255.0, 0.0), 2, Imgproc.LINE_AA);
-  				}
-  			}
-  		}
-  		return answer;
+        Mat answer = results.baseImage();
+        for(int i = 0; i < mat.rows(); i++){
+            for(int j = 0; j < mat.cols(); j++){
+                int jmod = j - mat.rows()/2;
+                int imod = i;
+                double actualX = jmod * ((double)width/expectedSideLengths);
+                double actualY = imod * ((double)height/expectedSideLengths);
+                double theta = Math.atan2(actualY, actualX) + angle;
+                double r = Math.sqrt(Math.pow(actualX, 2) + Math.pow(actualY, 2));
+                int currentX = x + (int)Math.round(r*Math.cos(theta));
+                int currentY = y + (int)Math.round(r*Math.sin(theta));
+                putSafe(answer, currentX, currentY, mat.get(i, j));
+                if(i == 0 && j == 0 || i == 0 && j == mat.cols() - 1){
+                    Imgproc.line(answer, new Point(currentY, currentX), new Point(originalY, originalX), new Scalar(81.0, 255.0, 0.0), 2, Imgproc.LINE_AA);
+                }
+            }
+        }
+        return answer;
 	}
 
 	/*private static void drawLine(Mat dest, int fromX, int fromY, int toX, int toY, int thickness, double[] color){
