@@ -3,6 +3,7 @@ package markerdetector;
 import org.opencv.core.*;
 import org.opencv.aruco.*;
 import java.util.List;
+import java.util.LinkedList;
 
 /**Container class containing all results from a marker detection operation, including the base image, 
 dictionary used, corners of detected markers, corners of rejected markers, rotation vectors, and translation vectors.
@@ -54,7 +55,9 @@ public class DetectorResults {
 	@return the base image.
 	*/
 	public Mat baseImage(){
-		return baseMatrix;
+		Mat answer = new Mat();
+		this.baseMatrix.copyTo(answer);
+		return answer;
 	}
 
 	/**Returns the dictionary used to detect markers.
@@ -68,28 +71,44 @@ public class DetectorResults {
 	@return the corners of all detected markers.
 	*/
 	public List<Mat> corners(){
-		return corners;
+		List<Mat> answer = new LinkedList<Mat>();
+		for(Mat m : this.corners){
+			Mat mat = new Mat();
+			m.copyTo(mat);
+			answer.add(mat);
+		}
+		return List.copyOf(answer);
 	}
 
 	/**Returns the corners of all rejected markers.
 	@return the corners of all rejected markers.
 	*/
 	public List<Mat> rejected(){
-		return rejected;
+		List<Mat> answer = new LinkedList<Mat>();
+		for(Mat m : this.rejected){
+			Mat mat = new Mat();
+			m.copyTo(mat);
+			answer.add(mat);
+		}
+		return List.copyOf(answer);
 	}
 
 	/**Returns the rotation vectors for all detected markers.
 	@return the rotation vectors for all detected markers.
 	*/
 	public Mat rotationVectors(){
-		return rotationVectors;
+		Mat answer = new Mat();
+		this.rotationVectors.copyTo(answer);
+		return answer;
 	}
 
 	/**Returns the translation vectors for all detected markers.
 	@return the translation vectors for all detected markers.
 	*/
 	public Mat translationVectors(){
-		return translationVectors;
+		Mat answer = new Mat();
+		this.translationVectors.copyTo(answer);
+		return answer;
 	}
 
 }
