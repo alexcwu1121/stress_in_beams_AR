@@ -31,21 +31,27 @@ public class MarkerInformation {
 	@return this marker's corners.
 	*/
 	public Mat corners(){
-		return corners;
+		Mat answer = new Mat();
+		this.corners.copyTo(answer);
+		return answer;
 	}
 
 	/**Returns this marker's rotation vector.
 	@return this marker's rotation vector.
 	*/
 	public Mat rotationVector(){
-		return rotationVector;
+		Mat answer = new Mat();
+		this.rotationVector.copyTo(answer);
+		return answer;
 	}
 
 	/**Returns this marker's translation vector.
 	@return this marker's translation vector.
 	*/
 	public Mat translationVector(){
-		return translationVector;
+		Mat answer = new Mat();
+		this.translationVector.copyTo(answer);
+		return answer;
 	}
 
 
