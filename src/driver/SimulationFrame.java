@@ -6,12 +6,13 @@ import java.awt.image.*;
 import org.opencv.core.*;
 import java.awt.Graphics;
 import markerdetector.*;
+import java.util.*;
 
 /**Simple JFrame class which runs a simulation.
 */
 
 public class SimulationFrame extends JFrame {
-	private Simulation simulation;
+	private List<Simulation> simulations;
 	private JPanel contentPane;
 	private Mat matrix;
 
@@ -25,15 +26,24 @@ public class SimulationFrame extends JFrame {
         setVisible(true);
 	}
 
-	/**Constructs a SimulationFrame using the given simulation.
+	/**Constructs a SimulationFrame using the given simulations.
 	@param s The simulation to use.
 	*/
-	public SimulationFrame(Simulation s){
-		simulation = s;
+	public SimulationFrame(Simulation... s){
+		this(List.of(s));
 	}
 
+    public SimulationFrame(List<Simulation> s){
+        this.simulations = List.copyOf(s);
+    }
+
 	public void simulate(DetectorResults results){
-		matrix = simulation.run(results);
+        this.matrix = new Mat();
+		List<Mat> mats = new LinkedList<Mat>();
+        for(Simulation simulation : this.simulations){
+            mats.add(simulation.run(results));
+        }
+        Core.hconcat(mats, this.matrix);
 	}
 
 	public void paint(Graphics g){
