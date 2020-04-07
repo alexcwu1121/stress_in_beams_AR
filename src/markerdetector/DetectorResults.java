@@ -55,9 +55,7 @@ public class DetectorResults {
 	@return the base image.
 	*/
 	public Mat baseImage(){
-		Mat answer = new Mat();
-		this.baseMatrix.copyTo(answer);
-		return answer;
+		return MarkerUtils.copyof(this.baseMatrix);
 	}
 
 	/**Returns the dictionary used to detect markers.
@@ -73,9 +71,7 @@ public class DetectorResults {
 	public List<Mat> corners(){
 		List<Mat> answer = new LinkedList<Mat>();
 		for(Mat m : this.corners){
-			Mat mat = new Mat();
-			m.copyTo(mat);
-			answer.add(mat);
+			answer.add(MarkerUtils.copyof(m));
 		}
 		return List.copyOf(answer);
 	}
@@ -86,9 +82,7 @@ public class DetectorResults {
 	public List<Mat> rejected(){
 		List<Mat> answer = new LinkedList<Mat>();
 		for(Mat m : this.rejected){
-			Mat mat = new Mat();
-			m.copyTo(mat);
-			answer.add(mat);
+			answer.add(MarkerUtils.copyof(m));
 		}
 		return List.copyOf(answer);
 	}
@@ -97,18 +91,13 @@ public class DetectorResults {
 	@return the rotation vectors for all detected markers.
 	*/
 	public Mat rotationVectors(){
-		Mat answer = new Mat();
-		this.rotationVectors.copyTo(answer);
-		return answer;
+		return MarkerUtils.copyof(this.rotationVectors);
 	}
 
 	/**Returns the translation vectors for all detected markers.
 	@return the translation vectors for all detected markers.
 	*/
 	public Mat translationVectors(){
-		Mat answer = new Mat();
-		this.translationVectors.copyTo(answer);
-		return answer;
+		return MarkerUtils.copyof(this.translationVectors);
 	}
-
 }
