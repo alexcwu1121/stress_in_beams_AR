@@ -33,7 +33,7 @@ public class Driver{
         //Simulation s = new DividedSimulation(cameraInfo.first(), cameraInfo.second(), new Pair<Integer, Integer>(0, 9), new Pair<Integer, Integer>(10, 19));
         Simulation s = new CrossSimulation(cameraInfo.first(), cameraInfo.second(), 8);
         Simulation t = new DividedSimulation(cameraInfo.first(), cameraInfo.second(), new Pair<Integer, Integer>(0, 9), new Pair<Integer, Integer>(10, 19));
-        Simulation vectorProject = new VectorDisplay(true, false, 1);
+        Simulation vectorProject = new VectorDisplay(cameraInfo.first(), cameraInfo.second(), true, false, .5);
         SimulationFrame frame = new SimulationFrame(s, t, vectorProject);
 
         while(true){

@@ -6,6 +6,7 @@ import org.opencv.core.Point;
 import org.opencv.imgproc.Imgproc;
 import org.opencv.aruco.*;
 import util.*;
+import org.opencv.calib3d.Calib3d;
 import java.util.Vector;
 import markerdetector.*;
 
@@ -16,13 +17,17 @@ public class VectorDisplay implements Simulation {
 	private final boolean drawForce;
 	private final boolean drawMoment;
 	private final double scale;
+	public final Mat cameraMatrix;
+	public final Mat distCoeffs;
 
 	//Mat base, Dictionary dict, Mat ids, List<Mat> corners, List<Mat> rejected, Mat rotationVectors, Mat translationVectors
 
-	public VectorDisplay(boolean _drawForce, boolean _drawMoment, double _scale){
-		drawForce = _drawForce;
-		drawMoment = _drawMoment;
-		scale = _scale;
+	public VectorDisplay(Mat _cameraMatrix, Mat _distCoeffs, boolean _drawForce, boolean _drawMoment, double _scale){
+		this.drawForce = _drawForce;
+		this.drawMoment = _drawMoment;
+		this.scale = _scale;
+		this.cameraMatrix = _cameraMatrix;
+		this.distCoeffs = _distCoeffs;
 	}
 
 	public Mat run(DetectorResults results){
@@ -30,33 +35,36 @@ public class VectorDisplay implements Simulation {
 		//transform all 3d vectors into 2d vectors with the camera matrix and change the source Mat
 		Mat finalMatrix = new Mat();
 		results.baseImage().copyTo(finalMatrix);
-		MarkerInformation reference = results.getMarkerInformation(0);
-		MarkerInformation dynamic = results.getMarkerInformation(1);
+		MarkerInformation reference = results.getMarkerInformation(6);
+		MarkerInformation dynamic = results.getMarkerInformation(7);
 
 		if(dynamic == null || reference == null){
 			return finalMatrix;
 		}
 
-		Point3D origin = new Point3D(dynamic);
-		Vector<Point3D> endpoints = new Vector<Point3D>();
-		endpoints.add(origin);
+		Vector<Float> magnitudes = new Vector<Float>();
 
 		if(drawForce){
 			// normal force applied parallel to the y axis of the beam
 			for(int i = 0; i < 2; i++){
-				Double magnitude = scale * (reference.rotationVector().get(0,0)[i] - dynamic.rotationVector().get(0,0)[i]);
-				Point3D endpoint = new Point3D(magnitude * Math.cos(reference.rotationVector().get(0, 0)[0]) + origin.x(),
-											magnitude * Math.cos(reference.rotationVector().get(0, 0)[1] + origin.y()),
-											magnitude * Math.cos(reference.rotationVector().get(0, 0)[2]) + origin.z());
-				endpoints.add(endpoint);
+				Float magnitude = (float)scale * (float)(reference.rotationVector().get(0,0)[i] - dynamic.rotationVector().get(0,0)[i]);
+				System.out.println(magnitude);
+				magnitudes.add(magnitude);
 			}
 		}
 
-		//iterate through endpoints and perform change of basis on all vectors
+		Mat axesPoints = new Mat(3, 3, CvType.CV_32FC3);
+	    axesPoints.put(0, 0, new float[]{0, 0, 0});
+	    axesPoints.put(1, 0, new float[]{(float)magnitudes.get(0), 0, 0});
+	    axesPoints.put(2, 0, new float[]{0, (float)magnitudes.get(0), 0});
+	    axesPoints.put(3, 0, new float[]{0, 0, (float)magnitudes.get(0)});
+	    Mat imagePoints = new Mat();
+	    Calib3d.fisheye_projectPoints(axesPoints, imagePoints, dynamic.rotationVector(), dynamic.translationVector(), cameraMatrix, distCoeffs);
 
-		Point pt1 = new Point(100, 200);
-		Point pt2 = new Point(300, 400);
-		Imgproc.line(finalMatrix, pt1, pt2, new Scalar(0,255,0), 3);
+	    // draw axes lines
+	    Imgproc.line(finalMatrix, new Point(imagePoints.get(0, 0)[0], imagePoints.get(0, 0)[1]), new Point(imagePoints.get(1, 0)[0], imagePoints.get(1, 0)[1]), new Scalar(0, 0, 255), 5);
+	    Imgproc.line(finalMatrix, new Point(imagePoints.get(0, 0)[0], imagePoints.get(0, 0)[1]), new Point(imagePoints.get(2, 0)[0], imagePoints.get(2, 0)[1]), new Scalar(0, 255, 0), 5);
+	    //Imgproc.line(finalMatrix, new Point(imagePoints.get(0, 0)[0], imagePoints.get(0, 0)[1]), new Point(imagePoints.get(3, 0)[0], imagePoints.get(3, 0)[1]), new Scalar(255, 0, 0), 5);
 
 		return finalMatrix;
 	}
