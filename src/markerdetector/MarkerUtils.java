@@ -116,6 +116,35 @@ public class MarkerUtils {
 		return answer;
 	}
 
+	/**Performs cross multiplication of the two matrices and returns the result.<br>
+	The matrices must have the same number of channels.<br>
+	The ith channel of the result matrix will contain the cross product of the ith channel of the first and second matrices.
+	@throws NullPointerException if either argument is null.
+	@throws IllegalArgumentException if first.cols() != second.rows() or if the matrices have different numbers of channels.
+	@return the result of the cross multiplication.
+	*/
+	public static Mat crossMultiply(Mat first, Mat second){
+		if(first.cols() != second.rows()){
+			throw new IllegalArgumentException("First matrix columns and second matrix rows do not match.");
+		}
+		if(first.channels() != second.channels()){
+			throw new IllegalArgumentException("Matrices had different numbers of channels.");
+		}
+		Mat answer = new Mat(first.rows(), second.cols(), first.type());
+		for(int i = 0; i < answer.rows(); i++){
+			for(int j = 0; j < answer.cols(); j++){
+				double[] data = new double[answer.channels()];
+				for(int k = 0; k < answer.channels(); k++){
+					for(int l = 0; l < first.cols(); l++){
+						data[k] += first.get(i, l)[k] * second.get(l, j)[k];
+					}
+				}
+				answer.put(i, j, data);
+			}
+		}
+		return answer;
+	}
+
 	/**Returns a copy of the provided mat, or null if the provided mat is null.
 	@param m The mat to copy.
 	@return a copy of the provided mat, or null if the provided mat is null.
