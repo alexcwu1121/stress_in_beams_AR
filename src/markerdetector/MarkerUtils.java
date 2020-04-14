@@ -3,6 +3,7 @@ package markerdetector;
 import util.*;
 import org.opencv.core.*;
 import org.opencv.calib3d.*;
+import org.json.*;
 
 /**Class containing various utility methods for use in marker detection.
 @author Owen Kulik
@@ -75,4 +76,46 @@ public class MarkerUtils {
             System.out.println();
         }
 	}
+
+	/**Converts a mat to a JSON format which can be read back by jsonToMat.<br> 
+	Note that this function is currently only capable of storing mats with one channel.
+	@param m The mat to store.
+	@throws NullPointerException if m is null.
+	@return a JSONObject representing the given mat.
+	*/
+	public static JSONObject matToJson(Mat m){
+        JSONObject answer = new JSONObject();
+        answer.put("type", m.type());
+        answer.put("rows", m.rows());
+        answer.put("cols", m.cols());
+        JSONArray data = new JSONArray();
+        for(int i = 0; i < m.rows(); i++){
+            for(int j = 0; j < m.cols(); j++){
+                data.put(m.get(i, j)[0]);
+            }
+        }
+        answer.put("data", data);
+        return answer;
+    }
+
+    /**Parses and returns a mat from the given JSON object.<br>
+    The JSON object must have the format of objects created by the matToJson function.<br>
+    Note that these functions are only capable of parsing mats with one channel.
+    @param obj the JSON object
+    @throws NullPointerException if obj is null
+    @throws JSONException if the JSON object is missing a field
+    @return the parsed mat.
+    */
+    public static Mat jsonToMat(JSONObject obj){
+        int rows = obj.getInt("rows");
+        int columns = obj.getInt("cols");
+        int type = obj.getInt("type");
+        Mat answer = new Mat(rows, columns, type);
+        JSONArray ja = obj.getJSONArray("data");
+        for(int i = 0; i < ja.length(); i++){
+            //System.out.println(ja.getDouble(i));
+            answer.put(i/columns, i%columns, ja.getDouble(i));
+        }
+        return answer;
+    }
 }

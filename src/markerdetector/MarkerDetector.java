@@ -68,27 +68,8 @@ public class MarkerDetector {
     private void readCameraParameters(String filename) throws IOException {
         String content = new Scanner(new File(filename)).useDelimiter("\\Z").next();
         JSONObject obj = new JSONObject(content);
-        this.cameraMatrix = parseMat(obj.getJSONObject("camera_matrix"));
-        this.distCoeffs = parseMat(obj.getJSONObject("distortion_coefficients"));
-    }
-
-    private static Mat parseMat(JSONObject obj){
-        int rows = obj.getInt("rows");
-        int columns = obj.getInt("cols");
-        Mat answer = new Mat(rows, columns, 5);
-        JSONArray ja = obj.getJSONArray("data");
-        for(int i = 0; i < ja.length(); i++){
-            //System.out.println(ja.getDouble(i));
-            answer.put(i/columns, i%columns, ja.getDouble(i));
-        }
-        /*System.out.println(answer);
-        for(int i = 0; i < rows; i++){
-            for(int j = 0; j < columns; j++){
-                System.out.print(answer.get(i, j)[0] + ", ");
-            }
-            System.out.println();
-        }*/
-        return answer;
+        this.cameraMatrix = MarkerUtils.jsonToMat(obj.getJSONObject("camera_matrix"));
+        this.distCoeffs = MarkerUtils.jsonToMat(obj.getJSONObject("distortion_coefficients"));
     }
 
     /**Returns the camera information for this camera.
