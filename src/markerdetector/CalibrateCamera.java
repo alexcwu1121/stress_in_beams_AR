@@ -172,16 +172,19 @@ public class CalibrateCamera {
         */
 
         Vector<Mat> allCornersConcatenated = new Vector<Mat>();
-        Mat allIdsConcatenated = new Mat();
+        Mat allIdsConcatenated = new Mat(allCorners.size(), 1, 0);
         Mat markerCounterPerFrame = new Mat(allCorners.size(), 1, 0);
         //markerCounterPerFrame.reserve(allCorners.size());
+        
         for(int i = 0; i < allCorners.size(); i++) {
             markerCounterPerFrame.put(i, 0, allCorners.get(i).size());
             for(int j = 0; j < allCorners.get(i).size(); j++) {
                 allCornersConcatenated.add(allCorners.get(i).get(j));
-                allIdsConcatenated.push_back(allIds.get(i));
+                //allIdsConcatenated.push_back(allIds.get(i));
+                allIdsConcatenated.put(i, 0, allIds.get(i).get(j, 0));
             }
         }
+
 
         repError = Aruco.calibrateCameraAruco(allCornersConcatenated, allIdsConcatenated,
                                            markerCounterPerFrame, board, imgSize, cameraMatrix,
@@ -192,6 +195,6 @@ public class CalibrateCamera {
     }
 
     public static void main(String[] args){
-        CalibrateCamera cal = new CalibrateCamera("detector_params.json", "camera_params.json", 0);
+        CalibrateCamera cal = new CalibrateCamera("detector_params.json", "camera_params.json", 4);
     }
 }
