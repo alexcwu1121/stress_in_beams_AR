@@ -26,12 +26,6 @@ public class CalibrateCamera {
     private Mat distCoeffs;
 
     public CalibrateCamera(String detectorConfig, String cameraConfig, int dict_id){
-        try{
-            System.out.println(detectorConfig);
-            //this.readDetectorParameters(detectorConfig);
-        }catch(Exception ex) {
-            ex.printStackTrace();
-        }
         this.calibrateCamera(cameraConfig, dict_id);
     }
 
@@ -85,30 +79,6 @@ public class CalibrateCamera {
         }
     }
 
-    /*
-    public void readCameraParameters(String filename) throws IOException {
-        String content = new Scanner(new File(filename)).useDelimiter("\\Z").next();
-        JSONObject obj = new JSONObject(content);
-        
-        Mat cameraMatrix, distCoeffs;
-        vector< Mat > rvecs, tvecs;
-        double repError;
-
-        if(calibrationFlags & CALIB_FIX_ASPECT_RATIO) {
-            cameraMatrix = Mat::eye(3, 3, CV_64F);
-            cameraMatrix.at< double >(0, 0) = aspectRatio;
-        }
-        //?????
-        //fs["camera_matrix"] >> this.cameraMatrix;
-        //?????
-        //fs["distortion_coefficients"] >> this.distCoeffs;
-    }
-
-    public Pair<Mat, Mat> getCameraInfomation(){
-        return new Pair<Mat, Mat>(cameraMatrix, distCoeffs);
-    }
-    */
-
     public static void calibrateCamera(String outputFile, int dict_id){
         VideoCapture inputVideo = new VideoCapture(0);
         int waitTime = 20;
@@ -143,14 +113,8 @@ public class CalibrateCamera {
             Vector<Mat> rejected = new Vector<Mat>();
             // detect markers
             Aruco.detectMarkers(image, dictionary, corners, ids, params, rejected);
-            //System.out.println(corners.get(0).type());
-            //System.out.println(ids.type());
-
-            // refind strategy to detect more markers
-            //Aruco.refineDetectedMarkers(image, board, corners, ids, rejected);
 
             Mat imageCopy = image;
-            //System.out.println(corners.size());
             if(ids.size().area() > 0) Aruco.drawDetectedMarkers(imageCopy, corners);
 
             HighGui.imshow("out", imageCopy);
@@ -170,13 +134,6 @@ public class CalibrateCamera {
         Vector<Mat> tvecs = new Vector<Mat>();
         double repError;
 
-        /*
-        if(calibrationFlags & CALIB_FIX_ASPECT_RATIO) {
-            cameraMatrix = Mat::eye(3, 3, CV_64F);
-            cameraMatrix.at< double >(0, 0) = aspectRatio;
-        }
-        */
-
         Vector<Mat> allCornersConcatenated = new Vector<Mat>();
         int total = 0;
         for(int i = 0; i < allCorners.size(); i++){
@@ -184,7 +141,6 @@ public class CalibrateCamera {
         }
         Mat allIdsConcatenated = new Mat(total, 1, 4);
         Mat markerCounterPerFrame = new Mat(allCorners.size(), 1, CvType.CV_32SC1);
-        //markerCounterPerFrame.reserve(allCorners.size());
         
         int index = 0;
         for(int i = 0; i < allCorners.size(); i++) {
@@ -196,8 +152,6 @@ public class CalibrateCamera {
                 index++;
             }
         }
-
-        //MarkerUtils.printmat(allIdsConcatenated);
 
         repError = Aruco.calibrateCameraAruco(allCornersConcatenated, allIdsConcatenated,
                                            markerCounterPerFrame, board, imgSize, cameraMatrix,
