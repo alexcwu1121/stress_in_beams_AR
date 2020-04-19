@@ -47,7 +47,7 @@ public class VectorDisplay implements Simulation {
 		if(drawForce){
 			// normal force applied parallel to the y axis of the beam
 			for(int i = 0; i < 2; i++){
-				Float magnitude = (float)scale * (float)(reference.rotationVector().get(0,0)[i] - dynamic.rotationVector().get(0,0)[i]);
+				Float magnitude = (float)scale * (float)(reference.rotationVector3D().get(i,0)[0] - dynamic.rotationVector3D().get(i,0)[0]);
 				System.out.println(magnitude);
 				magnitudes.add(magnitude);
 			}
@@ -56,14 +56,16 @@ public class VectorDisplay implements Simulation {
 		Mat axesPoints = new Mat(3, 3, CvType.CV_32FC3);
 	    axesPoints.put(0, 0, new float[]{0, 0, 0});
 	    axesPoints.put(1, 0, new float[]{(float)magnitudes.get(0), 0, 0});
-	    axesPoints.put(2, 0, new float[]{0, (float)magnitudes.get(0), 0});
-	    axesPoints.put(3, 0, new float[]{0, 0, (float)magnitudes.get(0)});
+	    axesPoints.put(2, 0, new float[]{0, (float)magnitudes.get(1), 0});
+	    axesPoints.put(3, 0, new float[]{0, 0, (float)magnitudes.get(2)});
 	    Mat imagePoints = new Mat();
 	    Calib3d.fisheye_projectPoints(axesPoints, imagePoints, dynamic.rotationVector(), dynamic.translationVector(), cameraMatrix, distCoeffs);
 
+	    //MarkerUtils.printmat(imagePoints);
+
 	    // draw axes lines
-	    Imgproc.line(finalMatrix, new Point(imagePoints.get(0, 0)[0], imagePoints.get(0, 0)[1]), new Point(imagePoints.get(1, 0)[0], imagePoints.get(1, 0)[1]), new Scalar(0, 0, 255), 5);
-	    Imgproc.line(finalMatrix, new Point(imagePoints.get(0, 0)[0], imagePoints.get(0, 0)[1]), new Point(imagePoints.get(2, 0)[0], imagePoints.get(2, 0)[1]), new Scalar(0, 255, 0), 5);
+	    //Imgproc.line(finalMatrix, new Point(imagePoints.get(0, 0)[0], imagePoints.get(0, 0)[1]), new Point(imagePoints.get(1, 0)[0], imagePoints.get(1, 0)[1]), new Scalar(0, 0, 255), 5);
+	    //Imgproc.line(finalMatrix, new Point(imagePoints.get(0, 0)[0], imagePoints.get(0, 0)[1]), new Point(imagePoints.get(2, 0)[0], imagePoints.get(2, 0)[1]), new Scalar(0, 255, 0), 5);
 	    //Imgproc.line(finalMatrix, new Point(imagePoints.get(0, 0)[0], imagePoints.get(0, 0)[1]), new Point(imagePoints.get(3, 0)[0], imagePoints.get(3, 0)[1]), new Scalar(255, 0, 0), 5);
 
 		return finalMatrix;
