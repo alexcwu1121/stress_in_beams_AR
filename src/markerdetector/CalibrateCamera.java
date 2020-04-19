@@ -69,6 +69,10 @@ public class CalibrateCamera {
         jsonObject.put("distortion_coefficients", MarkerUtils.matToJson(distCoeffs));
         jsonObject.put("avg_reprojection_error", totalAvgErr);
 
+        MarkerUtils.printmat(cameraMatrix);
+        System.out.println();
+        MarkerUtils.printmat(distCoeffs);
+
         try{
             FileWriter file = new FileWriter(filename);
             file.write(jsonObject.toString());
@@ -116,10 +120,10 @@ public class CalibrateCamera {
         markerSeparation - separation between two markers (same unit as markerLength)
         */
 
-        int markersX = 4;
-        int markersY = 5;
-        float markerLength = .027f;
-        float markerSeparation = .08f;
+        int markersX = 5;
+        int markersY = 4;
+        float markerLength = 4.3f;
+        float markerSeparation = 1.6f;
 
         Dictionary dictionary = Aruco.getPredefinedDictionary(dict_id);
         GridBoard gridboard = GridBoard.create(markersX, markersY, markerLength, markerSeparation, dictionary);
