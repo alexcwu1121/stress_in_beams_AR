@@ -122,8 +122,8 @@ public class CalibrateCamera {
 
         int markersX = 5;
         int markersY = 4;
-        float markerLength = 4.3f;
-        float markerSeparation = 1.6f;
+        float markerLength = .043f;
+        float markerSeparation = .016f;
 
         Dictionary dictionary = Aruco.getPredefinedDictionary(dict_id);
         GridBoard gridboard = GridBoard.create(markersX, markersY, markerLength, markerSeparation, dictionary);
@@ -147,7 +147,7 @@ public class CalibrateCamera {
             //System.out.println(ids.type());
 
             // refind strategy to detect more markers
-            Aruco.refineDetectedMarkers(image, board, corners, ids, rejected);
+            //Aruco.refineDetectedMarkers(image, board, corners, ids, rejected);
 
             Mat imageCopy = image;
             //System.out.println(corners.size());
@@ -178,18 +178,26 @@ public class CalibrateCamera {
         */
 
         Vector<Mat> allCornersConcatenated = new Vector<Mat>();
-        Mat allIdsConcatenated = new Mat(allCorners.size(), 1, 4);
+        int total = 0;
+        for(int i = 0; i < allCorners.size(); i++){
+            total += allCorners.get(i).size();
+        }
+        Mat allIdsConcatenated = new Mat(total, 1, 4);
         Mat markerCounterPerFrame = new Mat(allCorners.size(), 1, CvType.CV_32SC1);
         //markerCounterPerFrame.reserve(allCorners.size());
         
+        int index = 0;
         for(int i = 0; i < allCorners.size(); i++) {
             markerCounterPerFrame.put(i, 0, allCorners.get(i).size());
             for(int j = 0; j < allCorners.get(i).size(); j++) {
                 allCornersConcatenated.add(allCorners.get(i).get(j));
                 //allIdsConcatenated.push_back(allIds.get(i));
-                allIdsConcatenated.put(i, 0, allIds.get(i).get(j, 0));
+                allIdsConcatenated.put(index, 0, allIds.get(i).get(j, 0));
+                index++;
             }
         }
+
+        //MarkerUtils.printmat(allIdsConcatenated);
 
         repError = Aruco.calibrateCameraAruco(allCornersConcatenated, allIdsConcatenated,
                                            markerCounterPerFrame, board, imgSize, cameraMatrix,
