@@ -26,12 +26,6 @@ public class CalibrateCamera {
     private Mat distCoeffs;
 
     public CalibrateCamera(String detectorConfig, String cameraConfig, int dict_id){
-        try{
-            System.out.println(detectorConfig);
-            //this.readDetectorParameters(detectorConfig);
-        }catch(Exception ex) {
-            ex.printStackTrace();
-        }
         this.calibrateCamera(cameraConfig, dict_id);
     }
 
@@ -65,9 +59,13 @@ public class CalibrateCamera {
 
         jsonObject.put("image_width", imageSize.width);
         jsonObject.put("image_height", imageSize.height);
-        jsonObject.put("camera_matrix", cameraMatrix);
-        jsonObject.put("distortion_coefficients", distCoeffs);
+        jsonObject.put("camera_matrix", MarkerUtils.matToJson(cameraMatrix));
+        jsonObject.put("distortion_coefficients", MarkerUtils.matToJson(distCoeffs));
         jsonObject.put("avg_reprojection_error", totalAvgErr);
+
+        MarkerUtils.printmat(cameraMatrix);
+        System.out.println();
+        MarkerUtils.printmat(distCoeffs);
 
         try{
             FileWriter file = new FileWriter(filename);
@@ -81,30 +79,6 @@ public class CalibrateCamera {
         }
     }
 
-    /*
-    public void readCameraParameters(String filename) throws IOException {
-        String content = new Scanner(new File(filename)).useDelimiter("\\Z").next();
-        JSONObject obj = new JSONObject(content);
-        
-        Mat cameraMatrix, distCoeffs;
-        vector< Mat > rvecs, tvecs;
-        double repError;
-
-        if(calibrationFlags & CALIB_FIX_ASPECT_RATIO) {
-            cameraMatrix = Mat::eye(3, 3, CV_64F);
-            cameraMatrix.at< double >(0, 0) = aspectRatio;
-        }
-        //?????
-        //fs["camera_matrix"] >> this.cameraMatrix;
-        //?????
-        //fs["distortion_coefficients"] >> this.distCoeffs;
-    }
-
-    public Pair<Mat, Mat> getCameraInfomation(){
-        return new Pair<Mat, Mat>(cameraMatrix, distCoeffs);
-    }
-    */
-
     public static void calibrateCamera(String outputFile, int dict_id){
         VideoCapture inputVideo = new VideoCapture(0);
         int waitTime = 20;
@@ -116,10 +90,10 @@ public class CalibrateCamera {
         markerSeparation - separation between two markers (same unit as markerLength)
         */
 
-        int markersX = 4;
-        int markersY = 5;
-        float markerLength = .027f;
-        float markerSeparation = .08f;
+        int markersX = 5;
+        int markersY = 4;
+        float markerLength = .043f;
+        float markerSeparation = .016f;
 
         Dictionary dictionary = Aruco.getPredefinedDictionary(dict_id);
         GridBoard gridboard = GridBoard.create(markersX, markersY, markerLength, markerSeparation, dictionary);
@@ -140,11 +114,7 @@ public class CalibrateCamera {
             // detect markers
             Aruco.detectMarkers(image, dictionary, corners, ids, params, rejected);
 
-            // refind strategy to detect more markers
-            Aruco.refineDetectedMarkers(image, board, corners, ids, rejected);
-
             Mat imageCopy = image;
-            System.out.println(corners.size());
             if(ids.size().area() > 0) Aruco.drawDetectedMarkers(imageCopy, corners);
 
             HighGui.imshow("out", imageCopy);
@@ -164,22 +134,22 @@ public class CalibrateCamera {
         Vector<Mat> tvecs = new Vector<Mat>();
         double repError;
 
-        /*
-        if(calibrationFlags & CALIB_FIX_ASPECT_RATIO) {
-            cameraMatrix = Mat::eye(3, 3, CV_64F);
-            cameraMatrix.at< double >(0, 0) = aspectRatio;
-        }
-        */
-
         Vector<Mat> allCornersConcatenated = new Vector<Mat>();
-        Mat allIdsConcatenated = new Mat();
-        Mat markerCounterPerFrame = new Mat(allCorners.size(), 1, 0);
-        //markerCounterPerFrame.reserve(allCorners.size());
+        int total = 0;
+        for(int i = 0; i < allCorners.size(); i++){
+            total += allCorners.get(i).size();
+        }
+        Mat allIdsConcatenated = new Mat(total, 1, 4);
+        Mat markerCounterPerFrame = new Mat(allCorners.size(), 1, CvType.CV_32SC1);
+        
+        int index = 0;
         for(int i = 0; i < allCorners.size(); i++) {
             markerCounterPerFrame.put(i, 0, allCorners.get(i).size());
             for(int j = 0; j < allCorners.get(i).size(); j++) {
                 allCornersConcatenated.add(allCorners.get(i).get(j));
-                allIdsConcatenated.push_back(allIds.get(i));
+                //allIdsConcatenated.push_back(allIds.get(i));
+                allIdsConcatenated.put(index, 0, allIds.get(i).get(j, 0));
+                index++;
             }
         }
 
@@ -187,11 +157,12 @@ public class CalibrateCamera {
                                            markerCounterPerFrame, board, imgSize, cameraMatrix,
                                            distCoeffs, rvecs, tvecs);
 
+
         boolean saveOk = saveCameraParams(outputFile, imgSize, cameraMatrix,
                                    distCoeffs, repError);
     }
 
     public static void main(String[] args){
-        CalibrateCamera cal = new CalibrateCamera("detector_params.json", "camera_params.json", 0);
+        CalibrateCamera cal = new CalibrateCamera("detector_params.json", "camera_params.json", 4);
     }
 }
