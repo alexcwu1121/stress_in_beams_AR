@@ -5,7 +5,6 @@ import java.util.*;
 import util.*;
 
 public class MultiMarkerBody{
-
 	private HashMap<Integer, MarkerOffset> offsets = new HashMap<Integer, MarkerOffset>();
 
 	public MultiMarkerBody(List<MarkerOffset> offsets){
