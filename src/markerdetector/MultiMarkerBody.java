@@ -2,6 +2,7 @@ package markerdetector;
 
 import org.opencv.core.*;
 import java.util.*;
+import util.*;
 
 public class MultiMarkerBody{
 
@@ -10,42 +11,78 @@ public class MultiMarkerBody{
 	// private final int id180;
 	// private final int id270;
 	private List<MarkerOffset> offsets = new LinkedList<MarkerOffset>();
+   private List<Integer> offsetIds = new LinkedList<Integer>();
    //private MarkerInformation prediction = new MarkerInformation();
 
 	public MultiMarkerBody(List<MarkerOffset> offsets){
-		this.offsets = offsets;
+		this.offsets = offsets; 
+      for(MarkerOffset offset: offsets){
+         offsetIds.add(offset.id());
+      }
    }
 
    public MultiMarkerBody(MarkerOffset... offsets){
 		this.offsets = (Arrays.asList(offsets));
+      for(MarkerOffset offset: offsets){
+         offsetIds.add(offset.id());
+      }
    }
 
 	public MultiMarkerBody(){
 		MarkerOffset testOffset = new MarkerOffset(0, 1, 1, 1, 3, 3, 3);
 		this.offsets.add(testOffset);
+      for(MarkerOffset offset: offsets){
+         offsetIds.add(offset.id());
+      }
    }
 
-   public MarkerInformation predictCenter(DetectorResults results){
-      //MarkerInformation prediction = new MarkerInformation();
-      // repeat for all available markerinformation objects (all markers)
-      //while(true){
-         if(results.getMarkerInformation(0) == null){
-            //break;
-            return null;
+   public Mat averagePrediction(LinkedList<Mat> entries){
+      Mat average = new Mat(3, 1, CvType.CV_64FC1);
+      double runningSumX = 0;
+      double runningSumY = 0;
+      double runningSumZ = 0;
+      for(Mat entry: entries){
+         runningSumX = average.get(0, 0)[0] + entry.get(0, 0)[0];
+         runningSumY = average.get(1, 0)[0] + entry.get(0, 0)[0];
+         runningSumZ = average.get(2, 0)[0] + entry.get(0, 0)[0];
+      }
+      runningSumX = runningSumX/entries.size();
+      runningSumY = runningSumY/entries.size();
+      runningSumZ = runningSumZ/entries.size();
+      average.put(0, 0, new double[]{runningSumX});
+      average.put(1, 0, new double[]{runningSumY});
+      average.put(2, 0, new double[]{runningSumZ});
+      return average;
+   }
+
+   public Pair<Mat, Mat> predictCenter(DetectorResults results){
+      Mat ids = results.getIds();
+      if(ids.rows() == 0){
+         return null;
+      }
+
+      LinkedList<Mat> translationPredictions = new LinkedList<Mat>();
+      LinkedList<Mat> rotationPredictions = new LinkedList<Mat>();
+
+      for(int i = 0; i < ids.rows(); i++){
+         int id = (int)ids.get(i, 0)[0];
+         if(!offsetIds.contains(id)){
+            continue;
          }
-         MarkerInformation intermediate = results.getMarkerInformation(0);
+
+         MarkerInformation intermediate = results.getMarkerInformation(id);
          Mat rotation = intermediate.rotationVector3D();
          Mat translation = intermediate.translationVector3D();
 
          Mat transOffset = Mat.zeros(1, 3, CvType.CV_64FC1);
-         transOffset.put(0, 0, offsets.get(0).xTranslation());
-         transOffset.put(0, 1, offsets.get(0).yTranslation());
-         transOffset.put(0, 2, offsets.get(0).zTranslation());
+         transOffset.put(0, 0, offsets.get(id).xTranslation());
+         transOffset.put(0, 1, offsets.get(id).yTranslation());
+         transOffset.put(0, 2, offsets.get(id).zTranslation());
 
          Mat rotOffset = Mat.zeros(1, 3, CvType.CV_64FC1);
-         rotOffset.put(0, 0, offsets.get(0).xRotation());
-         rotOffset.put(0, 1, offsets.get(0).yRotation());
-         rotOffset.put(0, 2, offsets.get(0).zRotation());
+         rotOffset.put(0, 0, offsets.get(id).xRotation());
+         rotOffset.put(0, 1, offsets.get(id).yRotation());
+         rotOffset.put(0, 2, offsets.get(id).zRotation());
 
          Mat xRot = Mat.zeros(3, 3, CvType.CV_64FC1);
          xRot.put(0, 0, 1);
@@ -71,7 +108,6 @@ public class MultiMarkerBody{
          Mat xRotated = new Mat(3, 1, CvType.CV_64FC1);
          Mat yRotated = new Mat(3, 1, CvType.CV_64FC1);
          Mat zRotated = new Mat(3, 1, CvType.CV_64FC1);
-         //Core.gemm(transOffset, xRot, 1, new Mat(), 0, xRotated);
          xRotated = MarkerUtils.crossMultiply(transOffset, xRot);
          yRotated = MarkerUtils.crossMultiply(xRotated, yRot);
          zRotated = MarkerUtils.crossMultiply(yRotated, zRot);
@@ -96,8 +132,9 @@ public class MultiMarkerBody{
          rotation.put(1, 0, yRotFinal);
          rotation.put(2, 0, zRotFinal);
 
-
-      //}
-      return null;
+         translationPredictions.add(translation);
+         rotationPredictions.add(rotation);
+      }
+      return new Pair<Mat, Mat>(averagePrediction(translationPredictions), averagePrediction(rotationPredictions));
    }
 }
