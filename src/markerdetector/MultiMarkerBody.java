@@ -10,113 +10,94 @@ public class MultiMarkerBody{
 	// private final int id180;
 	// private final int id270;
 	private List<MarkerOffset> offsets = new LinkedList<MarkerOffset>();
+   //private MarkerInformation prediction = new MarkerInformation();
 
 	public MultiMarkerBody(List<MarkerOffset> offsets){
 		this.offsets = offsets;
-   	}
+   }
 
-   	public MultiMarkerBody(MarkerOffset... offsets){
+   public MultiMarkerBody(MarkerOffset... offsets){
 		this.offsets = (Arrays.asList(offsets));
-   	}
+   }
 
 	public MultiMarkerBody(){
-		 	MarkerOffset testOffset = new MarkerOffset(0, 1, 1, 1, 3, 3, 3);
-		 	this.offsets.add(testOffset);
-    }
+		MarkerOffset testOffset = new MarkerOffset(0, 1, 1, 1, 3, 3, 3);
+		this.offsets.add(testOffset);
+   }
 
-   	public void update(DetectorResults results){
-   		if (results.getMarkerInformation(0) != null){
-   			MarkerInformation info = results.getMarkerInformation(0);
-   			Mat rotation = info.rotationVector3D();
-   			Mat translation = info.translationVector3D();
-   			double xRot = rotation.get(0,0)[0];
-   			double yRot = rotation.get(1,0)[0];
-   			double zRot = rotation.get(2,0)[0];
-   			double xTrans = translation.get(0,0)[0];
-   			double yTrans = translation.get(1,0)[0];
-   			double zTrans = translation.get(2,0)[0];
+   public MarkerInformation predictCenter(DetectorResults results){
+      //MarkerInformation prediction = new MarkerInformation();
+      // repeat for all available markerinformation objects (all markers)
+      //while(true){
+         if(results.getMarkerInformation(0) == null){
+            //break;
+            return null;
+         }
+         MarkerInformation intermediate = results.getMarkerInformation(0);
+         Mat rotation = intermediate.rotationVector3D();
+         Mat translation = intermediate.translationVector3D();
 
-   			Mat transCoords = new Mat(1, 4, CvType.CV_64FC1);
-   			transCoords.put(0, 0, xTrans);
-   			transCoords.put(0, 1, yTrans);
-   			transCoords.put(0, 2, zTrans);
-   			transCoords.put(0, 3, 1);
+         Mat transOffset = Mat.zeros(1, 3, CvType.CV_64FC1);
+         transOffset.put(0, 0, offsets.get(0).xTranslation());
+         transOffset.put(0, 1, offsets.get(0).yTranslation());
+         transOffset.put(0, 2, offsets.get(0).zTranslation());
 
-   			Mat rotCoords = new Mat(1, 4, CvType.CV_64FC1);
-   			transCoords.put(0, 0, xRot);
-   			transCoords.put(0, 1, yRot);
-   			transCoords.put(0, 2, zRot);
-   			transCoords.put(0, 3, 1);
+         Mat rotOffset = Mat.zeros(1, 3, CvType.CV_64FC1);
+         rotOffset.put(0, 0, offsets.get(0).xRotation());
+         rotOffset.put(0, 1, offsets.get(0).yRotation());
+         rotOffset.put(0, 2, offsets.get(0).zRotation());
 
-   			Mat translationMatrix = Mat.zeros(4, 4, CvType.CV_64FC1);
-   			translationMatrix.put(0,0,1);
-   			translationMatrix.put(1,1,1);
-   			translationMatrix.put(2,2,1);
-   			translationMatrix.put(3,3,1);
-   			translationMatrix.put(3,0,offsets.get(0).xTranslation());
-   			translationMatrix.put(3,1,offsets.get(0).yTranslation());
-   			translationMatrix.put(3,2,offsets.get(0).zTranslation());
+         Mat xRot = Mat.zeros(3, 3, CvType.CV_64FC1);
+         xRot.put(0, 0, 1);
+         xRot.put(1, 1, Math.cos(rotation.get(0, 0)[0]));
+         xRot.put(1, 2, -Math.sin(rotation.get(0, 0)[0]));
+         xRot.put(2, 1, Math.sin(rotation.get(0, 0)[0]));
+         xRot.put(2, 2, Math.cos(rotation.get(0, 0)[0]));
 
-   			Mat rotationX =  Mat.zeros(4, 4, CvType.CV_64FC1);
-   			rotationX.put(0,0,1);
-   			rotationX.put(1,1,Math.cos(xRot));
-   			rotationX.put(1,2,-Math.sin(xRot));
-   			rotationX.put(2,1,Math.sin(xRot));
-   			rotationX.put(2,2,Math.cos(xRot));
-   			rotationX.put(3,3,1);
+         Mat yRot = Mat.zeros(3, 3, CvType.CV_64FC1);
+         yRot.put(0, 0, Math.cos(rotation.get(1, 0)[0]));
+         yRot.put(2, 0, -Math.sin(rotation.get(1, 0)[0]));
+         yRot.put(0, 2, Math.sin(rotation.get(1, 0)[0]));
+         yRot.put(2, 2, Math.cos(rotation.get(1, 0)[0]));
+         yRot.put(1, 1, 1);
 
-   			Mat rotationY =  Mat.zeros(4, 4, CvType.CV_64FC1);
-   			rotationX.put(0,0,Math.cos(yRot));
-   			rotationX.put(0,2,Math.sin(yRot));
-   			rotationX.put(1,1,1);
-   			rotationX.put(2,0,-Math.sin(yRot));
-   			rotationX.put(2,2,Math.cos(yRot));
-   			rotationX.put(3,3,1);
+         Mat zRot = Mat.zeros(3, 3, CvType.CV_64FC1);
+         zRot.put(0, 0, Math.cos(rotation.get(2, 0)[0]));
+         zRot.put(1, 0, Math.sin(rotation.get(2, 0)[0]));
+         zRot.put(0, 1, -Math.sin(rotation.get(2, 0)[0]));
+         zRot.put(1, 1, Math.cos(rotation.get(2, 0)[0]));
+         zRot.put(2, 2, 1);
 
-   			Mat rotationZ =  Mat.zeros(4, 4, CvType.CV_64FC1);
-   			rotationX.put(0,0,Math.cos(zRot));
-   			rotationX.put(0,1,-Math.sin(zRot));
-   			rotationX.put(1,0,Math.sin(zRot));
-   			rotationX.put(1,1,Math.cos(zRot));
-   			rotationX.put(2,2,1);
-   			rotationX.put(3,3,1);
+         Mat xRotated = new Mat(3, 1, CvType.CV_64FC1);
+         Mat yRotated = new Mat(3, 1, CvType.CV_64FC1);
+         Mat zRotated = new Mat(3, 1, CvType.CV_64FC1);
+         //Core.gemm(transOffset, xRot, 1, new Mat(), 0, xRotated);
+         xRotated = MarkerUtils.crossMultiply(transOffset, xRot);
+         yRotated = MarkerUtils.crossMultiply(xRotated, yRot);
+         zRotated = MarkerUtils.crossMultiply(yRotated, zRot);
 
-   			Mat rotationXRev = new Mat(4, 4, CvType.CV_64FC1);
-   			Core.multiply(rotationX, new Scalar(-1), rotationXRev);
+         double[] xtransFinal = translation.get(0, 0);
+         double[] ytransFinal = translation.get(1, 0);
+         double[] ztransFinal = translation.get(2, 0);
+         xtransFinal[0] = translation.get(0, 0)[0] + zRotated.get(0, 0)[0];
+         ytransFinal[0] = translation.get(1, 0)[0] + zRotated.get(0, 1)[0];
+         ztransFinal[0] = translation.get(2, 0)[0] + zRotated.get(0, 2)[0];
+         translation.put(0, 0, xtransFinal);
+         translation.put(1, 0, ytransFinal);
+         translation.put(2, 0, ztransFinal);
 
-   			Mat rotationYRev = new Mat(4, 4, CvType.CV_64FC1);
-   			Core.multiply(rotationY, new Scalar(-1), rotationYRev);
-
-   			Mat rotationZRev = new Mat(4, 4, CvType.CV_64FC1);
-   			Core.multiply(rotationZ, new Scalar(-1), rotationZRev);
-
-   			Mat transCoordsRev = new Mat(4, 4, CvType.CV_64FC1);
-   			Core.multiply(transCoords, new Scalar(-1), transCoordsRev);
-
-
-
-			Mat crossedTranslation = MarkerUtils.crossMultiply(transCoords,translationMatrix);
+         double[] xRotFinal = rotation.get(0, 0);
+         double[] yRotFinal = rotation.get(1, 0);
+         double[] zRotFinal = rotation.get(2, 0);
+         xRotFinal[0] = rotation.get(0, 0)[0] + rotOffset.get(0, 0)[0];
+         yRotFinal[0] = rotation.get(1, 0)[0] + rotOffset.get(0, 1)[0];
+         zRotFinal[0] = rotation.get(2, 0)[0] + rotOffset.get(0, 2)[0];
+         rotation.put(0, 0, xRotFinal);
+         rotation.put(1, 0, yRotFinal);
+         rotation.put(2, 0, zRotFinal);
 
 
-   			Mat transCoordsRevXY = new Mat(1, 4, CvType.CV_64FC1);
-   			transCoords.put(0, 0, -xTrans);
-   			transCoords.put(0, 1, -yTrans);
-   			transCoords.put(0, 2, 0);
-   			transCoords.put(0, 3, 1);
-
-
-   			Mat centered = MarkerUtils.crossMultiply(transCoordsRev,rotationY);
-   			Mat crossedY = MarkerUtils.crossMultiply(transCoordsRev,rotationY);
-
-   			System.out.println(transCoords.get(0,0)[0]);
-	   		System.out.println(transCoordsRev.get(0,0)[0]);
-   		}
-   	}
+      //}
+      return null;
+   }
 }
-//4 by 1 matrix and x it by matrix, x,y,z,1 of translation
-//normalize it with three multiplications
-//tx is the offset of the x vector
-//multiply the transformation matrix in
-//de-normalize it
-//add the rotation offsets.
-//find the unit vector 
