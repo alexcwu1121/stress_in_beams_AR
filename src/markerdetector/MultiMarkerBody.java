@@ -5,17 +5,25 @@ import java.util.*;
 import util.*;
 
 public class MultiMarkerBody{
-	private HashMap<Integer, MarkerOffset> offsets = new HashMap<Integer, MarkerOffset>();
+	// private final int idMaster;
+	// private final int id90;
+	// private final int id180;
+	// private final int id270;
+	private List<MarkerOffset> offsets = new LinkedList<MarkerOffset>();
+   private List<Integer> offsetIds = new LinkedList<Integer>();
+   //private MarkerInformation prediction = new MarkerInformation();
 
 	public MultiMarkerBody(List<MarkerOffset> offsets){
+		this.offsets = offsets; 
       for(MarkerOffset offset: offsets){
-         this.offsets.put(offset.id(), offset);
+         offsetIds.add(offset.id());
       }
    }
 
    public MultiMarkerBody(MarkerOffset... offsets){
+		this.offsets = (Arrays.asList(offsets));
       for(MarkerOffset offset: offsets){
-         this.offsets.put(offset.id(), offset);
+         offsetIds.add(offset.id());
       }
    }
 
