@@ -74,17 +74,17 @@ public class Plane extends JPanel {
     */
     public void planeUpdate(double rotL[], double rotR[]) {
 
-    	double xStress = rotL[0] - rotR[0];
-    	double yStress = rotL[1] - rotR[1];
+    	double lStress = Math.toDegrees(rotL[0]) - Math.toDegrees(rotR[0]);
+    	double rStress = Math.toDegrees(rotL[1]) - Math.toDegrees(rotR[1]);
     	int xMiddle = xSpaces / 2;
     	int yMiddle = ySpaces / 2;
-    	int magnifier = 255 / stressCap;
+    	int magnifier = 4;
 
     	for (int i = 0; i < xSpaces; i++){
     		for (int j = 0; j < ySpaces; j++){
-    			int xColor = (int)(((double)i / (double)xMiddle - 1) * Math.min(Math.max(xStress, -stressCap), stressCap) * magnifier);
-    			int yColor = (int)(((double)j / (double)yMiddle - 1) * Math.min(Math.max(yStress, -stressCap), stressCap) * magnifier);
-    			int combinedColor = xColor - yColor;
+    			int lColor = (int)(((double)i / (double)xMiddle - 1) * Math.min(Math.max(lStress, -stressCap), stressCap) * magnifier);
+    			int rColor = (int)(((double)j / (double)yMiddle - 1) * Math.min(Math.max(rStress, -stressCap), stressCap) * magnifier);
+    			int combinedColor = lColor - rColor;
     			if (combinedColor >= 0){
     				boxes[i][j].setColor(255, Math.max(255 - combinedColor, 0), Math.max(255 - combinedColor, 0));
     			} else {
@@ -100,7 +100,7 @@ public class Plane extends JPanel {
     @param rotR The rotational vectors of the other end of the beam
     */
     public void planeUpdate(Mat rotL, Mat rotR) {
-        planeUpdate(new double[]{rotL.get(0,0)[0], rotL.get(0,0)[1], rotL.get(0,0)[2]}, new double[]{rotR.get(0,0)[0],rotR.get(0,0)[1],rotR.get(0,0)[2]});
+        planeUpdate(new double[]{rotL.get(0,0)[0], rotL.get(1,0)[0], rotL.get(2,0)[0]}, new double[]{rotR.get(0,0)[0],rotR.get(1,0)[0],rotR.get(2,0)[0]});
     }
 
     /**Returns a BufferedImage representing this Plane. The image is in BufferedImage.TYPE_3BYTE_BGR.
