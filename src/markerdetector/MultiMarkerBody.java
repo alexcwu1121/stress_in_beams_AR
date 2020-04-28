@@ -128,6 +128,6 @@ public class MultiMarkerBody{
          translationPredictions.add(translation);
          rotationPredictions.add(rotation);
       }
-      return new Pair<Mat, Mat>(averagePrediction(translationPredictions), averagePrediction(rotationPredictions));
+      return new Pair<Mat, Mat>(averagePrediction(rotationPredictions), averagePrediction(translationPredictions));
    }
 }
