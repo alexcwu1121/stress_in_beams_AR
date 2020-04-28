@@ -6,34 +6,23 @@ import util.*;
 
 public class MultiMarkerBody{
 
-	// private final int idMaster;
-	// private final int id90;
-	// private final int id180;
-	// private final int id270;
-	private List<MarkerOffset> offsets = new LinkedList<MarkerOffset>();
-   private List<Integer> offsetIds = new LinkedList<Integer>();
-   //private MarkerInformation prediction = new MarkerInformation();
+	private HashMap<Integer, MarkerOffset> offsets = new HashMap<Integer, MarkerOffset>();
 
 	public MultiMarkerBody(List<MarkerOffset> offsets){
-		this.offsets = offsets; 
       for(MarkerOffset offset: offsets){
-         offsetIds.add(offset.id());
+         this.offsets.put(offset.id(), offset);
       }
    }
 
    public MultiMarkerBody(MarkerOffset... offsets){
-		this.offsets = (Arrays.asList(offsets));
       for(MarkerOffset offset: offsets){
-         offsetIds.add(offset.id());
+         this.offsets.put(offset.id(), offset);
       }
    }
 
 	public MultiMarkerBody(){
 		MarkerOffset testOffset = new MarkerOffset(0, 1, 1, 1, 3, 3, 3);
-		this.offsets.add(testOffset);
-      for(MarkerOffset offset: offsets){
-         offsetIds.add(offset.id());
-      }
+      this.offsets.put(testOffset.id(), testOffset);
    }
 
    public Mat averagePrediction(LinkedList<Mat> entries){
@@ -66,13 +55,18 @@ public class MultiMarkerBody{
 
       for(int i = 0; i < ids.rows(); i++){
          int id = (int)ids.get(i, 0)[0];
-         if(!offsetIds.contains(id)){
+         if(!offsets.keySet().contains(id)){
             continue;
          }
 
          MarkerInformation intermediate = results.getMarkerInformation(id);
+         MarkerUtils.printmat(intermediate.rotationVector());
          Mat rotation = intermediate.rotationVector3D();
          Mat translation = intermediate.translationVector3D();
+         /*
+         rotation seems to be in xzy
+         Translation seems to be in xyz
+         */
 
          Mat transOffset = Mat.zeros(1, 3, CvType.CV_64FC1);
          transOffset.put(0, 0, offsets.get(id).xTranslation());
