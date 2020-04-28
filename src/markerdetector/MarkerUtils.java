@@ -8,6 +8,8 @@ import org.json.*;
 @author Owen Kulik
 */
 
+//TODO: make get3DCoords better, add dot product and scalar product methods, add putSafe
+
 public class MarkerUtils {
 	private MarkerUtils(){}
 
@@ -114,6 +116,26 @@ public class MarkerUtils {
 			}
 		}
 		return answer;
+	}
+
+	public static boolean matEquals(Mat first, Mat second){
+		return matEquals(first, second, 0.0);
+	}
+
+	public static boolean matEquals(Mat first, Mat second, double tolerance){
+		if(first.rows() != second.rows() || first.cols() != second.cols() || first.channels() != second.channels()){
+			return false;
+		}
+		for(int i = 0; i < first.rows(); i++){
+			for(int j = 0; j < first.cols(); j++){
+				for(int k = 0; k < first.channels(); k++){
+					if(Math.abs(first.get(i, j)[k] - second.get(i, j)[k]) > tolerance){
+						return false;
+					}
+				}
+			}
+		}
+		return true;
 	}
 
 	/**Performs cross multiplication of the two matrices and returns the result.<br>
