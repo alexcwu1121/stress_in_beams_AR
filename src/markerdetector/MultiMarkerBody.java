@@ -32,8 +32,8 @@ public class MultiMarkerBody{
       double runningSumZ = 0;
       for(Mat entry: entries){
          runningSumX = runningSumX + entry.get(0, 0)[0];
-         runningSumY = runningSumY + entry.get(0, 0)[0];
-         runningSumZ = runningSumZ + entry.get(0, 0)[0];
+         runningSumY = runningSumY + entry.get(1, 0)[0];
+         runningSumZ = runningSumZ + entry.get(2, 0)[0];
       }
       runningSumX = runningSumX/entries.size();
       runningSumY = runningSumY/entries.size();
@@ -60,7 +60,6 @@ public class MultiMarkerBody{
          }
 
          MarkerInformation intermediate = results.getMarkerInformation(id);
-         MarkerUtils.printmat(intermediate.rotationVector());
          Mat rotation = intermediate.rotationVector3D();
          Mat translation = intermediate.translationVector3D();
          /*
