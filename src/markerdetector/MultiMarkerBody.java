@@ -31,9 +31,9 @@ public class MultiMarkerBody{
       double runningSumY = 0;
       double runningSumZ = 0;
       for(Mat entry: entries){
-         runningSumX = average.get(0, 0)[0] + entry.get(0, 0)[0];
-         runningSumY = average.get(1, 0)[0] + entry.get(0, 0)[0];
-         runningSumZ = average.get(2, 0)[0] + entry.get(0, 0)[0];
+         runningSumX = runningSumX + entry.get(0, 0)[0];
+         runningSumY = runningSumY + entry.get(0, 0)[0];
+         runningSumZ = runningSumZ + entry.get(0, 0)[0];
       }
       runningSumX = runningSumX/entries.size();
       runningSumY = runningSumY/entries.size();
