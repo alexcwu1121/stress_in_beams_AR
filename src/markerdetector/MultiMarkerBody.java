@@ -3,33 +3,57 @@ package markerdetector;
 import org.opencv.core.*;
 import java.util.*;
 import util.*;
+import java.io.*;
+import org.json.*;
 
 public class MultiMarkerBody{
-	// private final int idMaster;
-	// private final int id90;
-	// private final int id180;
-	// private final int id270;
-	private List<MarkerOffset> offsets = new LinkedList<MarkerOffset>();
-   private List<Integer> offsetIds = new LinkedList<Integer>();
-   //private MarkerInformation prediction = new MarkerInformation();
+	private Map<Integer, MarkerOffset> offsets;
 
 	public MultiMarkerBody(List<MarkerOffset> offsets){
-		this.offsets = offsets; 
+      this.offsets = new HashMap<Integer, MarkerOffset>();
       for(MarkerOffset offset: offsets){
          offsetIds.add(offset.id());
       }
    }
 
    public MultiMarkerBody(MarkerOffset... offsets){
-		this.offsets = (Arrays.asList(offsets));
-      for(MarkerOffset offset: offsets){
-         offsetIds.add(offset.id());
-      }
+      this(Arrays.asList(offsets));
+   }
+
+   public MultiMarkerBody(Map<Integer, MarkerOffset> offsets){
+      this.offsets = Map.copyOf(offsets);
    }
 
 	public MultiMarkerBody(){
 		MarkerOffset testOffset = new MarkerOffset(0, 1, 1, 1, 3, 3, 3);
       this.offsets.put(testOffset.id(), testOffset);
+   }
+
+   /**Constructs and returns a MultiMarkerBody containing the Marker Offsets as specified in the given JSON file. (use test_marker_offset.json as a template)
+   @param file Path to the JSON file.
+   @throws IOException if an IO error occurs.
+   @throws NullPointerException if file is null.
+   @return a MultiMarkerBody containing the Marker Offsets as specified in the given JSON file.
+   */
+   public static MultiMarkerBody fromJSONFile(String file) throws IOException {
+      String content = new Scanner(new File(file)).useDelimiter("\\Z").next();
+        JSONObject obj = new JSONObject(content);
+        return fromJSONObject(obj);
+   }
+
+   /**Constructs and returns a MultiMarkerBody containing the Marker Offsets as specified in the given JSON object. (use test_marker_offset.json as a template)
+   @param source The JSON object.
+   @throws NullPointerException if source is null.
+   @return a MultiMarkerBody containing the Marker Offsets as specified in the given JSON object.
+   */
+   public static MultiMarkerBody fromJSONObject(JSONObject source){
+      Map<Integer, MarkerOffset> answer = new HashMap<Integer, MarkerOffset>();
+      for(String s : source.keySet()){
+         int id = Integer.valueOf(s);
+         JSONObject js = source.getJSONObject(s);
+         answer.put(id, new MarkerOffset(id, js.getDouble("xRot"), js.getDouble("yRot"), js.getDouble("zRot"), js.getDouble("xTrans"), js.getDouble("yTrans"), js.getDouble("zTrans")));
+      }
+      return new MultiMarkerBody(answer);
    }
 
    public Mat averagePrediction(LinkedList<Mat> entries){
@@ -114,11 +138,19 @@ public class MultiMarkerBody{
       xRotFinal[0] = rotation.get(0, 0)[0] + rotOffset.get(0, 0)[0];
       yRotFinal[0] = rotation.get(1, 0)[0] + rotOffset.get(0, 1)[0];
       zRotFinal[0] = rotation.get(2, 0)[0] + rotOffset.get(0, 2)[0];
-      predictedRotation.put(0, 0, xRotFinal);
-      predictedRotation.put(1, 0, yRotFinal);
-      predictedRotation.put(2, 0, zRotFinal);
+      predictedRotation.put(0, 0, mod(xRotFinal[0]));
+      predictedRotation.put(1, 0, mod(yRotFinal[0]));
+      predictedRotation.put(2, 0, mod(zRotFinal[0]));
 
       return predictedRotation;
+   }
+
+   private static double mod(double input){
+      return ((input + Math.PI)%(2*Math.PI)) - Math.PI;
+      /*if(input > Math.PI){
+         return input - (2*Math.PI);
+      }
+      return input;*/
    }
 
    public Pair<Mat, Mat> predictCenter(DetectorResults results){
@@ -132,7 +164,7 @@ public class MultiMarkerBody{
 
       for(int i = 0; i < ids.rows(); i++){
          int id = (int)ids.get(i, 0)[0];
-         if(!offsets.keySet().contains(id)){
+         if(!this.offsets.keySet().contains(id)){
             continue;
          }
 

@@ -29,33 +29,6 @@ public class MarkerOffset {
 		this.zTranslation = zTrans;
 	}
 
-	/**Constructs and returns an unmodifiable list containing the Marker Offsets as specified in the given JSON file. (use test_marker_offset.json as a template)
-	@param file Path to the JSON file.
-	@throws IOException if an IO error occurs.
-	@throws NullPointerException if file is null.
-	@return returns an unmodifiable list containing the Marker Offsets as specified in the given JSON file.
-	*/
-	public static List<MarkerOffset> fromJSONFile(String file) throws IOException {
-		String content = new Scanner(new File(file)).useDelimiter("\\Z").next();
-        JSONObject obj = new JSONObject(content);
-        return fromJSONObject(obj);
-	}
-
-	/**Constructs and returns an unmodifiable list containing the Marker Offsets as specified in the given JSON object. (use test_marker_offset.json as a template)
-	@param source The JSON object.
-	@throws NullPointerException if source is null.
-	@return returns an unmodifiable list containing the Marker Offsets as specified in the given JSON object.
-	*/
-	public static List<MarkerOffset> fromJSONObject(JSONObject source){
-		List<MarkerOffset> answer = new LinkedList<MarkerOffset>();
-		for(String s : source.keySet()){
-			int id = Integer.valueOf(s);
-			JSONObject js = source.getJSONObject(s);
-			answer.add(new MarkerOffset(id, js.getDouble("xRot"), js.getDouble("yRot"), js.getDouble("zRot"), js.getDouble("xTrans"), js.getDouble("yTrans"), js.getDouble("zTrans")));
-		}
-		return List.copyOf(answer);
-	}
-
 	/**Returns this MarkerOffset's id.
 	@return this MarkerOffset's id.
 	*/
@@ -167,9 +140,7 @@ public class MarkerOffset {
 	//Test cases
 	public static void main(String[] args) throws IOException {
 		System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
-		List<MarkerOffset> lmo = MarkerOffset.fromJSONFile("markerdetector/test_marker_offset.json");
+		MultiMarkerBody lmo = MultiMarkerBody.fromJSONFile("markerdetector/test_marker_offset.json");
 		System.out.println(lmo);
-		MarkerUtils.printmat(lmo.get(1).rotationVector());
-		MarkerUtils.printmat(lmo.get(1).translationVector());
 	}
 }

@@ -8,7 +8,7 @@ import org.json.*;
 @author Owen Kulik
 */
 
-//TODO: make get3DCoords better, add dot product and scalar product methods, add putSafe
+//TODO: add dot product and scalar product methods, add putSafe
 
 public class MarkerUtils {
 	private MarkerUtils(){}
@@ -118,11 +118,25 @@ public class MarkerUtils {
 		return answer;
 	}
 
+	/**Returns true if and only if the given matrices are the same dimensions and 
+	each value of the given matrices are exactly equal, or if both mats are null.
+	@return a boolean indicating whether the mats are exactly equal.
+	*/
 	public static boolean matEquals(Mat first, Mat second){
 		return matEquals(first, second, 0.0);
 	}
 
+	/**Returns true if and only if the given matrices are the same dimensions and 
+	each value of the given matrices are equal within the given tolerance, or if both mats are null.
+	@return a boolean indicating whether the mats are equal within the given tolerance.
+	*/
 	public static boolean matEquals(Mat first, Mat second, double tolerance){
+		if(first == null && second == null){
+			return true;
+		}
+		if(first == second){
+			return true;
+		}
 		if(first.rows() != second.rows() || first.cols() != second.cols() || first.channels() != second.channels()){
 			return false;
 		}

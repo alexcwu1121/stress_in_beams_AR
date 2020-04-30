@@ -4,6 +4,7 @@ import org.opencv.core.*;
 import org.opencv.aruco.*;
 import java.util.List;
 import util.*;
+import java.io.IOException;
 
 public class MultiMarkerTest {
 	private MultiMarkerTest(){}
@@ -29,7 +30,7 @@ public class MultiMarkerTest {
 		Mat translation = new Mat(1, 1, CvType.CV_64FC3);
 		translation.put(0, 0, markervecs.get(3), markervecs.get(4), markervecs.get(5));
 		DetectorResults fakeResults = new DetectorResults(base, dict, ids, corners, rejected, rotation, translation);
-
+		
 		MultiMarkerBody zero = new MultiMarkerBody(new MarkerOffset(0, offsets.get(0), offsets.get(1), offsets.get(2), offsets.get(3), offsets.get(4), offsets.get(5)));
 		Pair<Mat, Mat> body = zero.predictCenter(fakeResults);
 
