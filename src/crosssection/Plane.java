@@ -74,7 +74,7 @@ public class Plane extends JPanel {
     */
     public void planeUpdate(double rotL[], double rotR[]) {
 
-    	double lStress = Math.toDegrees(rotL[0]) - Math.toDegrees(rotR[0]);
+    	double lStress = Math.toDegrees(rotL[2]) - Math.toDegrees(rotR[2]);
     	double rStress = Math.toDegrees(rotL[1]) - Math.toDegrees(rotR[1]);
     	int xMiddle = xSpaces / 2;
     	int yMiddle = ySpaces / 2;
@@ -84,7 +84,7 @@ public class Plane extends JPanel {
     		for (int j = 0; j < ySpaces; j++){
     			int lColor = (int)(((double)i / (double)xMiddle - 1) * Math.min(Math.max(lStress, -stressCap), stressCap) * magnifier);
     			int rColor = (int)(((double)j / (double)yMiddle - 1) * Math.min(Math.max(rStress, -stressCap), stressCap) * magnifier);
-    			int combinedColor = lColor - rColor;
+    			int combinedColor = lColor + rColor;
     			if (combinedColor >= 0){
     				boxes[i][j].setColor(255, Math.max(255 - combinedColor, 0), Math.max(255 - combinedColor, 0));
     			} else {
