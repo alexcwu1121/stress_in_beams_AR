@@ -23,6 +23,9 @@ public class CrossSimulation implements Simulation {
 	private final Mat cameraMatrix;
 	private final Mat distCoeffs;
 	private final int trackingID;
+    //Replace these later with multi-marker bodies
+    private final int firstId;
+    private final int secondId;
 
 	/**Constructs a CrossSimulation using the given values.
 	@param cameraMatrix the camera matrix to use.
@@ -31,8 +34,8 @@ public class CrossSimulation implements Simulation {
 	@throws IllegalArgumentException if idToTrack is negative.
 	*/
 	//Will probably need to change the signature of this constructor to take extra data about which IDs to look for.
-	public CrossSimulation(Mat cameraMatrix, Mat distCoeffs, int idToTrack){
-		if(idToTrack < 0){
+	public CrossSimulation(Mat cameraMatrix, Mat distCoeffs, int firstId, int secondId, int drawingId){
+		if(firstId < 0 || secondId < 0 || drawingId < 0){
 			throw new IllegalArgumentException("Marker ids cannot be negative");
 		}
 		if(cameraMatrix == null || distCoeffs == null){
@@ -40,7 +43,9 @@ public class CrossSimulation implements Simulation {
 		}
 		this.cameraMatrix = cameraMatrix;
 		this.distCoeffs = distCoeffs;
-		trackingID = idToTrack;
+		this.trackingID = drawingId;
+        this.firstId = firstId;
+        this.secondId = secondId;
 
 		//Hardcoded values, feel free to change
 		cross = new Plane(1.0, .2, 1.5);
@@ -52,19 +57,16 @@ public class CrossSimulation implements Simulation {
 	*/
 	public Mat run(DetectorResults results){
         //Edit this section of code to change the conditions on which the simulation does not run, as well as declare variables holding marker information.
-        MarkerInformation information = results.getMarkerInformation(trackingID);
-        if(information == null){
+        MarkerInformation information = results.getMarkerInformation(this.trackingID);
+        MarkerInformation first = results.getMarkerInformation(this.firstId);
+        MarkerInformation second = results.getMarkerInformation(this.secondId);
+        if(information == null || first == null || second == null){
             return results.baseImage();
         }
         //End section
 
         //Edit this section of code to change the values put into the crossection.
-        Mat rotation = information.rotationVector();
-        Mat translation = information.translationVector();
-        int scale = 10;
-        int[] vec1 = {scale*(int)rotation.get(0, 0)[0], scale*(int)rotation.get(0, 0)[1], scale*(int)rotation.get(0, 0)[2]};
-        int[] vec2 = {scale*(int)translation.get(0, 0)[0], scale*(int)translation.get(0, 0)[1], scale*(int)translation.get(0, 0)[2]};
-        cross.planeUpdate(vec1, vec2);
+        cross.planeUpdate(first.rotationVector3D(), second.rotationVector3D());
         //End section
 
         BufferedImage bi = cross.getImage();

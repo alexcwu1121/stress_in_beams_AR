@@ -9,6 +9,8 @@ import java.awt.image.*;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 
+import org.opencv.core.*;
+
 import crosssection.GridSpace;
 
 public class Plane extends JPanel {
@@ -67,23 +69,22 @@ public class Plane extends JPanel {
 
     /**
     Updates the colors of all GridSpaces in the grid then repaints the JFrame
-    @param vecX The X rotational vector
-    @param vecY The Y rotational vector
-	@author Nicholas Mataczynski
+    @param rotL The rotational vectors of one end of the beam
+    @param rotR The rotational vectors of the other end of the beam
     */
-    public void planeUpdate(int vecX[], int vecY[]) {
+    public void planeUpdate(double rotL[], double rotR[]) {
 
-    	int xStress = vecX[0] - vecY[0];
-    	int yStress = vecX[1] - vecY[1];
+    	double lStress = Math.toDegrees(rotL[0]) - Math.toDegrees(rotR[0]);
+    	double rStress = Math.toDegrees(rotL[1]) - Math.toDegrees(rotR[1]);
     	int xMiddle = xSpaces / 2;
     	int yMiddle = ySpaces / 2;
-    	int magnifier = 255 / stressCap;
+    	int magnifier = 4;
 
     	for (int i = 0; i < xSpaces; i++){
     		for (int j = 0; j < ySpaces; j++){
-    			int xColor = (int)(((double)i / (double)xMiddle - 1) * Math.min(Math.max(xStress, -stressCap), stressCap) * magnifier);
-    			int yColor = (int)(((double)j / (double)yMiddle - 1) * Math.min(Math.max(yStress, -stressCap), stressCap) * magnifier);
-    			int combinedColor = xColor - yColor;
+    			int lColor = (int)(((double)i / (double)xMiddle - 1) * Math.min(Math.max(lStress, -stressCap), stressCap) * magnifier);
+    			int rColor = (int)(((double)j / (double)yMiddle - 1) * Math.min(Math.max(rStress, -stressCap), stressCap) * magnifier);
+    			int combinedColor = lColor - rColor;
     			if (combinedColor >= 0){
     				boxes[i][j].setColor(255, Math.max(255 - combinedColor, 0), Math.max(255 - combinedColor, 0));
     			} else {
@@ -91,12 +92,19 @@ public class Plane extends JPanel {
     			}
     		}
         }
-        //frame.repaint();
+    }
+
+    /**
+    Updates the colors of all GridSpaces in the grid then repaints the JFrame
+    @param rotL The rotational vectors of one end of the beam
+    @param rotR The rotational vectors of the other end of the beam
+    */
+    public void planeUpdate(Mat rotL, Mat rotR) {
+        planeUpdate(new double[]{rotL.get(0,0)[0], rotL.get(1,0)[0], rotL.get(2,0)[0]}, new double[]{rotR.get(0,0)[0],rotR.get(1,0)[0],rotR.get(2,0)[0]});
     }
 
     /**Returns a BufferedImage representing this Plane. The image is in BufferedImage.TYPE_3BYTE_BGR.
     @return the image.
-    @author Owen Kulik (NOT nick)
     */
     public BufferedImage getImage() {
         BufferedImage answer = new BufferedImage(xDimension, yDimension, BufferedImage.TYPE_3BYTE_BGR);
