@@ -123,6 +123,10 @@ public class CrossSimulation implements Simulation {
                 }
             }
         }
+
+        Calib3d.drawFrameAxes(answer, this.cameraMatrix, this.distCoeffs, first.rotationVector(), first.translationVector(), 0.5F);
+        Calib3d.drawFrameAxes(answer, this.cameraMatrix, this.distCoeffs, second.rotationVector(), second.translationVector(), 0.5F);
+
         return answer;
 	}
 
