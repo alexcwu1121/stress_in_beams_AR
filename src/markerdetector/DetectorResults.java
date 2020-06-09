@@ -48,7 +48,7 @@ public class DetectorResults {
 		if(index == -1){
 			return null;
 		}
-		return new MarkerInformation(id, corners.get(index), rotationVectors.row(index), translationVectors.row(index));
+		return new MarkerInformation(id, corners.get(index), new Pose(rotationVectors.row(index), translationVectors.row(index)));
 	}
 
 	/**Returns the base image.

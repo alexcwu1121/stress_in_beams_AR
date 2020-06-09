@@ -48,14 +48,14 @@ public class DividedSimulation implements Simulation {
 			if(info == null){
 				continue;
 			}
-			Calib3d.drawFrameAxes(finalMatrix, this.cameraMatrix, this.distCoeffs, info.rotationVector(), info.translationVector(), 0.25F);
+			Calib3d.drawFrameAxes(finalMatrix, this.cameraMatrix, this.distCoeffs, info.pose().rotationVector(), info.pose().translationVector(), 0.25F);
 		}
 		for(int i = secondGroup.first(); i <= secondGroup.second(); i++){
 			MarkerInformation info = results.getMarkerInformation(i);
 			if(info == null){
 				continue;
 			}
-			Calib3d.drawFrameAxes(finalMatrix, this.cameraMatrix, this.distCoeffs, info.rotationVector(), info.translationVector(), 0.75F);
+			Calib3d.drawFrameAxes(finalMatrix, this.cameraMatrix, this.distCoeffs, info.pose().rotationVector(), info.pose().translationVector(), 0.75F);
 		}
 		return finalMatrix;
 	}
