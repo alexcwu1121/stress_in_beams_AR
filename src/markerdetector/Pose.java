@@ -164,7 +164,7 @@ public class Pose {
 	}
 
 	/**Returns a boolean indicating whether this Pose is equals to the provided object.<br>
-	This will return true if and only if the other object is a Pose and its id, rotation offsets, and translation offsets are the same.
+	This will return true if and only if the other object is a Pose and its rotation offsets and translation offsets are the same.
 	@param other The object to compare to
 	@return a boolean indicating whether this Pose is equals to the provided object.
 	*/
@@ -178,9 +178,32 @@ public class Pose {
 		if(!(other instanceof Pose)){
 			return false;
 		}
-		Pose mo = (Pose)other;
-		return this.xRotation == mo.xRotation && this.yRotation == mo.yRotation && this.zRotation == mo.zRotation && 
-					this.xTranslation == mo.xTranslation && this.yTranslation == mo.yTranslation && this.zTranslation == mo.zTranslation;
+		return this.equalsInternal((Pose)other, 0.0);
+	}
+
+	/**Returns a boolean indicating whether this Pose is equal to the other Pose within the given tolerance.
+	@param other The Pose to compare to.
+	@param tolerance The tolerance to use in the comparison.
+	@return a boolean indicating whether this Pose is equal to the other Pose within the given tolerance.
+	*/
+	public boolean equals(Pose other, double tolerance){
+		if(other == null){
+			return false;
+		}
+		if(this == other){
+			return true;
+		}
+		return this.equalsInternal(other, tolerance);
+	}
+
+	private boolean equalsInternal(Pose mo, double tolerance){
+		return withinTolerance(this.xRotation, mo.xRotation, tolerance) && withinTolerance(this.yRotation, mo.yRotation, tolerance) && 
+				withinTolerance(this.zRotation, mo.zRotation, tolerance) && withinTolerance(this.xTranslation, mo.xTranslation, tolerance) &&
+				withinTolerance(this.yTranslation, mo.yTranslation, tolerance) &&  withinTolerance(this.zTranslation, mo.zTranslation, tolerance);
+	}
+
+	private static boolean withinTolerance(double first, double second, double tolerance){
+		return Math.abs(first - second) <= tolerance;
 	}
 
 	/**Returns a String representation of this Pose.
