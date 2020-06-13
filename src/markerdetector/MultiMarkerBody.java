@@ -5,6 +5,7 @@ import java.util.*;
 import util.*;
 import java.io.*;
 import org.json.*;
+import org.opencv.calib3d.Calib3d;
 
 public class MultiMarkerBody{
 	private Map<Integer, MarkerOffset> offsets;
@@ -76,6 +77,8 @@ public class MultiMarkerBody{
    }
 
    public Mat predictTranslation(Integer id, Mat rotation, Mat translation){
+      Mat rotationMatrix = new Mat();
+      Calib3d.Rodrigues(rotation, rotationMatrix);
       Mat predictedTranslation = new Mat(3, 1, CvType.CV_64FC1);
 
       Mat transOffset = Mat.zeros(1, 3, CvType.CV_64FC1);
@@ -83,74 +86,67 @@ public class MultiMarkerBody{
       transOffset.put(0, 1, offsets.get(id).yTranslation());
       transOffset.put(0, 2, offsets.get(id).zTranslation());
 
-      Mat xRot = Mat.zeros(3, 3, CvType.CV_64FC1);
-      xRot.put(0, 0, 1);
-      xRot.put(1, 1, Math.cos(rotation.get(0, 0)[0]));
-      xRot.put(1, 2, -Math.sin(rotation.get(0, 0)[0]));
-      xRot.put(2, 1, Math.sin(rotation.get(0, 0)[0]));
-      xRot.put(2, 2, Math.cos(rotation.get(0, 0)[0]));
+      MarkerUtils.printmat(translation);
 
-      Mat yRot = Mat.zeros(3, 3, CvType.CV_64FC1);
-      yRot.put(0, 0, Math.cos(rotation.get(1, 0)[0]));
-      yRot.put(2, 0, -Math.sin(rotation.get(1, 0)[0]));
-      yRot.put(0, 2, Math.sin(rotation.get(1, 0)[0]));
-      yRot.put(2, 2, Math.cos(rotation.get(1, 0)[0]));
-      yRot.put(1, 1, 1);
-
-      Mat zRot = Mat.zeros(3, 3, CvType.CV_64FC1);
-      zRot.put(0, 0, Math.cos(rotation.get(2, 0)[0]));
-      zRot.put(1, 0, Math.sin(rotation.get(2, 0)[0]));
-      zRot.put(0, 1, -Math.sin(rotation.get(2, 0)[0]));
-      zRot.put(1, 1, Math.cos(rotation.get(2, 0)[0]));
-      zRot.put(2, 2, 1);
-
-      Mat xRotated = new Mat(3, 1, CvType.CV_64FC1);
-      Mat yRotated = new Mat(3, 1, CvType.CV_64FC1);
-      Mat zRotated = new Mat(3, 1, CvType.CV_64FC1);
-      xRotated = MarkerUtils.crossMultiply(transOffset, xRot);
-      yRotated = MarkerUtils.crossMultiply(xRotated, yRot);
-      zRotated = MarkerUtils.crossMultiply(yRotated, zRot);
+      transOffset = MarkerUtils.crossMultiply(transOffset, rotationMatrix);
 
       double[] xtransFinal = translation.get(0, 0);
-      double[] ytransFinal = translation.get(1, 0);
-      double[] ztransFinal = translation.get(2, 0);
-      xtransFinal[0] = translation.get(0, 0)[0] + zRotated.get(0, 0)[0];
-      ytransFinal[0] = translation.get(1, 0)[0] + zRotated.get(0, 1)[0];
-      ztransFinal[0] = translation.get(2, 0)[0] + zRotated.get(0, 2)[0];
+      double[] ytransFinal = translation.get(0, 0);
+      double[] ztransFinal = translation.get(0, 0);
+      xtransFinal[0] = translation.get(0, 0)[0] + transOffset.get(0, 0)[0];
+      ytransFinal[0] = translation.get(0, 0)[1] + transOffset.get(0, 1)[0];
+      ztransFinal[0] = translation.get(0, 0)[2] + transOffset.get(0, 2)[0];
       predictedTranslation.put(0, 0, xtransFinal);
       predictedTranslation.put(1, 0, ytransFinal);
       predictedTranslation.put(2, 0, ztransFinal);
+
+      MarkerUtils.printmat(predictedTranslation);
 
       return predictedTranslation;
    }
 
    public Mat predictRotation(Integer id, Mat rotation){
       Mat predictedRotation = new Mat(3, 1, CvType.CV_64FC1);
+      Mat rotationMatrix = new Mat();
+      Calib3d.Rodrigues(rotation, rotationMatrix);
 
       Mat rotOffset = Mat.zeros(1, 3, CvType.CV_64FC1);
       rotOffset.put(0, 0, offsets.get(id).xRotation());
       rotOffset.put(0, 1, offsets.get(id).yRotation());
       rotOffset.put(0, 2, offsets.get(id).zRotation());
 
-      double[] xRotFinal = rotation.get(0, 0);
-      double[] yRotFinal = rotation.get(1, 0);
-      double[] zRotFinal = rotation.get(2, 0);
-      xRotFinal[0] = rotation.get(0, 0)[0] + rotOffset.get(0, 0)[0];
-      yRotFinal[0] = rotation.get(1, 0)[0] + rotOffset.get(0, 1)[0];
-      zRotFinal[0] = rotation.get(2, 0)[0] + rotOffset.get(0, 2)[0];
-      predictedRotation.put(0, 0, mod(xRotFinal[0]));
-      predictedRotation.put(1, 0, mod(yRotFinal[0]));
-      predictedRotation.put(2, 0, mod(zRotFinal[0]));
+      Mat xRotOffset = Mat.zeros(3, 3, CvType.CV_64FC1);
+      xRotOffset.put(0, 0, 1);
+      xRotOffset.put(1, 1, Math.cos(rotOffset.get(0, 0)[0]));
+      xRotOffset.put(1, 2, -Math.sin(rotOffset.get(0, 0)[0]));
+      xRotOffset.put(2, 1, Math.sin(rotOffset.get(0, 0)[0]));
+      xRotOffset.put(2, 2, Math.cos(rotOffset.get(0, 0)[0]));
 
-      return predictedRotation;
-   }
+      Mat yRotOffset = Mat.zeros(3, 3, CvType.CV_64FC1);
+      yRotOffset.put(0, 0, Math.cos(rotOffset.get(0, 1)[0]));
+      yRotOffset.put(2, 0, -Math.sin(rotOffset.get(0, 1)[0]));
+      yRotOffset.put(0, 2, Math.sin(rotOffset.get(0, 1)[0]));
+      yRotOffset.put(2, 2, Math.cos(rotOffset.get(0, 1)[0]));
+      yRotOffset.put(1, 1, 1);
 
-   private static double mod(double input){
-      return ((input + Math.PI)%(2*Math.PI)) - Math.PI;
-      /*if(input > Math.PI){
-         return input - (2*Math.PI);
-      }
-      return input;*/
+      Mat zRotOffset = Mat.zeros(3, 3, CvType.CV_64FC1);
+      zRotOffset.put(0, 0, Math.cos(rotOffset.get(0, 2)[0]));
+      zRotOffset.put(1, 0, Math.sin(rotOffset.get(0, 2)[0]));
+      zRotOffset.put(0, 1, -Math.sin(rotOffset.get(0, 2)[0]));
+      zRotOffset.put(1, 1, Math.cos(rotOffset.get(0, 2)[0]));
+      zRotOffset.put(2, 2, 1);
+
+      Mat xRotated = new Mat(3, 1, CvType.CV_64FC1);
+      Mat yRotated = new Mat(3, 1, CvType.CV_64FC1);
+      Mat zRotated = new Mat(3, 1, CvType.CV_64FC1);
+      zRotated = MarkerUtils.crossMultiply(rotationMatrix, zRotOffset);
+      yRotated = MarkerUtils.crossMultiply(zRotated, yRotOffset);
+      xRotated = MarkerUtils.crossMultiply(yRotated, xRotOffset);
+
+      Mat finalRotVector = new Mat();
+      Calib3d.Rodrigues(xRotated, finalRotVector);
+
+      return finalRotVector;
    }
 
    public Pair<Mat, Mat> predictCenter(DetectorResults results){
@@ -169,8 +165,10 @@ public class MultiMarkerBody{
          }
 
          MarkerInformation intermediate = results.getMarkerInformation(id);
-         Mat rotation = intermediate.rotationVector3D();
-         Mat translation = intermediate.translationVector3D();
+         //Mat rotation = intermediate.rotationVector3D();
+         //Mat translation = intermediate.translationVector3D();
+         Mat rotation = intermediate.rotationVector();
+         Mat translation = intermediate.translationVector();
 
          Mat predictedRotation = predictRotation(id, rotation);
          Mat predictedTranslation = predictTranslation(id, rotation, translation);
