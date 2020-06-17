@@ -30,6 +30,7 @@ public class PoseBuffer {
 			this.currentPose = next;
 			return true;
 		}
+		//this.currentPose = next;
 		return false;
 		/* Check the differentials between the current pose and the proposed next pose's attributes. 
 			If any attribute's differential exceeds a threshold, do not update the pose

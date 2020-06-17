@@ -49,8 +49,8 @@ public class CrossSimulation implements Simulation {
 		this.trackingID = drawingId;
         this.firstId = firstId;
         this.secondId = secondId;
-        this.firstBuf = new PoseBuffer(1, 1);
-        this.secondBuf = new PoseBuffer(1, 1);
+        this.firstBuf = new PoseBuffer(1.2f, 5);
+        this.secondBuf = new PoseBuffer(1.2f, 5);
 
 		//Hardcoded values, feel free to change
 		cross = new Plane(1.0, .2, 1.5);
@@ -115,6 +115,10 @@ public class CrossSimulation implements Simulation {
         //End section
 
         Mat answer = results.baseImage();
+
+        Calib3d.drawFrameAxes(answer, this.cameraMatrix, this.distCoeffs, firstBuf.getPose().rotationVector(), firstBuf.getPose().translationVector(), 0.5F);
+        Calib3d.drawFrameAxes(answer, this.cameraMatrix, this.distCoeffs, secondBuf.getPose().rotationVector(), secondBuf.getPose().translationVector(), 0.5F);
+
         for(int i = 0; i < mat.rows(); i++){
             for(int j = 0; j < mat.cols(); j++){
                 int jmod = j - mat.rows()/2;
