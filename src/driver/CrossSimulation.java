@@ -27,6 +27,9 @@ public class CrossSimulation implements Simulation {
     private final int firstId;
     private final int secondId;
 
+    private PoseBuffer firstBuf;
+    private PoseBuffer secondBuf;
+
 	/**Constructs a CrossSimulation using the given values.
 	@param cameraMatrix the camera matrix to use.
 	@param distCoeffs the distortion coefficients to use.
@@ -46,6 +49,8 @@ public class CrossSimulation implements Simulation {
 		this.trackingID = drawingId;
         this.firstId = firstId;
         this.secondId = secondId;
+        this.firstBuf = new PoseBuffer(1, 1);
+        this.secondBuf = new PoseBuffer(1, 1);
 
 		//Hardcoded values, feel free to change
 		cross = new Plane(1.0, .2, 1.5);
@@ -65,8 +70,11 @@ public class CrossSimulation implements Simulation {
         }
         //End section
 
+        firstBuf.updatePose(first.pose());
+        secondBuf.updatePose(second.pose());
+
         //Edit this section of code to change the values put into the crossection.
-        cross.planeUpdate(first.pose().flipCoords().rotationVector(), second.pose().flipCoords().rotationVector());
+        cross.planeUpdate(firstBuf.getPose().flipCoords().rotationVector(), secondBuf.getPose().flipCoords().rotationVector());
         //End section
 
         BufferedImage bi = cross.getImage();
