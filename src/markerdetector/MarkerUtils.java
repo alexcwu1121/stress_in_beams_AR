@@ -205,4 +205,18 @@ public class MarkerUtils {
         }
         return answer;
     }
+
+    /**Parses and returns a mat from the given JSON object.<br>
+    The JSON object must have the format of objects created by the matToJson function.<br>
+    Note that these functions are only capable of parsing mats with one channel.
+    @param mark1 the first marker pose
+    @param mark2 the second marker pose
+    @return the distance between the two markers.
+    */
+    public static double distance(Pose mark1, Pose mark2){
+        double d = (double)(Math.sqrt(Math.pow(mark2.xTranslation() - mark1.xTranslation(), 2) 
+                    + Math.pow(mark2.yTranslation() - mark1.yTranslation(), 2)
+                    + Math.pow(mark2.zTranslation() - mark1.zTranslation(), 2) * 1.0)); 
+        return d; 
+    }
 }

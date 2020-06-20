@@ -66,7 +66,7 @@ public class CrossSimulation implements Simulation {
         //End section
 
         //Edit this section of code to change the values put into the crossection.
-        cross.planeUpdate(first.pose().flipCoords().rotationVector(), second.pose().flipCoords().rotationVector());
+        cross.planeUpdate(first.pose(), second.pose());
         //End section
 
         BufferedImage bi = cross.getImage();
