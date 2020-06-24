@@ -19,7 +19,7 @@ public class CoordinateTestSimulation implements Simulation {
 		this.cameraMatrix = cameraMatrix;
 		this.distCoeffs = distCoeffs;
 		this.secondid = secondid;
-		body = new MultiMarkerBody(new MarkerOffset(secondid, 0, 3.14, 3.14, 0, 0, 0));
+		body = new MultiMarkerBody(new MarkerOffset(secondid, 0, 0, 0, 0, 1, 0));
 	}
 
 	public Mat run(DetectorResults results){
