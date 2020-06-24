@@ -10,10 +10,10 @@ import org.opencv.calib3d.Calib3d;
 public class MultiMarkerBody{
 	private Map<Integer, MarkerOffset> offsets;
 
-	public MultiMarkerBody(List<MarkerOffset> offsets){
+   public MultiMarkerBody(List<MarkerOffset> offsets){
       this.offsets = new HashMap<Integer, MarkerOffset>();
       for(MarkerOffset offset: offsets){
-         offsetIds.add(offset.id());
+         this.offsets.put(offset.id(), offset);
       }
    }
 
