@@ -118,69 +118,6 @@ public class MarkerUtils {
 		return answer;
 	}
 
-	/**Returns true if and only if the given matrices are the same dimensions and 
-	each value of the given matrices are exactly equal, or if both mats are null.
-	@return a boolean indicating whether the mats are exactly equal.
-	*/
-	public static boolean matEquals(Mat first, Mat second){
-		return matEquals(first, second, 0.0);
-	}
-
-	/**Returns true if and only if the given matrices are the same dimensions and 
-	each value of the given matrices are equal within the given tolerance, or if both mats are null.
-	@return a boolean indicating whether the mats are equal within the given tolerance.
-	*/
-	public static boolean matEquals(Mat first, Mat second, double tolerance){
-		if(first == null && second == null){
-			return true;
-		}
-		if(first == second){
-			return true;
-		}
-		if(first.rows() != second.rows() || first.cols() != second.cols() || first.channels() != second.channels()){
-			return false;
-		}
-		for(int i = 0; i < first.rows(); i++){
-			for(int j = 0; j < first.cols(); j++){
-				for(int k = 0; k < first.channels(); k++){
-					if(Math.abs(first.get(i, j)[k] - second.get(i, j)[k]) > tolerance){
-						return false;
-					}
-				}
-			}
-		}
-		return true;
-	}
-
-	/**Performs cross multiplication of the two matrices and returns the result.<br>
-	The matrices must have the same number of channels.<br>
-	The ith channel of the result matrix will contain the cross product of the ith channel of the first and second matrices.
-	@throws NullPointerException if either argument is null.
-	@throws IllegalArgumentException if first.cols() != second.rows() or if the matrices have different numbers of channels.
-	@return the result of the cross multiplication.
-	*/
-	public static Mat crossMultiply(Mat first, Mat second){
-		if(first.cols() != second.rows()){
-			throw new IllegalArgumentException("First matrix columns and second matrix rows do not match.");
-		}
-		if(first.channels() != second.channels()){
-			throw new IllegalArgumentException("Matrices had different numbers of channels.");
-		}
-		Mat answer = new Mat(first.rows(), second.cols(), first.type());
-		for(int i = 0; i < answer.rows(); i++){
-			for(int j = 0; j < answer.cols(); j++){
-				double[] data = new double[answer.channels()];
-				for(int k = 0; k < answer.channels(); k++){
-					for(int l = 0; l < first.cols(); l++){
-						data[k] += first.get(i, l)[k] * second.get(l, j)[k];
-					}
-				}
-				answer.put(i, j, data);
-			}
-		}
-		return answer;
-	}
-
 	/**Returns a copy of the provided mat, or null if the provided mat is null.
 	@param m The mat to copy.
 	@return a copy of the provided mat, or null if the provided mat is null.

@@ -92,8 +92,8 @@ public class MultiMarkerBody{
       double[] ytransFinal = translation.get(0, 0);
       double[] ztransFinal = translation.get(0, 0);
       xtransFinal[0] = translation.get(0, 0)[0] + transOffset.get(0, 0)[0];
-      ytransFinal[0] = translation.get(0, 0)[1] + transOffset.get(1, 0)[0];
-      ztransFinal[0] = translation.get(0, 0)[2] + transOffset.get(2, 0)[0];
+      ytransFinal[0] = translation.get(1, 0)[0] + transOffset.get(1, 0)[0];
+      ztransFinal[0] = translation.get(2, 0)[0] + transOffset.get(2, 0)[0];
       predictedTranslation.put(0, 0, xtransFinal);
       predictedTranslation.put(1, 0, ytransFinal);
       predictedTranslation.put(2, 0, ztransFinal);
@@ -162,8 +162,8 @@ public class MultiMarkerBody{
 
          MarkerInformation intermediate = results.getMarkerInformation(id);
 
-         Mat rotation = intermediate.rotationVector();
-         Mat translation = intermediate.translationVector();
+         Mat rotation = intermediate.pose().rotationVector();
+         Mat translation = intermediate.pose().translationVector();
 
          Mat predictedRotation = predictRotation(id, rotation);
          Mat predictedTranslation = predictTranslation(id, rotation, translation);
