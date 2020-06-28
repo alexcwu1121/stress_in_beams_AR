@@ -89,7 +89,7 @@ public class settingsWindow {
       panel.setMinimumSize(expectedDimension);
       panel.setBackground(new Color(192, 192, 192));
       panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
-      
+
       JLabel placeholder_L = new JLabel("Placeholder Text Field", SwingConstants.CENTER);
       JLabel scale_L = new JLabel("Size of crossection:");
       JLabel boxCyl_L = new JLabel("Box or Cylinder:");

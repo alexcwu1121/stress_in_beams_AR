@@ -8,6 +8,8 @@ import org.json.*;
 @author Owen Kulik
 */
 
+//TODO: add dot product and scalar product methods, add putSafe
+
 public class MarkerUtils {
 	private MarkerUtils(){}
 

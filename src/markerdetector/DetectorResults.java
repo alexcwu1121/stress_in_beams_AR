@@ -65,6 +65,13 @@ public class DetectorResults {
 		return dict;
 	}
 
+	/**Returns a list of all ids detected in a frame.
+	@return a list of all ids detected in a frame.
+	*/
+	public Mat getIds(){
+		return MarkerUtils.copyof(ids);
+	}
+
 	/**Returns the corners of all detected markers.
 	@return the corners of all detected markers.
 	*/

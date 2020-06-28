@@ -1,0 +1,25 @@
+{"0":
+   {"xTrans": 0,
+   "yTrans": 0,
+   "zTrans": 0,
+   "xRot": 0,
+   "yRot": 0,
+   "zRot": 0
+},
+"1":
+   {"xTrans": 3,
+   "yTrans": 3,
+   "zTrans": 0,
+   "xRot": 3,
+   "yRot": 3,
+   "zRot": 0
+},
+"2":
+   {"xTrans": -3,
+   "yTrans": -3,
+   "zTrans": 0,
+   "xRot": -3,
+   "yRot": -3,
+   "zRot": 0
+}
+}
