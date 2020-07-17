@@ -37,14 +37,28 @@ public class SimulationFrame extends JFrame {
         this.simulations = List.copyOf(s);
     }
 
-	public void simulate(DetectorResults results){
+    /**Generates a mat for each simulation and merges them
+    @param results The detector results to use.
+    */
+    public void simulateSeparate(DetectorResults results){
         this.matrix = new Mat();
-		List<Mat> mats = new LinkedList<Mat>();
+        List<Mat> mats = new LinkedList<Mat>();
         for(Simulation simulation : this.simulations){
             mats.add(simulation.run(results));
         }
         Core.hconcat(mats, this.matrix);
-	}
+    }
+
+    /**Constructs a mat for each simulation and stacks them in one image
+    @param results The detector results to use.
+    */
+    public void simulate(DetectorResults results){
+        this.matrix = new Mat();
+        for(Simulation simulation : this.simulations){
+            this.matrix = simulation.run(results);
+            results = new DetectorResults(this.matrix, results);
+        }
+    }
 
 	public void paint(Graphics g){
 		if(matrix != null){

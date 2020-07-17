@@ -30,6 +30,18 @@ public class DetectorResults {
 		this.translationVectors = translationVectors;
 	}
 
+	/**Constructs a DetectorResults with the same values as the original, but a new base Mat
+	*/
+	public DetectorResults(Mat base, DetectorResults oldDetector){
+		this.baseMatrix = base;
+		this.dict = oldDetector.dict;
+		this.ids = oldDetector.ids;
+		this.corners = oldDetector.corners;
+		this.rejected = oldDetector.rejected;
+		this.rotationVectors = oldDetector.rotationVectors;
+		this.translationVectors = oldDetector.translationVectors;
+	}
+
 	/**Returns a MarkerInformation object representing information for the marker specified by id.
 	@throws IllegalArgumentException if id < 0.
 	@return a MarkerInformation object representing information for the marker specified by id, or null if the marker was not detected.
