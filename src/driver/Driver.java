@@ -29,9 +29,9 @@ public class Driver{
         String cameraParameters = args[1];
         MarkerDetector detector = new MarkerDetector(detectorParameters, cameraParameters);
         Pair<Mat, Mat> cameraInfo = detector.getCameraInformation();
-        //Simulation s = new DividedSimulation(cameraInfo.first(), cameraInfo.second(), new Pair<Integer, Integer>(0, 9), new Pair<Integer, Integer>(10, 19));
-        Simulation s = new CoordinateTestSimulation(cameraInfo.first(), cameraInfo.second(), 8);
-        //Simulation t = new DividedSimulation(cameraInfo.first(), cameraInfo.second(), new Pair<Integer, Integer>(0, 9), new Pair<Integer, Integer>(10, 19));
+        List<Simulation> s = new LinkedList<Simulation>();
+        s.add(new DividedSimulation(cameraInfo.first(), cameraInfo.second(), new Pair<Integer, Integer>(0, 9), new Pair<Integer, Integer>(10, 19)));
+        s.add(new CoordinateTestSimulation(cameraInfo.first(), cameraInfo.second(), 8));
         SimulationFrame frame = new SimulationFrame(s);
         while(true){
             Mat m = webcam.getOneFrame();
