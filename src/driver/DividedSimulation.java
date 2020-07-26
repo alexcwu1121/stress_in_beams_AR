@@ -11,27 +11,21 @@ For the first group of markers, it draws a short set of axes. For the second gro
 */
 
 public class DividedSimulation implements Simulation {
-	private Mat cameraMatrix;
-	private Mat distCoeffs;
 	private Pair<Integer, Integer> firstGroup;
 	private Pair<Integer, Integer> secondGroup;
 
 	/**Constructs a divided simulation with the given information.<br>
 	The first pair of ints represents the range of ids to put in the first grouop, and the second pair represents the second group (both inclusive).
-	@param cameraMatrix The camera matrix to use for this simulation.
-	@param distCoeefs The distortion coefficients to use for this simulation.
 	@param firstRange Pair representing the first range of ids, inclusive.
 	@param secondRange Pair representing the second range of ids, inclusive.
 	*/
-	public DividedSimulation(Mat cameraMatrix, Mat distCoeffs, Pair<Integer, Integer> firstRange, Pair<Integer, Integer> secondRange){
-		if(cameraMatrix == null || distCoeffs == null || firstRange == null || secondRange == null){
+	public DividedSimulation(Pair<Integer, Integer> firstRange, Pair<Integer, Integer> secondRange){
+		if(firstRange == null || secondRange == null){
 			throw new NullPointerException();
 		}
 		if(firstRange.first() == null || firstRange.second() == null || secondRange.first() == null || secondRange.second() == null){
 			throw new NullPointerException();
 		}
-		this.cameraMatrix = cameraMatrix;
-		this.distCoeffs = distCoeffs;
 		this.firstGroup = firstRange;
 		this.secondGroup = secondRange;
 	}
@@ -43,19 +37,20 @@ public class DividedSimulation implements Simulation {
 	public Mat run(DetectorResults results){
 		Mat finalMatrix = new Mat();
 		results.baseImage().copyTo(finalMatrix);
+		CalibrationInformation ci = results.calibrationInformation();
 		for(int i = firstGroup.first(); i <= firstGroup.second(); i++){
 			MarkerInformation info = results.getMarkerInformation(i);
 			if(info == null){
 				continue;
 			}
-			Calib3d.drawFrameAxes(finalMatrix, this.cameraMatrix, this.distCoeffs, info.pose().rotationVector(), info.pose().translationVector(), 0.25F);
+			Calib3d.drawFrameAxes(finalMatrix, ci.cameraMatrix(), ci.distCoeffs(), info.pose().rotationVector(), info.pose().translationVector(), 0.25F);
 		}
 		for(int i = secondGroup.first(); i <= secondGroup.second(); i++){
 			MarkerInformation info = results.getMarkerInformation(i);
 			if(info == null){
 				continue;
 			}
-			Calib3d.drawFrameAxes(finalMatrix, this.cameraMatrix, this.distCoeffs, info.pose().rotationVector(), info.pose().translationVector(), 0.75F);
+			Calib3d.drawFrameAxes(finalMatrix, ci.cameraMatrix(), ci.distCoeffs(), info.pose().rotationVector(), info.pose().translationVector(), 0.75F);
 		}
 		return finalMatrix;
 	}

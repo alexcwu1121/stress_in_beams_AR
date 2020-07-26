@@ -29,7 +29,8 @@ public class MultiMarkerTest {
 		rotation.put(0, 0, markervecs.get(0), markervecs.get(1), markervecs.get(2));
 		Mat translation = new Mat(1, 1, CvType.CV_64FC3);
 		translation.put(0, 0, markervecs.get(3), markervecs.get(4), markervecs.get(5));
-		DetectorResults fakeResults = new DetectorResults(base, dict, ids, corners, rejected, rotation, translation);
+		CalibrationInformation ci = new CalibrationInformation(new Mat(), new Mat());
+		DetectorResults fakeResults = new DetectorResults(base, dict, ids, corners, rejected, rotation, translation, ci);
 		
 		MultiMarkerBody zero = new MultiMarkerBody(new MarkerOffset(0, offsets.get(0), offsets.get(1), offsets.get(2), offsets.get(3), offsets.get(4), offsets.get(5)));
 		Pair<Mat, Mat> body = zero.predictCenter(fakeResults);

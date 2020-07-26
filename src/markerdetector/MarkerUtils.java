@@ -173,7 +173,7 @@ public class MarkerUtils {
 	@throws NullPointerException if m is null.
 	@return a JSONObject representing the given mat.
 	*/
-	public static JSONObject matToJson(Mat m){
+	public static JSONObject matToJSON(Mat m){
         JSONObject answer = new JSONObject();
         answer.put("type", m.type());
         answer.put("rows", m.rows());

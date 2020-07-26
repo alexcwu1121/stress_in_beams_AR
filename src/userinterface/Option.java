@@ -18,11 +18,11 @@ public abstract class Option<Q, V>{
 		this.reader = reader;
 	}
 
-	public abstract OptionEvaluator<Q> getEvaluator();
+	public abstract OptionEvaluator<Q> getEvaluator(Q currentValue);
 
-	public abstract void addToJSONObject(JSONObject obj);
+	//public abstract void addToJSONObject(JSONObject obj, Q value);
 
-	public abstract Q readFromJSONObject(JSONObject obj);
+	//public abstract Q readFromJSONObject(JSONObject obj);
 
 	public Q read(V readFrom){
 		return this.reader.read(readFrom);
