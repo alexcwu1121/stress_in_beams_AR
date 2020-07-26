@@ -7,17 +7,10 @@ import util.*;
 import org.opencv.calib3d.Calib3d;
 
 public class CoordinateTestSimulation implements Simulation {
-	private final Mat cameraMatrix;
-	private final Mat distCoeffs;
 	private final int secondid;
 	private final MultiMarkerBody body;
 
-	public CoordinateTestSimulation(Mat cameraMatrix, Mat distCoeffs, int secondid){
-		if(cameraMatrix == null || distCoeffs == null){
-			throw new NullPointerException();
-		}
-		this.cameraMatrix = cameraMatrix;
-		this.distCoeffs = distCoeffs;
+	public CoordinateTestSimulation(int secondid){
 		this.secondid = secondid;
 		body = new MultiMarkerBody(new MarkerOffset(secondid, 0, 0, 0, 0, 0, 0));
 	}
@@ -41,7 +34,8 @@ public class CoordinateTestSimulation implements Simulation {
 		//MarkerUtils.printmat(prediction.second());
 		//System.out.println();
 		//Pair<Mat, Mat> back = MarkerUtils.get3DCoords(prediction.first(), prediction.second());
-		Calib3d.drawFrameAxes(finalMatrix, this.cameraMatrix, this.distCoeffs, prediction.first(), prediction.second(), 0.5F);
+		CalibrationInformation ci = results.calibrationInformation();
+		Calib3d.drawFrameAxes(finalMatrix, ci.cameraMatrix(), ci.distCoeffs(), prediction.first(), prediction.second(), 0.5F);
 		return finalMatrix;
 	}
 }

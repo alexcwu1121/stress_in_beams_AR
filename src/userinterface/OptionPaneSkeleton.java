@@ -5,8 +5,7 @@ import java.util.*;
 import java.awt.GridBagLayout;
 import java.awt.GridBagConstraints;
 
-public class OptionPaneSkeleton<V>{
-	//Note that all mentions of Option and OptionComponentSkeleton in this class are "raw" types; they do not include the template.
+public class OptionPaneSkeleton<V> implements Skeleton<JOptionPane, V>{
 	private final List<Option<?, V>> options;
 
 	public OptionPaneSkeleton(List<Option<?, V>> options){
@@ -17,7 +16,7 @@ public class OptionPaneSkeleton<V>{
 		JPanel tab = new JPanel();
 		tab.setLayout(new GridBagLayout());
 		JButton apply = new JButton("Apply and Close");
-		JButton reset = new JButton("Rest to Defaults");
+		JButton reset = new JButton("Reset to Defaults");
 		JButton cancel = new JButton("Cancel");
 		int row = 0;
 		for(Option<?, V> o : this.options){
@@ -26,13 +25,22 @@ public class OptionPaneSkeleton<V>{
 			tab.add(evaluator.getComponent(), makeGridBagConstraint(1, row, 1, 1, GridBagConstraints.EAST));
 			row++;
 		}
+		apply.addActionListener((action) -> {
+			SwingUtilities.windowForComponent(tab).dispose();
+		});
+		reset.addActionListener((action) -> {
+			SwingUtilities.windowForComponent(tab).dispose();
+		});
+		cancel.addActionListener((action) -> {
+			SwingUtilities.windowForComponent(tab).dispose();
+		});
 		Object[] buttons =  new Object[]{apply, reset, cancel};
-		JOptionPane optionPane =  new JOptionPane(tab, JOptionPane.DEFAULT_OPTION, JOptionPane.PLAIN_MESSAGE, null, buttons, null);
+		JOptionPane optionPane = new JOptionPane(tab, JOptionPane.DEFAULT_OPTION, JOptionPane.PLAIN_MESSAGE, null, buttons, null);
 		return optionPane;
 	}
 
 	private <T> OptionEvaluator<T> registerOption(Option<T, V> option, JButton apply, JButton reset, V enactOn){
-		OptionEvaluator<T> evaluator = option.getEvaluator();
+		OptionEvaluator<T> evaluator = option.getEvaluator(option.read(enactOn));
 		apply.addActionListener((action) -> {
 			option.enact(evaluator.evaluate(), enactOn);
 		});
@@ -51,6 +59,7 @@ public class OptionPaneSkeleton<V>{
 		gbc.gridheight = height;
 		gbc.anchor = anchor;
 		gbc.ipadx = 10;
+		//gbc.weightx = 1.0;
 		return gbc;
 	}
 }

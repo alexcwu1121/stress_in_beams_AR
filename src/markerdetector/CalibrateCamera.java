@@ -59,8 +59,8 @@ public class CalibrateCamera {
 
         jsonObject.put("image_width", imageSize.width);
         jsonObject.put("image_height", imageSize.height);
-        jsonObject.put("camera_matrix", MarkerUtils.matToJson(cameraMatrix));
-        jsonObject.put("distortion_coefficients", MarkerUtils.matToJson(distCoeffs));
+        jsonObject.put("camera_matrix", MarkerUtils.matToJSON(cameraMatrix));
+        jsonObject.put("distortion_coefficients", MarkerUtils.matToJSON(distCoeffs));
         jsonObject.put("avg_reprojection_error", totalAvgErr);
 
         MarkerUtils.printmat(cameraMatrix);

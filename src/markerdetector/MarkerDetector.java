@@ -16,12 +16,9 @@ import org.json.*;
 import java.io.FileWriter;
 
 public class MarkerDetector {
-
-    // no idea if these types are right
     private Dictionary markers;
     private DetectorParameters params = DetectorParameters.create();
-    private Mat cameraMatrix;
-    private Mat distCoeffs;
+    private CalibrationInformation calibrationInformation;
 
     /**Constructs a detector.
     @param detectorConfig Path to a file containing the detector options.
@@ -33,6 +30,12 @@ public class MarkerDetector {
         //cameraMatrix = Mat.eye(3, 3, 1);
         //distCoeffs = new Mat();
     }
+
+    public MarkerDetector(CalibrationInformation ci){
+        this.calibrationInformation = ci;
+    }
+
+    public MarkerDetector(){}
 
     /**public Detector(String detectorConfig) throws IOException {
         this.readDetectorParameters(detectorConfig);
@@ -68,15 +71,14 @@ public class MarkerDetector {
     private void readCameraParameters(String filename) throws IOException {
         String content = new Scanner(new File(filename)).useDelimiter("\\Z").next();
         JSONObject obj = new JSONObject(content);
-        this.cameraMatrix = MarkerUtils.jsonToMat(obj.getJSONObject("camera_matrix"));
-        this.distCoeffs = MarkerUtils.jsonToMat(obj.getJSONObject("distortion_coefficients"));
+        this.calibrationInformation = CalibrationInformation.fromJSONObject(obj);
     }
 
     /**Returns the camera information for this camera.
     @return a Pair of mats, the first is the camera matrix, the second is the distortion coefficients.
     */
-    public Pair<Mat, Mat> getCameraInformation(){
-        return new Pair<Mat, Mat>(this.cameraMatrix, this.distCoeffs);
+    public CalibrationInformation getCameraInformation(){
+        return this.calibrationInformation;
     }
 
     /**Detects all markers within the source mat.
@@ -89,10 +91,16 @@ public class MarkerDetector {
         List<Mat> corners = new LinkedList<Mat>();
         Mat ids = new Mat();
         List<Mat> rejectedImgPoints = new LinkedList<Mat>();
-        Aruco.detectMarkers(src, markers, corners, ids, this.params, rejectedImgPoints, this.cameraMatrix, this.distCoeffs);
-        Mat rvecs = new Mat();
-        Mat tvecs = new Mat();
-        Aruco.estimatePoseSingleMarkers(corners, 1.0f, this.cameraMatrix, this.distCoeffs, rvecs, tvecs);
-        return new DetectorResults(src, markers, ids, corners, rejectedImgPoints, rvecs, tvecs);
+        Mat rvecs = null;
+        Mat tvecs = null;
+        if(this.calibrationInformation == null){
+            Aruco.detectMarkers(src, markers, corners, ids, this.params, rejectedImgPoints);
+        } else {
+            rvecs = new Mat();
+            tvecs = new Mat();
+            Aruco.detectMarkers(src, markers, corners, ids, this.params, rejectedImgPoints, this.calibrationInformation.cameraMatrix(), this.calibrationInformation.distCoeffs());
+            Aruco.estimatePoseSingleMarkers(corners, 1.0f, this.calibrationInformation.cameraMatrix(), this.calibrationInformation.distCoeffs(), rvecs, tvecs);
+        }
+        return new DetectorResults(src, markers, ids, corners, rejectedImgPoints, rvecs, tvecs, this.calibrationInformation);
     }
 }

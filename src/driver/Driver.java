@@ -29,8 +29,8 @@ public class Driver{
         String detectorParameters = args[0];
         String cameraParameters = args[1];
         MarkerDetector detector = new MarkerDetector(detectorParameters, cameraParameters);
-        Pair<Mat, Mat> cameraInfo = detector.getCameraInformation();
-        StrengthsGUI gui = new StrengthsGUI();
+        CalibrationInformation cameraInfo = detector.getCameraInformation();
+        StrengthsGUI gui = new StrengthsGUI(cameraInfo);
         while(true){
             Mat m = webcam.getOneFrame();
             DetectorResults results = detector.detectMarkers(m, 4);
