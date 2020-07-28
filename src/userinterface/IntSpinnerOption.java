@@ -18,9 +18,12 @@ public class IntSpinnerOption<V> extends Option<Integer, V>{
 		return new OptionEvaluator<Integer>(){
 			private JSpinner component;
 
+			{
+				this.component = new JSpinner(new SpinnerNumberModel((int)currentValue, IntSpinnerOption.this.minValue, IntSpinnerOption.this.maxValue, IntSpinnerOption.this.step));
+			}
+
 			@Override
 			public JComponent getComponent(){
-				this.component = new JSpinner(new SpinnerNumberModel((int)currentValue, IntSpinnerOption.this.minValue, IntSpinnerOption.this.maxValue, IntSpinnerOption.this.step));
 				return this.component;
 			}
 

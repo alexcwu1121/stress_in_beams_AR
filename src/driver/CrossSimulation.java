@@ -25,6 +25,10 @@ public class CrossSimulation implements Simulation {
     private final int firstId;
     private final int secondId;
 
+    public CrossSimulation(){
+        this(5, 9, 7);
+    }
+
     /**Constructs a CrossSimulation using the given values.
     @param idToTrack the marker id to base data off of.
     @throws IllegalArgumentException if idToTrack is negative.
