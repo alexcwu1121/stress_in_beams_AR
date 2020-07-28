@@ -26,11 +26,36 @@ public class SimulationPanel extends JPanel {
     @param results The detector results to use.
     */
     public void simulate(DetectorResults results){
-        this.matrix = new Mat();
+        this.matrix = results.baseImage();
         for(Simulation simulation : this.simulations){
             this.matrix = simulation.run(results);
             results = new DetectorResults(this.matrix, results);
         }
+    }
+
+    public Set<Class<? extends Simulation>> getRunningSimulations(){
+        Set<Class<? extends Simulation>> answer = new HashSet<Class<? extends Simulation>>();
+        for(Simulation simulation : this.simulations){
+            answer.add(simulation.getClass());
+        }
+        return answer;
+    }
+
+    public void addSimulation(Simulation s){
+        List<Simulation> simulations = new LinkedList<Simulation>(this.simulations);
+        simulations.add(s);
+        this.simulations = simulations;
+    }
+
+    public void removeSimulation(Class<? extends Simulation> cl){
+        List<Simulation> simulations = new LinkedList<Simulation>(this.simulations);
+        for(int i = 0; i < simulations.size(); i++){
+            if(simulations.get(i).getClass() == cl){
+                simulations.remove(i);
+                i--;
+            }
+        }
+        this.simulations = simulations;
     }
 
     @Override

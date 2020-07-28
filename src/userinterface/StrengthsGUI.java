@@ -15,7 +15,7 @@ import util.*;
 //Settings: Which simulations to turn on, markerbuffering
 //Menus: Calibrate camera, stop simulation at frame
 
-//TODO: figure out how to have dynamic number of option panels, write menu action listeners, improve application design of calibration objects and markerdetector
+//TODO: write menu action listeners, figure out option tabs, write simulationPanel methods for reading and removing simulations,
 //figure out how to disable certain buttons, write documentation
 
 public class StrengthsGUI{
@@ -25,14 +25,23 @@ public class StrengthsGUI{
 	private int numPanels;
 	private MarkerDetector detector;
 
-	private boolean testOption;
-
 	private static VideoCap webcam = new VideoCap();
 
 	private static MenuBarSkeleton<StrengthsGUI> bar;
-	private static OptionPaneSkeleton<StrengthsGUI> optionPane;
+	//private static OptionPaneSkeleton<StrengthsGUI> optionPane;
 	private static List<Option<?, StrengthsGUI>> options;
+	private static List<Option<?, SimulationPanel>> panelOptions;
 
+	//Hardcoding eligible simulations: maybe not a great idea? 
+	//At the same time it's difficult to think of a much better way. 
+	//Reflection-based operations such as getting all subclasses or using annotations would be very expensive, 
+	//although they would allow developers to use new simulations without editing this file.
+	private static List<Class<? extends Simulation>> eligibleSimulations = List.of(
+		CrossSimulation.class,
+		DividedSimulation.class,
+		CoordinateTestSimulation.class,
+		SimpleSimulation.class
+	);
 
 	private static final StaticActionListener<StrengthsGUI> calibrateCamera = (action, gui) -> {
 		gui.calibrateCamera();
@@ -43,9 +52,21 @@ public class StrengthsGUI{
 	};
 
 	private static final StaticActionListener<StrengthsGUI> settings = (action, gui) -> {
-		//Remove this line and the program doesn't compile
-		optionPane = optionPane;
-		JOptionPane pane = optionPane.getComponent(gui);
+		Map<String, List<InstanceOption<?, ?>>> tabs = new LinkedHashMap<String, List<InstanceOption<?, ?>>>();
+		List<InstanceOption<?, ?>> instanceOptions = new LinkedList<InstanceOption<?, ?>>();
+		for(Option<?, StrengthsGUI> o : options){
+			instanceOptions.add(InstanceOption.make(o, gui));
+		}
+		tabs.put("General", instanceOptions);
+		for(int i = 0; i < gui.simulationPanels.size(); i++){
+			SimulationPanel sp = gui.simulationPanels.get(i);
+			instanceOptions = new LinkedList<InstanceOption<?, ?>>();
+			for(Option<?, SimulationPanel> o : panelOptions){
+				instanceOptions.add(InstanceOption.make(o, sp));
+			}
+			tabs.put("Simulation " + i, instanceOptions);
+		}
+		JOptionPane pane = UserInterfaceUtils.tabbedOptionPane(tabs);
 		JDialog dialog = new JDialog(gui.frame, "Settings", JDialog.ModalityType.APPLICATION_MODAL);
 		dialog.setContentPane(pane);
 		dialog.pack();
@@ -75,28 +96,53 @@ public class StrengthsGUI{
 
 		bar = new MenuBarSkeleton<StrengthsGUI>(List.of(calibrationMenu, preferencesMenu, simulationMenu));
 
-		Option<Boolean, StrengthsGUI> test = new CheckboxOption<StrengthsGUI>("Test Option", "Test Option", false, (gui) -> {
-			return gui.testOption;
-		}, (value, gui) -> {
-			gui.testOption = value;
-		});
 		Option<Integer, StrengthsGUI> testSpinner = new IntSpinnerOption<StrengthsGUI>("Simulations", "Select Number of Simulations", 1, (gui) -> {
 			return gui.numPanels;
 		}, (value, gui) -> {
 			if(gui.numPanels == value){
 				return;
 			}
-			gui.numPanels = value;
-			List<Simulation> nullSim = List.of(NullSimulation.get());
+			
+			List<Simulation> nullSim = List.of();
 			List<SimulationPanel> panels = new LinkedList<SimulationPanel>();
-			for(int i = 0; i < gui.numPanels; i++){
-				panels.add(new SimulationPanel(nullSim));
+			for(int i = 0; i < value; i++){
+				if(i < gui.numPanels){
+					panels.add(gui.simulationPanels.get(i));
+				} else {
+					panels.add(new SimulationPanel(nullSim));
+				}
 			}
+			gui.numPanels = value;
 			gui.simulationPanels = panels;
 			gui.updatePanels();
 		}, 0, 10, 1);
-		options = List.of(test, testSpinner);
-		optionPane = new OptionPaneSkeleton<StrengthsGUI>(List.of(test, testSpinner));
+		options = List.of(testSpinner);
+
+		List<Option<?, SimulationPanel>> panelOptionList = new LinkedList<Option<?, SimulationPanel>>();
+
+		for(Class<? extends Simulation> cl : getAllEligibleSimulations()){
+			String className = cl.getSimpleName();
+			panelOptionList.add(new CheckboxOption<SimulationPanel>(className, className, false, (panel) -> {
+				return panel.getRunningSimulations().contains(cl);
+			}, (value, panel) -> {
+				if(panel.getRunningSimulations().contains(cl) == value){
+					return;
+				}
+				if(value){
+					try{
+						Simulation s = cl.getDeclaredConstructor().newInstance();
+						panel.addSimulation(s);
+					} catch(ReflectiveOperationException e){
+						System.out.println("Reflective operation failed");
+					}
+				} else {
+					panel.removeSimulation(cl);
+				}
+				
+			}));
+		}
+		panelOptions = List.copyOf(panelOptionList);
+		//optionPane = new OptionPaneSkeleton<StrengthsGUI>(List.of(test, testSpinner));
 	}
 
 	{
@@ -175,6 +221,11 @@ public class StrengthsGUI{
 			this.updatePanels();
 			JOptionPane.showMessageDialog(this.frame, "Calibration Successful.");
 		}).start();
+	}
+
+	//Change this method if a better way of marking eligible simulations is found.
+	private static List<Class<? extends Simulation>> getAllEligibleSimulations(){
+		return eligibleSimulations;
 	}
 
 	public static void main(String[] args) throws IOException {

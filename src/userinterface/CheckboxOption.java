@@ -11,10 +11,13 @@ public class CheckboxOption<V> extends Option<Boolean, V> {
 		return new OptionEvaluator<Boolean>(){
 			private JCheckBox component;
 
-			@Override
-			public JComponent getComponent(){
+			{
 				this.component = new JCheckBox();
 				this.component.setSelected(currentValue);
+			}
+
+			@Override
+			public JComponent getComponent(){
 				return this.component;
 			}
 

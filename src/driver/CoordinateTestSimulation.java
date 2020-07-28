@@ -10,6 +10,10 @@ public class CoordinateTestSimulation implements Simulation {
 	private final int secondid;
 	private final MultiMarkerBody body;
 
+	public CoordinateTestSimulation(){
+		this(7);
+	}
+
 	public CoordinateTestSimulation(int secondid){
 		this.secondid = secondid;
 		body = new MultiMarkerBody(new MarkerOffset(secondid, 0, 0, 0, 0, 0, 0));

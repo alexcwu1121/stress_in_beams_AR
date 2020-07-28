@@ -14,6 +14,10 @@ public class DividedSimulation implements Simulation {
 	private Pair<Integer, Integer> firstGroup;
 	private Pair<Integer, Integer> secondGroup;
 
+	public DividedSimulation(){
+		this(new Pair<Integer, Integer>(0, 10), new Pair<Integer, Integer>(11, 20));
+	}
+
 	/**Constructs a divided simulation with the given information.<br>
 	The first pair of ints represents the range of ids to put in the first grouop, and the second pair represents the second group (both inclusive).
 	@param firstRange Pair representing the first range of ids, inclusive.
