@@ -17,7 +17,7 @@ import java.awt.image.*;
 import java.util.*;
 import java.io.*;
 
-import util.Pair;
+import util.*;
 import markerdetector.*;
 import userinterface.*;
 

@@ -1,4 +1,4 @@
-package driver;
+package simulation;
 
 import org.opencv.core.*;
 import org.opencv.calib3d.Calib3d;
@@ -7,6 +7,7 @@ import markerdetector.*;
 /**Simulation which draws axes on all detected markers.
 */
 
+@HumanReadableName("Simple Simulation")
 public class SimpleSimulation implements Simulation {
 	public SimpleSimulation(){}
 
