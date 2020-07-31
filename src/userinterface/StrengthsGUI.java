@@ -3,6 +3,7 @@ package userinterface;
 import java.util.*;
 import javax.swing.*;
 import java.awt.GridLayout;
+import java.awt.event.*;
 import java.io.*;
 
 import org.json.*;
@@ -11,12 +12,20 @@ import org.opencv.core.*;
 import driver.*;
 import markerdetector.*;
 import util.*;
+import simulation.*;
 
 //Settings: Which simulations to turn on, markerbuffering
 //Menus: Calibrate camera, stop simulation at frame
 
 //TODO: write menu action listeners, figure out option tabs, write simulationPanel methods for reading and removing simulations,
-//figure out how to disable certain buttons, write documentation
+//figure out how to disable certain buttons, write documentation, save camera params
+
+//Current application design questions:
+//Should users be able to manually save/load calibration files or should there just be a hardcoded location that users don't know about?
+//Hardcoding eligible simulations
+//How should human-readable names and marking external parameters be done? Should it be annotations in the simulation package or code in the userinterface package?
+//userinterface package/StrengthsGUI class too powerful?
+//Should CameraCalibrationSimulation be in userinterface?
 
 public class StrengthsGUI{
 	private JFrame frame;
@@ -24,6 +33,15 @@ public class StrengthsGUI{
 	private CalibrationInformation calibrationInformation;
 	private int numPanels;
 	private MarkerDetector detector;
+	private State state;
+	private Map<State, List<JComponent>> stateEnablings = new EnumMap<State, List<JComponent>>(State.class);
+	{
+		for(State s : State.values()){
+			stateEnablings.put(s, new LinkedList<JComponent>());
+		}
+	}
+
+	private static final String CALIBRATION_FILE = "../config/calibration.json";
 
 	private static VideoCap webcam = new VideoCap();
 
@@ -36,20 +54,26 @@ public class StrengthsGUI{
 	//At the same time it's difficult to think of a much better way. 
 	//Reflection-based operations such as getting all subclasses or using annotations would be very expensive, 
 	//although they would allow developers to use new simulations without editing this file.
-	private static List<Class<? extends Simulation>> eligibleSimulations = List.of(
+	private static final List<Class<? extends Simulation>> eligibleSimulations = List.of(
 		CrossSimulation.class,
 		DividedSimulation.class,
 		CoordinateTestSimulation.class,
 		SimpleSimulation.class
 	);
 
+	private static final Calibrator calibrator = new ArucoCalibrator();
+
 	private static final StaticActionListener<StrengthsGUI> calibrateCamera = (action, gui) -> {
 		gui.calibrateCamera();
 	};
 
-	private static final StaticActionListener<StrengthsGUI> loadCalibration = (action, gui) -> {
-		//gui.frame = null;
+	/*private static final StaticActionListener<StrengthsGUI> loadCalibration = (action, gui) -> {
+		
 	};
+
+	private static final StaticActionListener<StrengthsGUI> saveCalibration = (action, gui) -> {
+
+	};*/
 
 	private static final StaticActionListener<StrengthsGUI> settings = (action, gui) -> {
 		Map<String, List<InstanceOption<?, ?>>> tabs = new LinkedHashMap<String, List<InstanceOption<?, ?>>>();
@@ -75,23 +99,24 @@ public class StrengthsGUI{
 	};
 
 	private static final StaticActionListener<StrengthsGUI> pause = (action, gui) -> {
-		//gui.frame = null;
+		gui.changeState(State.PAUSED);
 	};
 
 	private static final StaticActionListener<StrengthsGUI> resume = (action, gui) -> {
-		//gui.frame = null;
+		gui.changeState(State.PLAYING);
 	};
 
 	static {
-		MenuItemSkeleton<StrengthsGUI> calibrateCameraItem = new MenuItemSkeleton<StrengthsGUI>("Calibrate Camera...", calibrateCamera);
-		MenuItemSkeleton<StrengthsGUI> loadCalibrationItem = new MenuItemSkeleton<StrengthsGUI>("Load Calibration File...", loadCalibration);
-		MenuSkeleton<StrengthsGUI> calibrationMenu = new MenuSkeleton<StrengthsGUI>("Calibration", List.of(calibrateCameraItem, loadCalibrationItem));
+		MenuItemSkeleton<StrengthsGUI> calibrateCameraItem = new StateMenuItemSkeleton("Calibrate Camera...", calibrateCamera, State.PLAYING, State.PAUSED);
+		//MenuItemSkeleton<StrengthsGUI> loadCalibrationItem = new MenuItemSkeleton<StrengthsGUI>("Load Calibration File...", loadCalibration);
+		//MenuItemSkeleton<StrengthsGUI> saveCalibrationItem = new MenuItemSkeleton<StrengthsGUI>("Save Calibration File...", loadCalibration);
+		MenuSkeleton<StrengthsGUI> calibrationMenu = new MenuSkeleton<StrengthsGUI>("Calibration", List.of(calibrateCameraItem/*, loadCalibrationItem, saveCalibrationItem*/));
 
-		MenuItemSkeleton<StrengthsGUI> settingsItem = new MenuItemSkeleton<StrengthsGUI>("Settings...", settings);
+		MenuItemSkeleton<StrengthsGUI> settingsItem = new StateMenuItemSkeleton("Settings...", settings, State.PLAYING, State.PAUSED);
 		MenuSkeleton<StrengthsGUI> preferencesMenu = new MenuSkeleton<StrengthsGUI>("Preferences", List.of(settingsItem));
 
-		MenuItemSkeleton<StrengthsGUI> pauseItem = new MenuItemSkeleton<StrengthsGUI>("Pause Simulation", pause);
-		MenuItemSkeleton<StrengthsGUI> resumeItem = new MenuItemSkeleton<StrengthsGUI>("Resume Simulation", resume);
+		MenuItemSkeleton<StrengthsGUI> pauseItem = new StateMenuItemSkeleton("Pause Simulations", pause, KeyStroke.getKeyStroke(KeyEvent.VK_P, ActionEvent.CTRL_MASK), -1, State.PLAYING);
+		MenuItemSkeleton<StrengthsGUI> resumeItem = new StateMenuItemSkeleton("Resume Simulations", resume, KeyStroke.getKeyStroke(KeyEvent.VK_R, ActionEvent.CTRL_MASK), -1, State.PAUSED);
 		MenuSkeleton<StrengthsGUI> simulationMenu = new MenuSkeleton<StrengthsGUI>("Simulation", List.of(pauseItem, resumeItem));
 
 		bar = new MenuBarSkeleton<StrengthsGUI>(List.of(calibrationMenu, preferencesMenu, simulationMenu));
@@ -122,7 +147,9 @@ public class StrengthsGUI{
 
 		for(Class<? extends Simulation> cl : getAllEligibleSimulations()){
 			String className = cl.getSimpleName();
-			panelOptionList.add(new CheckboxOption<SimulationPanel>(className, className, false, (panel) -> {
+			HumanReadableName hrn = cl.getAnnotation(HumanReadableName.class);
+			String message = hrn == null ? className : hrn.value();
+			panelOptionList.add(new CheckboxOption<SimulationPanel>(className, message, false, (panel) -> {
 				return panel.getRunningSimulations().contains(cl);
 			}, (value, panel) -> {
 				if(panel.getRunningSimulations().contains(cl) == value){
@@ -163,6 +190,7 @@ public class StrengthsGUI{
 		this.calibrationInformation = ci;
 		this.frame.setVisible(true);
 		this.updateDetector();
+		this.changeState(State.PLAYING);
 		if(this.calibrationInformation == null){
 			JOptionPane.showMessageDialog(this.frame, "Your camera has not been calibrated yet. We will now start camera calibration.");
 			this.calibrateCamera();
@@ -190,18 +218,21 @@ public class StrengthsGUI{
 	}
 
 	public void updateSimulations(DetectorResults results){
-        for(SimulationPanel sp : this.simulationPanels){
-        	sp.simulate(results);
-        	//Possibly unnecessary?
-        	sp.repaint();
-        }
+		if(this.state != State.PAUSED){
+	        for(SimulationPanel sp : this.simulationPanels){
+	        	sp.simulate(results);
+	        	//Possibly unnecessary?
+	        	sp.repaint();
+	        }
+    	}
 	}
 
 	private void calibrateCamera(){
 		List<SimulationPanel> tmpPanels = this.simulationPanels;
-		CameraCalibrationPanel ccp = new CameraCalibrationPanel();
+		CameraCalibrationPanel ccp = new CameraCalibrationPanel(getCalibrator());
 		this.simulationPanels = List.of(ccp);
 		this.updatePanels();
+		this.changeState(State.CALIBRATING);
 		//this.frame.requestFocusInWindow(); 
 		this.frame.addKeyListener(ccp);
 		new Thread(() -> {
@@ -220,7 +251,35 @@ public class StrengthsGUI{
 			this.frame.removeKeyListener(ccp);
 			this.updatePanels();
 			JOptionPane.showMessageDialog(this.frame, "Calibration Successful.");
+			this.changeState(State.PLAYING);
+			this.saveCalibrationFile();
 		}).start();
+	}
+
+	private void changeState(State newState){
+		if(this.state == null){
+			for(State s : state.values()){
+				this.setEnabledForState(s, false);
+			}
+		} else {
+			this.setEnabledForState(this.state, false);
+		}
+		this.state = newState;
+		this.setEnabledForState(this.state, true);
+	}
+
+	private void setEnabledForState(State state, boolean enabled){
+		for(JComponent jc : this.stateEnablings.get(state)){
+			jc.setEnabled(enabled);
+		}
+	}
+
+	private void saveCalibrationFile(){
+		try (PrintStream out = new PrintStream(new FileOutputStream(CALIBRATION_FILE))) {
+    		out.print(this.calibrationInformation.toJSONObject().toString());
+		} catch(IOException e){
+			JOptionPane.showMessageDialog(this.frame, "Calibration information could not be saved. The calibration will only apply for this session.");
+		}
 	}
 
 	//Change this method if a better way of marking eligible simulations is found.
@@ -228,13 +287,44 @@ public class StrengthsGUI{
 		return eligibleSimulations;
 	}
 
+	//Change if a different method of determining the calibrator is used.
+	private static Calibrator getCalibrator(){
+		return calibrator;
+	}
+
+	private static enum State{
+		PLAYING, PAUSED, CALIBRATING;
+	}
+
+	private static class StateMenuItemSkeleton extends MenuItemSkeleton<StrengthsGUI>{
+		private State[] enabledStates;
+
+		public StateMenuItemSkeleton(String message, StaticActionListener<StrengthsGUI> listener, State... enabledStates){
+			super(message, listener);
+			this.enabledStates = enabledStates;
+		}
+
+		public StateMenuItemSkeleton(String message, StaticActionListener<StrengthsGUI> listener, KeyStroke accelerator, int mnemonic, State... enabledStates){
+			super(message, listener, accelerator, mnemonic);
+			this.enabledStates = enabledStates;
+		}
+
+		public JMenuItem getComponent(StrengthsGUI enactOn){
+			JMenuItem answer = super.getComponent(enactOn);
+			for(State st : this.enabledStates){
+				enactOn.stateEnablings.get(st).add(answer);
+			}
+			return answer;
+		}
+	}
+
 	public static void main(String[] args) throws IOException {
 		StrengthsGUI gui;
-		if(args.length > 0){
-			String content = new Scanner(new File(args[0])).useDelimiter("\\Z").next();
+		try{
+			String content = new Scanner(new File(CALIBRATION_FILE)).useDelimiter("\\Z").next();
         	JSONObject obj = new JSONObject(content);
 			gui = new StrengthsGUI(CalibrationInformation.fromJSONObject(obj));
-		} else {
+		} catch(IOException e) {
 			gui = new StrengthsGUI();
 		}
         while(true){

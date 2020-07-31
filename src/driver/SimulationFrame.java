@@ -6,6 +6,7 @@ import java.awt.image.*;
 import org.opencv.core.*;
 import java.awt.Graphics;
 import markerdetector.*;
+import simulation.*;
 import java.util.*;
 
 /**Simple JFrame class which runs a simulation.

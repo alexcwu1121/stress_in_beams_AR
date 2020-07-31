@@ -1,4 +1,4 @@
-package driver;
+package simulation;
 
 import org.opencv.core.*;
 import markerdetector.*;
@@ -6,6 +6,7 @@ import org.opencv.imgproc.Imgproc;
 import util.*;
 import org.opencv.calib3d.Calib3d;
 
+@HumanReadableName("Test Simulation")
 public class CoordinateTestSimulation implements Simulation {
 	private final int secondid;
 	private final MultiMarkerBody body;

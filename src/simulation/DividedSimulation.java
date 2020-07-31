@@ -1,4 +1,4 @@
-package driver;
+package simulation;
 
 import org.opencv.core.*;
 import org.opencv.aruco.*;
@@ -10,6 +10,7 @@ import util.Pair;
 For the first group of markers, it draws a short set of axes. For the second group of markers, it draws a longer set of axes.
 */
 
+@HumanReadableName("Divided Simulation")
 public class DividedSimulation implements Simulation {
 	private Pair<Integer, Integer> firstGroup;
 	private Pair<Integer, Integer> secondGroup;

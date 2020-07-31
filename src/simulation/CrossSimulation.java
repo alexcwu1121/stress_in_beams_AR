@@ -1,4 +1,4 @@
-package driver;
+package simulation;
 
 import markerdetector.*;
 import crosssection.*;
@@ -18,6 +18,7 @@ Additionally, lines are drawn from the crosssection to the marker as a visual ai
 @author Owen Kulik
 */
 
+@HumanReadableName("Cross-Section Simulation")
 public class CrossSimulation implements Simulation {
     private final Plane cross;
     private final int trackingID;

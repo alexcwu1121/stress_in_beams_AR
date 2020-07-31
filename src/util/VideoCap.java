@@ -1,4 +1,4 @@
-package driver;
+package util;
 
 import org.opencv.videoio.VideoCapture;
 import org.opencv.videoio.Videoio;
