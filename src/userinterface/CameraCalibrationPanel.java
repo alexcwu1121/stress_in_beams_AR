@@ -9,6 +9,10 @@ import org.opencv.aruco.*;
 import java.util.*;
 import util.*;
 
+/**Subclass of SimulationPanel which is used for camera calibration.
+@author Owen Kulik
+*/
+
 public class CameraCalibrationPanel extends SimulationPanel implements KeyListener {
 	private CalibrationInformation calibration;
 	private CameraCalibrationSimulation simulation;
@@ -18,19 +22,33 @@ public class CameraCalibrationPanel extends SimulationPanel implements KeyListen
     //Java mandates this stupid design pattern
     private CameraCalibrationPanel(Calibrator calibrator, CameraCalibrationSimulation ccs){
     	super(List.of(ccs));
+    	if(calibrator == null){
+    		throw new NullPointerException();
+    	}
     	this.simulation = ccs;
     	this.calibrator = calibrator;
     }
 
+    /**Constructs a CameraCalibrationPanel from the given Calibrator.
+    @param calibrator the calibration algorithm to use.
+    @throws NullPointerException if calibrator is null.
+    */
 	public CameraCalibrationPanel(Calibrator calibrator){
 		this(calibrator, new CameraCalibrationSimulation());
 	}
 
+	/**Returns the results of camera calibration, blocking until results are available.
+	@throws InterruptedException if the thread is interrupted while waiting for results.
+	@return the results of camera calibration
+	*/
 	public synchronized CalibrationInformation calibrateCamera() throws InterruptedException {
 		this.wait();
 		return this.calibrateCameraNonBlocking();
 	}
 
+	/**Returns the results of camera calibration, or null if results are not currently available.
+	@return the results of camera calibration
+	*/
 	public synchronized CalibrationInformation calibrateCameraNonBlocking(){
 		return this.calibration;
 	}

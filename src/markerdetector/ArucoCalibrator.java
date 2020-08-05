@@ -4,6 +4,12 @@ import org.opencv.core.*;
 import org.opencv.aruco.*;
 import java.util.*;
 
+/**Implementation of the Calibrator interface which calibrates using a board of Aruco markers.<br>
+The parameters of this calibration (number of markers, size of markers, etc) are hardcoded in this class.<br>
+@author Owen Kulik
+@author Alex Wu
+*/
+
 public class ArucoCalibrator implements Calibrator{
 	private final int minFrames;
 
@@ -17,14 +23,29 @@ public class ArucoCalibrator implements Calibrator{
     private static final float MARKER_LENGTH = .043f;
     private static final float MARKER_SEPARATION = .016f;
 
+    /**Constructs an ArucoCalibrator object with a minimum frames value of 10.
+    */
 	public ArucoCalibrator(){
 		this(DEFAULT_VALUE);
 	}
 
+	/**Constructs an ArucoCalibrator object with the given minimum frames value.
+	@param minFrames the minimum frames that must be provided for calibration to occur.
+	@throws IllegalArgumentException if minFrames is negative.
+	*/
 	public ArucoCalibrator(int minFrames){
+		if(minFrames < 0){
+			throw new IllegalArgumentException("minFrames value was negative.");
+		}
 		this.minFrames = minFrames;
 	}
 
+	/**Using the provided DetectorResults objects as input, calibrates the camera using the Aruco.calibrateCameraAruco function and returns the result.
+	@param frames The input frames, represented as DetectorResults objects.
+	@throws NullPointerException if frames is null.
+	@throws NotEnoughFramesException if the number of frames provided is less than minFrames.
+	@return the camera's calibration.
+	*/
 	public CalibrationInformation calibrate(Collection<DetectorResults> frames) throws NotEnoughFramesException {
 		List<List<Mat>> allCorners = new Vector<List<Mat>>();
     	List<Mat> allIds = new Vector<Mat>();

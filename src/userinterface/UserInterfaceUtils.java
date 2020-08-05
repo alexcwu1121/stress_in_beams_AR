@@ -5,13 +5,33 @@ import java.util.*;
 import java.awt.GridBagLayout;
 import java.awt.GridBagConstraints;
 
+/**Uninstantiatable class containing utility methods for the userinterface package.
+@author Owen Kulik
+*/
+
 public class UserInterfaceUtils {
 	private UserInterfaceUtils(){}
 
+	/**Returns a JOptionPane for the given InstanceOption objects.<br>
+	The JOptionPane will consist of a row for each option.<br>
+	Each row will have the option's message on the left side and the option's component on the right side.<br>
+	The pane will have three buttons at the bottom: "Apply and Close", "Reset to Defaults", and "Cancel", each of which do what their names suggest.
+	@param optionMappings the InstanceOptions to use.
+	@throws NullPointerException if optionMappings or any value in optionMappings is null.
+	@return a JOptionPane for the given InstanceOption objects.
+	*/
 	public static JOptionPane optionPane(List<InstanceOption<?, ?>> optionMappings){
 		return optionPaneWithContent(getTab(optionMappings), optionMappings);
 	}
-											  //.... I can explain
+	
+	/**Returns a JOptionPane with tabs for the given Strings and InstanceOptions.<br>
+	Each entry in the given map represents a tab in the option pane.<br>
+	The key is the name of the pane, and the value is the options which will go in that pane.<br>
+	The content of the tabs in the returned option pane are the same as the content of a pane returned by the optionPane() method.
+	@param optionTabMappings the option tab mappings.
+	@throws NullPointerException if optionTabMappings or any value in optionTabMappings is null.
+	@return a JOptionPane for the given mappings.
+	*/
 	public static JOptionPane tabbedOptionPane(Map<String, List<InstanceOption<?, ?>>> optionTabMappings){
 		JTabbedPane panel = new JTabbedPane();
 		List<InstanceOption<?, ?>> options = new LinkedList<InstanceOption<?, ?>>();
@@ -22,6 +42,7 @@ public class UserInterfaceUtils {
 		return optionPaneWithContent(panel, options);
 	}
 
+	//Returns a JOptionPane with "Apply and Close", "Reset to Defaults", and "Cancel" buttons which work for the given options, and has content as its content panel.
 	private static JOptionPane optionPaneWithContent(JComponent content, List<InstanceOption<?, ?>> options){
 		JButton apply = new JButton("Apply and Close");
 		JButton reset = new JButton("Reset to Defaults");
@@ -43,12 +64,13 @@ public class UserInterfaceUtils {
 		return optionPane;
 	}
 
+	//Returns a JPanel representing option rows for the given instance options.
 	private static JPanel getTab(List<InstanceOption<?, ?>> optionMappings){
 		JPanel tab = new JPanel();
 		tab.setLayout(new GridBagLayout());
 		int row = 0;
 		for(InstanceOption<?, ?> entry : optionMappings){
-			OptionEvaluator evaluator = entry.getEvaluator();//registerOption(entry, apply, reset);
+			OptionEvaluator evaluator = entry.getEvaluator();
 			tab.add(new JLabel(entry.getOption().getMessage()), makeGridBagConstraint(0, row, 1, 1, GridBagConstraints.WEST));
 			tab.add(evaluator.getComponent(), makeGridBagConstraint(1, row, 1, 1, GridBagConstraints.EAST));
 			row++;
@@ -56,6 +78,7 @@ public class UserInterfaceUtils {
 		return tab;
 	}
 
+	//Adds actionlisteners relating to the given InstanceOption the the given apply and reset buttons.
 	private static <Q, V> void registerOption(InstanceOption<Q, V> instanceOption, JButton apply, JButton reset){
 		apply.addActionListener((action) -> {
 			instanceOption.enact();

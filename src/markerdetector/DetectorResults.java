@@ -7,6 +7,8 @@ import java.util.LinkedList;
 
 /**Container class containing all results from a marker detection operation, including the base image, 
 dictionary used, corners of detected markers, corners of rejected markers, rotation vectors, and translation vectors.
+@author Owen Kulik
+@author Nicholas Mataczynski
 */
 
 public class DetectorResults {
