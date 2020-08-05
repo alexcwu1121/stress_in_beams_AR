@@ -14,11 +14,10 @@ import markerdetector.*;
 import util.*;
 import simulation.*;
 
-//Settings: Which simulations to turn on, markerbuffering
+//Settings: Which simulations to turn on, markerbuffering, camera id setting
 //Menus: Calibrate camera, stop simulation at frame
 
-//TODO: write menu action listeners, figure out option tabs, write simulationPanel methods for reading and removing simulations,
-//figure out how to disable certain buttons, write documentation, save camera params
+//TODO: write menu action listeners, move annotations to util package, write documentation
 
 //Current application design questions:
 //Should users be able to manually save/load calibration files or should there just be a hardcoded location that users don't know about?
@@ -26,6 +25,10 @@ import simulation.*;
 //How should human-readable names and marking external parameters be done? Should it be annotations in the simulation package or code in the userinterface package?
 //userinterface package/StrengthsGUI class too powerful?
 //Should CameraCalibrationSimulation be in userinterface?
+
+/**The main GUI class and current main method class of the project.
+@author Owen Kulik
+*/
 
 public class StrengthsGUI{
 	private JFrame frame;
@@ -182,10 +185,15 @@ public class StrengthsGUI{
 		}
 	}
 
+	/**Constructs a StrengthsGUI. Since no calibration information is available, the user will be immediately prompted to calibrate their camera.
+	*/
 	public StrengthsGUI(){
 		this(null);
 	}
 
+	/**Constructs a StrengthsGUI with the given CalibrationInformation. If ci is null, the user will be prompted to calibrate their camera.
+	@param ci the calibration information.
+	*/
 	public StrengthsGUI(CalibrationInformation ci){
 		this.calibrationInformation = ci;
 		this.frame.setVisible(true);
@@ -197,10 +205,12 @@ public class StrengthsGUI{
 		}
 	}
 
+	//Updates the detector with the current calibration information.
 	private void updateDetector(){
 		this.detector = new MarkerDetector(this.calibrationInformation);
 	}
 
+	//Updates the frame's content pane to reflect any changes in the simulationPanels variable.
 	private void updatePanels(){
 		JPanel contentPane = new JPanel(new GridLayout());
 		for(SimulationPanel sp : this.simulationPanels){
@@ -211,12 +221,19 @@ public class StrengthsGUI{
 		this.frame.repaint();
 	}
 
+	/**Updates the simulations to the current frame by one frame using this StrengthsGUI's MarkerDetector.
+	Does nothing if the simulations are currently paused.
+	*/
 	public void updateSimulations(){
 		Mat m = webcam.getOneFrame();
         DetectorResults results = detector.detectMarkers(m, 4);
         this.updateSimulations(results);
 	}
 
+	/**Updates the simulations using the provided DetectorResults.
+	@param results the detector results.
+	@throws NullPointerException if results is null.
+	*/
 	public void updateSimulations(DetectorResults results){
 		if(this.state != State.PAUSED){
 	        for(SimulationPanel sp : this.simulationPanels){
@@ -227,6 +244,7 @@ public class StrengthsGUI{
     	}
 	}
 
+	//Calibrates the user's camera.
 	private void calibrateCamera(){
 		List<SimulationPanel> tmpPanels = this.simulationPanels;
 		CameraCalibrationPanel ccp = new CameraCalibrationPanel(getCalibrator());
@@ -256,6 +274,7 @@ public class StrengthsGUI{
 		}).start();
 	}
 
+	//Changes the current state by disabling items limited to the old state and enabling items which are enabled for the new state.
 	private void changeState(State newState){
 		if(this.state == null){
 			for(State s : state.values()){
@@ -268,12 +287,14 @@ public class StrengthsGUI{
 		this.setEnabledForState(this.state, true);
 	}
 
+	//Sets whether a component is enabled for all components for the given State.
 	private void setEnabledForState(State state, boolean enabled){
 		for(JComponent jc : this.stateEnablings.get(state)){
 			jc.setEnabled(enabled);
 		}
 	}
 
+	//Saves the current calibrationInformation.
 	private void saveCalibrationFile(){
 		try (PrintStream out = new PrintStream(new FileOutputStream(CALIBRATION_FILE))) {
     		out.print(this.calibrationInformation.toJSONObject().toString());
@@ -282,20 +303,22 @@ public class StrengthsGUI{
 		}
 	}
 
-	//Change this method if a better way of marking eligible simulations is found.
+	//Returns all eligible simulations, ie simulations which users can manually enable. Change this method if a better way of marking eligible simulations is found.
 	private static List<Class<? extends Simulation>> getAllEligibleSimulations(){
 		return eligibleSimulations;
 	}
 
-	//Change if a different method of determining the calibrator is used.
+	//Returns the calibrator currently being used. Change if a different method of determining the calibrator is used.
 	private static Calibrator getCalibrator(){
 		return calibrator;
 	}
 
+	//Enum used to mark the GUI as being in a certain state.
 	private static enum State{
 		PLAYING, PAUSED, CALIBRATING;
 	}
 
+	//Subclass of MenuItemSkeleton which is used to mark MenuItems as only being enabled in certain states.
 	private static class StateMenuItemSkeleton extends MenuItemSkeleton<StrengthsGUI>{
 		private State[] enabledStates;
 

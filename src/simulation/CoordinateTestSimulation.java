@@ -6,7 +6,7 @@ import org.opencv.imgproc.Imgproc;
 import util.*;
 import org.opencv.calib3d.Calib3d;
 
-@HumanReadableName("Test Simulation")
+@HumanReadableName("Multimarker Body Test Simulation")
 public class CoordinateTestSimulation implements Simulation {
 	private final int secondid;
 	private final MultiMarkerBody body;
