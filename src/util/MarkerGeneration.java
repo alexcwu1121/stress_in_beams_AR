@@ -53,6 +53,14 @@ public class MarkerGeneration {
         Integer numGroups = Integer.parseInt(reader.readLine()); // Could be taken in by some other method other than console
         System.out.println();
 
+        System.out.print("Enter secondary outer border width (i.e, 30): ");
+        Integer border_width = Integer.parseInt(reader.readLine()); // Could be taken in by some other method other than console
+        System.out.println();
+
+        System.out.print("Enter spacing width (i.e, 40): ");
+        Integer spacing = Integer.parseInt(reader.readLine()); // Could be taken in by some other method other than console
+        System.out.println();
+
         List<Integer> groups = new ArrayList<Integer>();
         for (int i = 0; i < numGroups; i++) {
 
@@ -66,7 +74,7 @@ public class MarkerGeneration {
             for(int j = 0; j < groups.get(i); j++){
                 Mat m = new Mat();
                 Aruco.drawMarker(markers, total, 256, m, 1);
-                Mat padded = MarkerGeneration.pad_mat(40, 20, m);
+                Mat padded = MarkerGeneration.pad_mat(spacing, border_width, m);
                 Imgcodecs.imwrite("./group_" + Integer.toString(i) + "_dictid_" + Integer.toString(total) + ".png", padded);
                 total += 1;
             }
