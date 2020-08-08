@@ -36,6 +36,8 @@ public class StrengthsGUI{
 	private CalibrationInformation calibrationInformation;
 	private int numPanels;
 	private MarkerDetector detector;
+
+	//The state of the StrengthsGUI is used to mark certain buttons as enabled and disabled.
 	private State state;
 	private Map<State, List<JComponent>> stateEnablings = new EnumMap<State, List<JComponent>>(State.class);
 	{
@@ -70,14 +72,6 @@ public class StrengthsGUI{
 		gui.calibrateCamera();
 	};
 
-	/*private static final StaticActionListener<StrengthsGUI> loadCalibration = (action, gui) -> {
-		
-	};
-
-	private static final StaticActionListener<StrengthsGUI> saveCalibration = (action, gui) -> {
-
-	};*/
-
 	private static final StaticActionListener<StrengthsGUI> settings = (action, gui) -> {
 		Map<String, List<InstanceOption<?, ?>>> tabs = new LinkedHashMap<String, List<InstanceOption<?, ?>>>();
 		List<InstanceOption<?, ?>> instanceOptions = new LinkedList<InstanceOption<?, ?>>();
@@ -109,11 +103,11 @@ public class StrengthsGUI{
 		gui.changeState(State.PLAYING);
 	};
 
+	//In order to make a menu item which is enabled in only certain states, declare it as a StateMenuItemSkeleton and enumerate the states it is enabled in.
+	//In order to make a menu item which is enabled in all states, declate it as a MenuItemSkeleton.
 	static {
 		MenuItemSkeleton<StrengthsGUI> calibrateCameraItem = new StateMenuItemSkeleton("Calibrate Camera...", calibrateCamera, State.PLAYING, State.PAUSED);
-		//MenuItemSkeleton<StrengthsGUI> loadCalibrationItem = new MenuItemSkeleton<StrengthsGUI>("Load Calibration File...", loadCalibration);
-		//MenuItemSkeleton<StrengthsGUI> saveCalibrationItem = new MenuItemSkeleton<StrengthsGUI>("Save Calibration File...", loadCalibration);
-		MenuSkeleton<StrengthsGUI> calibrationMenu = new MenuSkeleton<StrengthsGUI>("Calibration", List.of(calibrateCameraItem/*, loadCalibrationItem, saveCalibrationItem*/));
+		MenuSkeleton<StrengthsGUI> calibrationMenu = new MenuSkeleton<StrengthsGUI>("Calibration", List.of(calibrateCameraItem));
 
 		MenuItemSkeleton<StrengthsGUI> settingsItem = new StateMenuItemSkeleton("Settings...", settings, State.PLAYING, State.PAUSED);
 		MenuSkeleton<StrengthsGUI> preferencesMenu = new MenuSkeleton<StrengthsGUI>("Preferences", List.of(settingsItem));
@@ -124,6 +118,8 @@ public class StrengthsGUI{
 
 		bar = new MenuBarSkeleton<StrengthsGUI>(List.of(calibrationMenu, preferencesMenu, simulationMenu));
 
+		//In order to make an option which applies to the entire application, add it to the options list.
+		//In order to make an option which applies to each SimulationPanel, add it to panelOptions list.
 		Option<Integer, StrengthsGUI> testSpinner = new IntSpinnerOption<StrengthsGUI>("Simulations", "Select Number of Simulations", 1, (gui) -> {
 			return gui.numPanels;
 		}, (value, gui) -> {
@@ -172,7 +168,6 @@ public class StrengthsGUI{
 			}));
 		}
 		panelOptions = List.copyOf(panelOptionList);
-		//optionPane = new OptionPaneSkeleton<StrengthsGUI>(List.of(test, testSpinner));
 	}
 
 	{
