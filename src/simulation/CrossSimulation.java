@@ -7,6 +7,7 @@ import org.opencv.core.*;
 import org.opencv.aruco.*;
 import org.opencv.calib3d.Calib3d;
 import org.opencv.imgproc.Imgproc;
+import util.HumanReadableName;
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;

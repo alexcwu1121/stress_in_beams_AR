@@ -3,6 +3,7 @@ package simulation;
 import org.opencv.core.*;
 import org.opencv.calib3d.Calib3d;
 import markerdetector.*;
+import util.HumanReadableName;
 
 /**Simulation which draws axes on all detected markers.
 */

@@ -5,6 +5,7 @@ import org.opencv.aruco.*;
 import org.opencv.calib3d.Calib3d;
 import markerdetector.*;
 import util.Pair;
+import util.HumanReadableName;
 
 /**Simulation which separates markers into two groups.
 For the first group of markers, it draws a short set of axes. For the second group of markers, it draws a longer set of axes.
