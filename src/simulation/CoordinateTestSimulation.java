@@ -11,13 +11,15 @@ public class CoordinateTestSimulation implements Simulation {
 	private final int secondid;
 	private final MultiMarkerBody body;
 
-	public CoordinateTestSimulation(){
-		this(7);
-	}
-
+	@Internal
 	public CoordinateTestSimulation(int secondid){
 		this.secondid = secondid;
 		body = new MultiMarkerBody(new MarkerOffset(secondid, 0, 0, 0, 0, 0, 0));
+	}
+
+	public CoordinateTestSimulation(int drawingID, double xRotation, double yRotation, double zRotation, double xTranslation, double yTranslation, double zTranslation){
+		this.secondid = drawingID;
+		body = new MultiMarkerBody(new MarkerOffset(secondid, xRotation, yRotation, zRotation, xTranslation, yTranslation, zTranslation));
 	}
 
 	public Mat run(DetectorResults results){

@@ -27,15 +27,10 @@ public class CrossSimulation implements Simulation {
     private final int firstId;
     private final int secondId;
 
-    public CrossSimulation(){
-        this(5, 9, 7);
-    }
-
     /**Constructs a CrossSimulation using the given values.
     @param idToTrack the marker id to base data off of.
     @throws IllegalArgumentException if idToTrack is negative.
     */
-    //Will probably need to change the signature of this constructor to take extra data about which IDs to look for.
     public CrossSimulation(int firstId, int secondId, int drawingId){
         if(firstId < 0 || secondId < 0 || drawingId < 0){
             throw new IllegalArgumentException("Marker ids cannot be negative");

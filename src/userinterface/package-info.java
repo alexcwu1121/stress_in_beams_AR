@@ -1,4 +1,21 @@
-/**Contains the application's user interface. What follows are tutorials on how to use the classes in this package.<br>
+/**Contains the application's user interface. What follows are tutorials on how to use the GUI and the classes in this package.<br>
+
+I just wrote a Simulation class. How do I get it on the GUI?<br>
+You have to follow a couple of steps.
+The GUI will get a copy of your Simulation by using a particular constructor in that Simulation.<br>
+The first step is to choose which constructor the GUI will use.<br>
+This constructor's parameters must all be representable as JSON literals (ie integers, floats, strings, booleans). (A feature to make more complicated types eligible is currently in the works.)
+Once you have chosen the constructor to use, mark all other constructors with the @Internal annotation. This signals to the GUI not to use them.<br>
+Additionally, consider marking the paramters of the constructor with the @Description annotation, which will be the name that the paramter is displayed with on the GUI.
+(An example of this can be found in the SimpleSimulation class.)<br>
+Next, go into the StrengthsGUI class. On approximately line 60, a field called "eligibleSimulations" is declared.<br>
+This field is a hardcoded list of all simulations to be shown on the GUI.<br>
+Add your Simulation to this list.<br>
+Finally, the GUI needs to know default values for your Simulation's parameters. The final step is to specify these default values.<br>
+This is done by making a default value config file.<br>
+Go into the config folder and create a JSON file whose name is the same as your class with ".json" on the end.<br>
+List the default values you'd like to use for the constructor in a JSON array.<br>
+Examples of this can be found for the currently-used simulations.<br> <br>
 
 The Skeleton Interface<br>
 The Skeleton interface allows classes to statically specify GUI components in a single line of code.<br>
@@ -45,17 +62,6 @@ For an example of this design pattern, see the StateMenuItemSkeleton class insid
 <br>
 <br>
 The Option class and related classes<br>
-
-Class which is used to statically specify an application option.<br>
-This class works by taking two functions at construction time: a reader and an enactor.<br>
-The reader specifies how the option's current value can be read given the object that it reads from.<br>
-The enactor specifies how to change the option's value given the new value and the object to enact on.<br>
-The Option's user interface component is represented by an OptionEvaluator object.<br>
-Since this class statically specifies options, each call to the getEvaluator method must return a new OptionEvaluator.<br>
-For a view of an Option that returns the same OptionEvaluator each time, see the InstanceOption class.<br>
-Subclasses of this class must override the getEvaluator method. All other methods are marked as final and as such cannot be overridden.<br>
-This class has two type parameters. The first one, Q, represents the type of the option.<br>
-The second one, V, represents the type of object that the option is being read from and written to.
 
 The Option class is used to statically specify an application option.<br>
 It has two type parameters. The first one, Q, represents the type of the option.<br>

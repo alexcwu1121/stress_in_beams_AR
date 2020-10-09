@@ -9,23 +9,33 @@ import driver.*;
 import simulation.*;
 import java.util.*;
 import java.awt.Graphics;
+import util.*;
 
 /**JPanel which displays running simulations.<br>
-This class can run multiple simulations at once. These simulations are layered on top of one another.<br>
-If no simulations are provided, simply draws any provided frames.
+This class will store simulations which are either provided at construction-time or with the addSimulation method.<br>
+This class remembers the parameters of Simulations which are not currently running.<br>
+As a consequence of this, setting a Simulation to running or not running and adding or removing the Simulation are distinct pairs of operations.<br>
+Upon setting a Simulation to not running, the parameters of this Simulation are still stored, and the Simulation can be immediately set to running again, and
+a simulation can only be set to running if the panel already has a copy of its parameters.<br>
+Adding a Simulation will cause that Simulation's parameters to be stored, but the Simulation will not be running by default.<br>
+Removing a Simulation will cause that Simulation's parameters to be deleted, and the Simulation must be added again before it is set to running.<br>
+This class cannot store multiple different versions of the same Simulation class, and attempting do so will result in an IllegalArgumentException.
 @author Owen Kulik
 */
 
 public class SimulationPanel extends JPanel {
-	private List<Simulation> simulations;
+    //This is evil. The only reason that I'm allowing myself to do this is because it's not part of the class' public API.
+	private Map<Class<? extends Simulation>, Pair<Boolean, Pair<Simulation, SimulationParameters>>> simulationInformation = new HashMap<>();;
 	private Mat matrix;
 
     /**Constructs a SimulationPanel with the provided simulations.
     @param s the initial list of simulations to display.
     @throws NullPointerException if s is null or any value in s is null.
     */
-    public SimulationPanel(List<Simulation> s){
-        this.simulations = new LinkedList<Simulation>(List.copyOf(s));
+    public SimulationPanel(Collection<SimulationParameters> defaultSimulationParameters){
+        for(SimulationParameters params : defaultSimulationParameters){
+            this.putSimulation(params);
+        }
     }
 
     /**Constructs a mat for each simulation and stacks them in one image.
@@ -34,48 +44,107 @@ public class SimulationPanel extends JPanel {
     */
     public void simulate(DetectorResults results){
         this.matrix = results.baseImage();
-        for(Simulation simulation : this.simulations){
-            this.matrix = simulation.run(results);
-            results = new DetectorResults(this.matrix, results);
-        }
-    }
-
-    /**Returns a set of class objects representing every simulation that is currently running.
-    @return the set.
-    */
-    public Set<Class<? extends Simulation>> getRunningSimulations(){
-        Set<Class<? extends Simulation>> answer = new HashSet<Class<? extends Simulation>>();
-        for(Simulation simulation : this.simulations){
-            answer.add(simulation.getClass());
-        }
-        return answer;
-    }
-
-    /**Adds this simulation to this panel's running simulations.
-    @param s the simulation to add
-    @throws NullPointerException if s is null.
-    */
-    public void addSimulation(Simulation s){
-        if(s == null){
-            throw new NullPointerException();
-        }
-        List<Simulation> simulations = new LinkedList<Simulation>(this.simulations);
-        simulations.add(s);
-        this.simulations = simulations;
-    }
-
-    /**Removes all simulations of the given class type from this SimulationPanel. Has no effect if cl is null.
-    @param cl the class to remove simulations of.
-    */
-    public void removeSimulation(Class<? extends Simulation> cl){
-        List<Simulation> simulations = new LinkedList<Simulation>(this.simulations);
-        for(int i = 0; i < simulations.size(); i++){
-            if(simulations.get(i).getClass() == cl){
-                simulations.remove(i);
-                i--;
+        for(Map.Entry<Class<? extends Simulation>, Pair<Boolean, Pair<Simulation, SimulationParameters>>> entry : this.simulationInformation.entrySet()){
+            if(entry.getValue().first()){
+                this.matrix = entry.getValue().second().first().run(results);
+                results = new DetectorResults(this.matrix, results);
             }
         }
-        this.simulations = simulations;
+    }
+
+    /**Adds the given Simulation to this SimulationPanel's collection of Simulations, using the given parameters a default values.
+    @param defaultValues the default parameters for this Simulation.
+    @throws IllegalArgumentException if a Simulation of the same type is already stored in this SimulationPanel.
+    @throws NullPointerException if defaultValues is null.
+    */
+    public void addSimulation(SimulationParameters defaultValues){
+        if(this.hasSimulation(defaultValues.getSimulationClass())){
+            throw new IllegalArgumentException("Panel already has an instance of " + defaultValues.getSimulationClass().toString());
+        }
+        this.putSimulation(defaultValues);
+    }
+
+    /**Removes the given Simulation from this SimulationPanel's collection of Simulations. Has no effect if this panel does not have a Simulation of this type.
+    @param simulationClass the Simulation type to remove.
+    @throws NullPointerException if simulationClass is null.
+    */
+    public void removeSimulation(Class<? extends Simulation> simulationClass){
+        this.simulationInformation.remove(simulationClass);
+    }
+
+    /**Returns whether this panel has the given Simulation class.
+    @param simulationClass the Simulation type to remove.
+    @throws NullPointerException if simulationClass is null.
+    @return whether this panel has the given Simulation class.
+    */
+    public boolean hasSimulation(Class<? extends Simulation> simulationClass){
+        return this.simulationInformation.containsKey(simulationClass);
+    }
+
+    /**Returns the current SimulationParamters object for the given simulation class, or null if this panel does not have a Simulation of the given type.
+    @param simulationClass the Simulation type to get paramters of.
+    @throws NullPointerException if simulationClass is null.
+    @return the current SimulationParamters object for the given simulation class
+    */
+    public SimulationParameters getParametersForSimulation(Class<? extends Simulation> simulationClass){
+        return this.hasSimulation(simulationClass) ? this.simulationInformation.get(simulationClass).second().second() : null;
+    }
+
+    /**Replaces the SimulationParameters for the class that the SimulationParameters represents.
+    @param params the parameters
+    @throws IllegalArgumentException if the panel does not have a Simulation of this type.
+    @throws NullPointerException if params is null.
+    */
+    public void replaceParameters(SimulationParameters params){
+        if(!this.hasSimulation(params.getSimulationClass())){
+            throw new IllegalArgumentException("Panel does not have an instance of " + params.getSimulationClass().toString());
+        }
+        Pair<Boolean, Pair<Simulation, SimulationParameters>> pair = this.simulationInformation.get(params.getSimulationClass());
+        Pair<Boolean, Pair<Simulation, SimulationParameters>> answer = Pair.makePair(pair.first(), Pair.makePair(params.getSimulation(), params));
+        this.simulationInformation.put(params.getSimulationClass(), answer);
+    }
+
+    /**Sets whether the Simulation for the given class is running.
+    @param simulationClass the class to consider
+    @param running whether to run the simulation
+    @throws IllegalArgumentException if the panel does not have a Simulation of this type.
+    @throws NullPointerException if simulationClass is null.
+    */
+    public void setRunning(Class<? extends Simulation> simulationClass, boolean running){
+        if(!this.hasSimulation(simulationClass)){
+            throw new IllegalArgumentException("Panel does not have an instance of " + simulationClass.toString());
+        }
+        Pair<Boolean, Pair<Simulation, SimulationParameters>> pair = this.simulationInformation.get(simulationClass);
+        Pair<Boolean, Pair<Simulation, SimulationParameters>> answer = Pair.makePair(running, pair.second());
+        this.simulationInformation.put(simulationClass, answer);
+    }
+
+    /**Returns whether this simulation is currently running.
+    @param simulationClass the class to consider
+    @throws IllegalArgumentException if the panel does not have a Simulation of this type.
+    @throws NullPointerException if simulationClass is null.
+    @return whether this simulation is currently running.
+    */
+    public boolean getRunning(Class<? extends Simulation> simulationClass){
+        if(!this.hasSimulation(simulationClass)){
+            throw new IllegalArgumentException("Panel does not have an instance of " + simulationClass.toString());
+        }
+        return this.simulationInformation.get(simulationClass).first();
+    }
+
+    /**If the given simulation class is currently running, returns that running simulation. Otherwise returns null.
+    @param simulationClass the class to consider
+    @throws IllegalArgumentException if the panel does not have a Simulation of this type.
+    @throws NullPointerException if simulationClass is null.
+    @return the running simulation.
+    */
+    @SuppressWarnings("unchecked")
+    public <T extends Simulation> T getRunningSimulation(Class<T> simulationClass){
+        if(!this.hasSimulation(simulationClass)){
+            throw new IllegalArgumentException("Panel does not have an instance of " + simulationClass.toString());
+        }
+        boolean running = this.getRunning(simulationClass);
+        return (T)(running ? this.simulationInformation.get(simulationClass).second().first() : null);
     }
 
     /**Returns this panel's preferred size, which is the size of the most recently provided input matrix.
@@ -126,4 +195,8 @@ public class SimulationPanel extends JPanel {
         lined.get(0, 0, data);
         return img;
     } 
+
+    private void putSimulation(SimulationParameters params){
+        this.simulationInformation.put(params.getSimulationClass(), Pair.makePair(false, Pair.makePair(params.getSimulation(), params.copy())));
+    }
 }

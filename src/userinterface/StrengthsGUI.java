@@ -17,14 +17,11 @@ import simulation.*;
 //Settings: Which simulations to turn on, markerbuffering, camera id setting
 //Menus: Calibrate camera, stop simulation at frame
 
-//TODO: write menu action listeners, move annotations to util package, write documentation
+//TODO: remember settings between runs, write documentation, write calibration instructions, write config generator
+//Possible refactorings/extra features: include JSON parsing for complicated values, template SimulationParameters, make SimulationParameters optional wrapper class
 
 //Current application design questions:
-//Should users be able to manually save/load calibration files or should there just be a hardcoded location that users don't know about?
-//Hardcoding eligible simulations
-//How should human-readable names and marking external parameters be done? Should it be annotations in the simulation package or code in the userinterface package?
 //userinterface package/StrengthsGUI class too powerful?
-//Should CameraCalibrationSimulation be in userinterface?
 
 /**The main GUI class and current main method class of the project.
 @author Owen Kulik
@@ -46,7 +43,8 @@ public class StrengthsGUI{
 		}
 	}
 
-	private static final String CALIBRATION_FILE = "../config/calibration.json";
+	private static final String CONFIG_PATH = "./config";
+	private static final String CALIBRATION_FILE = CONFIG_PATH + File.separator + "calibration.json";
 
 	private static VideoCap webcam = new VideoCap();
 
@@ -55,16 +53,14 @@ public class StrengthsGUI{
 	private static List<Option<?, StrengthsGUI>> options;
 	private static List<Option<?, SimulationPanel>> panelOptions;
 
-	//Hardcoding eligible simulations: maybe not a great idea? 
-	//At the same time it's difficult to think of a much better way. 
-	//Reflection-based operations such as getting all subclasses or using annotations would be very expensive, 
-	//although they would allow developers to use new simulations without editing this file.
 	private static final List<Class<? extends Simulation>> eligibleSimulations = List.of(
 		CrossSimulation.class,
 		DividedSimulation.class,
 		CoordinateTestSimulation.class,
 		SimpleSimulation.class
 	);
+
+	private static final List<SimulationParameters> defaultParameters = new ArrayList<SimulationParameters>();
 
 	private static final Calibrator calibrator = new ArucoCalibrator();
 
@@ -120,6 +116,27 @@ public class StrengthsGUI{
 
 		//In order to make an option which applies to the entire application, add it to the options list.
 		//In order to make an option which applies to each SimulationPanel, add it to panelOptions list.
+		List<Option<?, SimulationPanel>> panelOptionList = new LinkedList<Option<?, SimulationPanel>>();
+		for(Class<? extends Simulation> cl : getAllEligibleSimulations()){
+			String className = cl.getSimpleName();
+			HumanReadableName hrn = cl.getAnnotation(HumanReadableName.class);
+			String message = hrn == null ? className : hrn.value();
+			SimulationParameters defaultValues;
+			try{
+				defaultValues = getDefaultValuesForSimulation(cl);
+			} catch(IOException e){
+				throw new UncheckedIOException(e);
+			}
+			defaultParameters.add(defaultValues);
+			panelOptionList.add(new SimulationOption<SimulationPanel>(className, message, Pair.makePair(false, defaultValues), (panel) -> {
+				return new Pair<Boolean, SimulationParameters>(panel.getRunning(cl), panel.getParametersForSimulation(cl));
+			}, (value, panel) -> {
+				panel.replaceParameters(value.second());
+				panel.setRunning(cl, value.first());
+			}));
+		}
+		panelOptions = List.copyOf(panelOptionList);
+
 		Option<Integer, StrengthsGUI> testSpinner = new IntSpinnerOption<StrengthsGUI>("Simulations", "Select Number of Simulations", 1, (gui) -> {
 			return gui.numPanels;
 		}, (value, gui) -> {
@@ -127,13 +144,12 @@ public class StrengthsGUI{
 				return;
 			}
 			
-			List<Simulation> nullSim = List.of();
 			List<SimulationPanel> panels = new LinkedList<SimulationPanel>();
 			for(int i = 0; i < value; i++){
 				if(i < gui.numPanels){
 					panels.add(gui.simulationPanels.get(i));
 				} else {
-					panels.add(new SimulationPanel(nullSim));
+					panels.add(new SimulationPanel(defaultParameters));
 				}
 			}
 			gui.numPanels = value;
@@ -141,33 +157,6 @@ public class StrengthsGUI{
 			gui.updatePanels();
 		}, 0, 10, 1);
 		options = List.of(testSpinner);
-
-		List<Option<?, SimulationPanel>> panelOptionList = new LinkedList<Option<?, SimulationPanel>>();
-
-		for(Class<? extends Simulation> cl : getAllEligibleSimulations()){
-			String className = cl.getSimpleName();
-			HumanReadableName hrn = cl.getAnnotation(HumanReadableName.class);
-			String message = hrn == null ? className : hrn.value();
-			panelOptionList.add(new CheckboxOption<SimulationPanel>(className, message, false, (panel) -> {
-				return panel.getRunningSimulations().contains(cl);
-			}, (value, panel) -> {
-				if(panel.getRunningSimulations().contains(cl) == value){
-					return;
-				}
-				if(value){
-					try{
-						Simulation s = cl.getDeclaredConstructor().newInstance();
-						panel.addSimulation(s);
-					} catch(ReflectiveOperationException e){
-						System.out.println("Reflective operation failed");
-					}
-				} else {
-					panel.removeSimulation(cl);
-				}
-				
-			}));
-		}
-		panelOptions = List.copyOf(panelOptionList);
 	}
 
 	{
@@ -296,6 +285,20 @@ public class StrengthsGUI{
 		} catch(IOException e){
 			JOptionPane.showMessageDialog(this.frame, "Calibration information could not be saved. The calibration will only apply for this session.");
 		}
+	}
+
+	private static SimulationParameters getDefaultValuesForSimulation(Class<? extends Simulation> simulationClass) throws IOException {
+		SimulationParameters answer = new SimulationParameters(simulationClass);
+		if(answer.numberOfParameters() == 0){
+			return answer;
+		}
+		String configFilePath = CONFIG_PATH +  File.separator + simulationClass.getSimpleName() +  ".json";
+		String content = new Scanner(new File(configFilePath)).useDelimiter("\\Z").next();
+        JSONArray obj = new JSONArray(content);
+        for(int i = 0; i < answer.numberOfParameters(); i++){
+        	answer.fillInParameter(i, obj.get(i));
+        }
+        return answer;
 	}
 
 	//Returns all eligible simulations, ie simulations which users can manually enable. Change this method if a better way of marking eligible simulations is found.
