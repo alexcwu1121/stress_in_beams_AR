@@ -17,15 +17,15 @@ public class CameraCalibrationPanel extends SimulationPanel implements KeyListen
 	private CalibrationInformation calibration;
 	private CameraCalibrationSimulation simulation;
 	private Calibrator calibrator;
-	private boolean calibrationComplete = false;
 
     //Java mandates this stupid design pattern
-    private CameraCalibrationPanel(Calibrator calibrator, CameraCalibrationSimulation ccs){
+    private CameraCalibrationPanel(Calibrator calibrator, SimulationParameters ccs){
     	super(List.of(ccs));
     	if(calibrator == null){
     		throw new NullPointerException();
     	}
-    	this.simulation = ccs;
+    	this.setRunning(CameraCalibrationSimulation.class, true);
+    	this.simulation = this.getRunningSimulation(CameraCalibrationSimulation.class);
     	this.calibrator = calibrator;
     }
 
@@ -34,7 +34,7 @@ public class CameraCalibrationPanel extends SimulationPanel implements KeyListen
     @throws NullPointerException if calibrator is null.
     */
 	public CameraCalibrationPanel(Calibrator calibrator){
-		this(calibrator, new CameraCalibrationSimulation());
+		this(calibrator, new SimulationParameters(CameraCalibrationSimulation.class));
 	}
 
 	/**Returns the results of camera calibration, blocking until results are available.
@@ -79,6 +79,8 @@ public class CameraCalibrationPanel extends SimulationPanel implements KeyListen
 	private static class CameraCalibrationSimulation implements Simulation {
 		private boolean captureNextFrame;
 		private List<DetectorResults> capturedFrames = new LinkedList<DetectorResults>();
+
+		public CameraCalibrationSimulation(){}
 
 		public Mat run(DetectorResults results){
 			DetectorParameters params = DetectorParameters.create();

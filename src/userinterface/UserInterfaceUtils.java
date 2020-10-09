@@ -12,6 +12,39 @@ import java.awt.GridBagConstraints;
 public class UserInterfaceUtils {
 	private UserInterfaceUtils(){}
 
+	private static final Map<Class<?>, Class<? extends Option>> optionClassMappings = new HashMap<>();;
+	static {
+		optionClassMappings.put(Integer.class, IntSpinnerOption.class);
+		optionClassMappings.put(int.class, IntSpinnerOption.class);
+		//optionClassMappings.put(Long.class, IntSpinnerOption.class);
+		optionClassMappings.put(Short.class, IntSpinnerOption.class);
+		optionClassMappings.put(short.class, IntSpinnerOption.class);
+		optionClassMappings.put(Byte.class, IntSpinnerOption.class);
+		optionClassMappings.put(byte.class, IntSpinnerOption.class);
+		optionClassMappings.put(Double.class, DoubleSpinnerOption.class);
+		optionClassMappings.put(double.class, DoubleSpinnerOption.class);
+		optionClassMappings.put(Float.class, FloatSpinnerOption.class);
+		optionClassMappings.put(float.class, FloatSpinnerOption.class);
+		optionClassMappings.put(Boolean.class, CheckboxOption.class);
+		optionClassMappings.put(boolean.class, CheckboxOption.class);
+	}
+
+	/**Returns an Option class which is suitable for use with values of the given class.
+	@param cl The class to return an option for
+	@throws IllegalArgumentException if no Option class was found for the given class.
+	@throws NullPointerException if cl is null
+	@return an Option class which is suitable for use with values of the given class.
+	*/
+	public static Class<? extends Option> getOptionForClass(Class<?> cl){
+		if(cl == null){
+			throw new NullPointerException();
+		}
+		if(!optionClassMappings.containsKey(cl)){
+			throw new IllegalArgumentException("No Option found for " + cl.toString());
+		}
+		return optionClassMappings.get(cl);
+	}
+
 	/**Returns a JOptionPane for the given InstanceOption objects.<br>
 	The JOptionPane will consist of a row for each option.<br>
 	Each row will have the option's message on the left side and the option's component on the right side.<br>
@@ -72,7 +105,7 @@ public class UserInterfaceUtils {
 		for(InstanceOption<?, ?> entry : optionMappings){
 			OptionEvaluator evaluator = entry.getEvaluator();
 			tab.add(new JLabel(entry.getOption().getMessage()), makeGridBagConstraint(0, row, 1, 1, GridBagConstraints.WEST));
-			tab.add(evaluator.getComponent(), makeGridBagConstraint(1, row, 1, 1, GridBagConstraints.EAST));
+			tab.add(evaluator.getComponent(), makeGridBagConstraint(1, row, 1, 1, GridBagConstraints.WEST));
 			row++;
 		}
 		return tab;

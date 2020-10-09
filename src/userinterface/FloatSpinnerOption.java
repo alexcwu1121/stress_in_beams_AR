@@ -2,21 +2,21 @@ package userinterface;
 
 import javax.swing.*;
 
-/**Option for an Integer value using a JSpinner representation.
+/**Option for a Float value using a JSpinner representation.
 @author Owen Kulik
 */
 
-public class IntSpinnerOption<V> extends Option<Integer, V>{
-	private final int minValue;
-	private final int maxValue;
-	private final int step;
+public class FloatSpinnerOption<V> extends Option<Float, V>{
+	private final float minValue;
+	private final float maxValue;
+	private final float step;
 
-	private static final int DEFAULT_MIN_VALUE = Integer.MIN_VALUE;
-	private static final int DEFAULT_MAX_VALUE = Integer.MAX_VALUE;
-	private static final int DEFAULT_STEP = 1;
+	private static final float DEFAULT_MIN_VALUE = Long.MIN_VALUE;//-Float.MAX_VALUE;
+	private static final float DEFAULT_MAX_VALUE = Long.MAX_VALUE;//Float.MAX_VALUE;
+	private static final float DEFAULT_STEP = .1F;
 
-	/**Constructs an IntSpinnerOption from the given values.<br> 
-	Uses Integer.MIN_VALUE, Integer.MAX_VALUE, and 1 for min value, max value, and step, respectively.
+	/**Constructs a FloatSpinnerOption from the given values.<br> 
+	Uses -Float.MAX_VALUE, Float.MAX_VALUE, and 0.1 for min value, max value, and step, respectively.
 	@param name the option's name. Can be null.
 	@param message the option's message. This is what is displayed to users explaining what the option is, it should be human-readable. Can be null.
 	@param defaultValue the option's default value. Can NOT be null.
@@ -24,11 +24,11 @@ public class IntSpinnerOption<V> extends Option<Integer, V>{
 	@param enactor the function which enacts an option value.
 	@throws NullPointerException if reader, enactor or DefaultValue is null.
 	*/
-	public IntSpinnerOption(String name, String message, Integer defaultValue, Reader<Integer, V> reader, Enactor<Integer, V> enactor){
+	public FloatSpinnerOption(String name, String message, Float defaultValue, Reader<Float, V> reader, Enactor<Float, V> enactor){
 		this(name, message, defaultValue, reader, enactor, DEFAULT_MIN_VALUE, DEFAULT_MAX_VALUE, DEFAULT_STEP);
 	}
 
-	/**Constructs an IntSpinnerOption from the given values.
+	/**Constructs a FloatSpinnerOption from the given values.
 	@param name the option's name. Can be null.
 	@param message the option's message. This is what is displayed to users explaining what the option is, it should be human-readable. Can be null.
 	@param defaultValue the option's default value. Can NOT be null.
@@ -39,27 +39,27 @@ public class IntSpinnerOption<V> extends Option<Integer, V>{
 	@param step the interval between valid spinner values.
 	@throws NullPointerException if reader, enactor or DefaultValue is null.
 	*/
-	public IntSpinnerOption(String name, String message, Integer defaultValue, Reader<Integer, V> reader, Enactor<Integer, V> enactor, int minValue, int maxValue, int step){
+	public FloatSpinnerOption(String name, String message, Float defaultValue, Reader<Float, V> reader, Enactor<Float, V> enactor, float minValue, float maxValue, float step){
 		super(name, message, defaultValue, reader, enactor);
 		this.minValue = minValue;
 		this.maxValue = maxValue;
 		this.step = step;
 	}
 
-	/**Returns an OptionEvaluator for this IntSpinnerOption.<br>
+	/**Returns an OptionEvaluator for this FloatSpinnerOption.<br>
 	The OptionEvaluator's getComponent method will always return an instance of JSpinner.<br>
 	The OptionEvaluator's evaluate method will return the JSpinner's value. It will never return null.
 	@param currentValue the JSpinner's initial value.
 	@throws NullPointerException if currentValue is null.
-	@return an OptionEvaluator for this IntSpinnerOption.
+	@return an OptionEvaluator for this FloatSpinnerOption.
 	*/
 	@Override
-	public OptionEvaluator<Integer> getEvaluator(Integer currentValue){
-		return new OptionEvaluator<Integer>(){
+	public OptionEvaluator<Float> getEvaluator(Float currentValue){
+		return new OptionEvaluator<Float>(){
 			private JSpinner component;
 
 			{
-				this.component = new JSpinner(new SpinnerNumberModel((int)currentValue, IntSpinnerOption.this.minValue, IntSpinnerOption.this.maxValue, IntSpinnerOption.this.step));
+				this.component = new JSpinner(new SpinnerNumberModel((float)currentValue, FloatSpinnerOption.this.minValue, FloatSpinnerOption.this.maxValue, FloatSpinnerOption.this.step));
 			}
 
 			@Override
@@ -68,8 +68,8 @@ public class IntSpinnerOption<V> extends Option<Integer, V>{
 			}
 
 			@Override
-			public Integer evaluate(){
-				return (Integer)this.component.getValue();
+			public Float evaluate(){
+				return (Float)this.component.getValue();
 			}
 		};
 	}
