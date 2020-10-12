@@ -8,13 +8,12 @@ import java.lang.reflect.*;
 import util.*;
 
 /**Option class used for Simulations.<br>
-The type of this option class is Pair<Boolean, SimulationParameters>. 
-The boolean indicates whether the Simulation is currently running, and the SimulationParamters object stores the simulation paramters.<br>
-This is done so that the paramters can be remembered even when the simulation is not running.
+The type of this option class is OptionalSimulationParameters. <br>
+This allows for the paramters to be remembered even when the simulation is not running.
 @author Owen Kulik
 */
 
-public class SimulationOption<V> extends Option<Pair<Boolean, SimulationParameters>, V>{
+public class SimulationOption<V> extends Option<OptionalSimulationParameters, V>{
 	/**Constructs a SimulationOption from the given values.<br> 
 	@param name the option's name. Can be null.
 	@param message the option's message. This is what is displayed to users explaining what the option is, it should be human-readable. Can be null.
@@ -23,7 +22,7 @@ public class SimulationOption<V> extends Option<Pair<Boolean, SimulationParamete
 	@param enactor the function which enacts an option value.
 	@throws NullPointerException if reader, enactor or DefaultValue is null.
 	*/
-	public SimulationOption(String name, String message, Pair<Boolean, SimulationParameters> defaultValue, Reader<Pair<Boolean, SimulationParameters>, V> reader, Enactor<Pair<Boolean, SimulationParameters>, V> enactor){
+	public SimulationOption(String name, String message, OptionalSimulationParameters defaultValue, Reader<OptionalSimulationParameters, V> reader, Enactor<OptionalSimulationParameters, V> enactor){
 		super(name, message, defaultValue, reader, enactor);
 	}
 
@@ -36,26 +35,26 @@ public class SimulationOption<V> extends Option<Pair<Boolean, SimulationParamete
 	@return an OptionEvaluator for this SimulationOption. 
 	*/
 	@Override
-	public OptionEvaluator<Pair<Boolean, SimulationParameters>> getEvaluator(Pair<Boolean, SimulationParameters> currentValue){
+	public OptionEvaluator<OptionalSimulationParameters> getEvaluator(OptionalSimulationParameters currentValue){
 		return this.new SimulationOptionEvaluator(currentValue);
 	}
 
-	private class SimulationOptionEvaluator implements OptionEvaluator<Pair<Boolean, SimulationParameters>>{
+	private class SimulationOptionEvaluator implements OptionEvaluator<OptionalSimulationParameters>{
 		private JPanel component;
 		private SimulationParameters params;
 		private JCheckBox checkbox;
 
 		@SuppressWarnings("unchecked")
-		private SimulationOptionEvaluator(Pair<Boolean, SimulationParameters> currentValue){
-			this.params = currentValue.second();
+		private SimulationOptionEvaluator(OptionalSimulationParameters currentValue){
+			this.params = currentValue.getParameters();
 			this.component = new JPanel();
 			this.checkbox = new JCheckBox();
-			this.checkbox.setSelected(currentValue.first());
+			this.checkbox.setSelected(currentValue.isRunning());
 			this.component.add(this.checkbox);
 
 			if(this.params.numberOfParameters() > 0){
 				JButton button = new JButton("Edit Simulation Parameters");
-				button.setEnabled(currentValue.first());
+				button.setEnabled(currentValue.isRunning());
 				this.checkbox.addActionListener((action) -> button.setEnabled(this.checkbox.isSelected()));
 				button.addActionListener((action) -> {
 					JOptionPane pane = UserInterfaceUtils.optionPane(this.getOptions());
@@ -73,8 +72,8 @@ public class SimulationOption<V> extends Option<Pair<Boolean, SimulationParamete
 			return this.component;
 		}
 
-		public Pair<Boolean, SimulationParameters> evaluate(){
-			return new Pair<Boolean, SimulationParameters>(this.checkbox.isSelected(), this.params.copy());
+		public OptionalSimulationParameters evaluate(){
+			return new OptionalSimulationParameters(this.checkbox.isSelected(), this.params.copy());
 		}
 
 		@SuppressWarnings("unchecked")
@@ -106,7 +105,7 @@ public class SimulationOption<V> extends Option<Pair<Boolean, SimulationParamete
 					evaluator.params.fillInParameter(i, value);
 				};
 				try{
-					options.add(InstanceOption.make(constructor.newInstance(parameterName, description, SimulationOption.this.getDefaultValue().second().getParameter(i), r, e), this));
+					options.add(InstanceOption.make(constructor.newInstance(parameterName, description, SimulationOption.this.getDefaultValue().getParameters().getParameter(i), r, e), this));
 				} catch(ReflectiveOperationException exc){
 					throw new RuntimeException("Option constructor threw exception.", exc);
 				}

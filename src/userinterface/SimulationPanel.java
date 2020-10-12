@@ -24,8 +24,7 @@ This class cannot store multiple different versions of the same Simulation class
 */
 
 public class SimulationPanel extends JPanel {
-    //This is evil. The only reason that I'm allowing myself to do this is because it's not part of the class' public API.
-	private Map<Class<? extends Simulation>, Pair<Boolean, Pair<Simulation, SimulationParameters>>> simulationInformation = new HashMap<>();;
+	private Map<Class<? extends Simulation>, Pair<OptionalSimulationParameters, Simulation>> simulationInformation = new HashMap<>();
 	private Mat matrix;
 
     /**Constructs a SimulationPanel with the provided simulations.
@@ -44,9 +43,9 @@ public class SimulationPanel extends JPanel {
     */
     public void simulate(DetectorResults results){
         this.matrix = results.baseImage();
-        for(Map.Entry<Class<? extends Simulation>, Pair<Boolean, Pair<Simulation, SimulationParameters>>> entry : this.simulationInformation.entrySet()){
-            if(entry.getValue().first()){
-                this.matrix = entry.getValue().second().first().run(results);
+        for(Map.Entry<Class<? extends Simulation>, Pair<OptionalSimulationParameters, Simulation>> entry : this.simulationInformation.entrySet()){
+            if(entry.getValue().first().isRunning()){
+                this.matrix = entry.getValue().second().run(results);
                 results = new DetectorResults(this.matrix, results);
             }
         }
@@ -87,7 +86,7 @@ public class SimulationPanel extends JPanel {
     @return the current SimulationParamters object for the given simulation class
     */
     public SimulationParameters getParametersForSimulation(Class<? extends Simulation> simulationClass){
-        return this.hasSimulation(simulationClass) ? this.simulationInformation.get(simulationClass).second().second() : null;
+        return this.hasSimulation(simulationClass) ? this.simulationInformation.get(simulationClass).first().getParameters().copy() : null;
     }
 
     /**Replaces the SimulationParameters for the class that the SimulationParameters represents.
@@ -99,9 +98,7 @@ public class SimulationPanel extends JPanel {
         if(!this.hasSimulation(params.getSimulationClass())){
             throw new IllegalArgumentException("Panel does not have an instance of " + params.getSimulationClass().toString());
         }
-        Pair<Boolean, Pair<Simulation, SimulationParameters>> pair = this.simulationInformation.get(params.getSimulationClass());
-        Pair<Boolean, Pair<Simulation, SimulationParameters>> answer = Pair.makePair(pair.first(), Pair.makePair(params.getSimulation(), params));
-        this.simulationInformation.put(params.getSimulationClass(), answer);
+        this.simulationInformation.get(params.getSimulationClass()).first().setParameters(params);
     }
 
     /**Sets whether the Simulation for the given class is running.
@@ -114,9 +111,7 @@ public class SimulationPanel extends JPanel {
         if(!this.hasSimulation(simulationClass)){
             throw new IllegalArgumentException("Panel does not have an instance of " + simulationClass.toString());
         }
-        Pair<Boolean, Pair<Simulation, SimulationParameters>> pair = this.simulationInformation.get(simulationClass);
-        Pair<Boolean, Pair<Simulation, SimulationParameters>> answer = Pair.makePair(running, pair.second());
-        this.simulationInformation.put(simulationClass, answer);
+        this.simulationInformation.get(simulationClass).first().setRunning(running);
     }
 
     /**Returns whether this simulation is currently running.
@@ -129,7 +124,7 @@ public class SimulationPanel extends JPanel {
         if(!this.hasSimulation(simulationClass)){
             throw new IllegalArgumentException("Panel does not have an instance of " + simulationClass.toString());
         }
-        return this.simulationInformation.get(simulationClass).first();
+        return this.simulationInformation.get(simulationClass).first().isRunning();
     }
 
     /**If the given simulation class is currently running, returns that running simulation. Otherwise returns null.
@@ -144,7 +139,7 @@ public class SimulationPanel extends JPanel {
             throw new IllegalArgumentException("Panel does not have an instance of " + simulationClass.toString());
         }
         boolean running = this.getRunning(simulationClass);
-        return (T)(running ? this.simulationInformation.get(simulationClass).second().first() : null);
+        return (T)(running ? this.simulationInformation.get(simulationClass).second() : null);
     }
 
     /**Returns this panel's preferred size, which is the size of the most recently provided input matrix.
@@ -197,6 +192,6 @@ public class SimulationPanel extends JPanel {
     } 
 
     private void putSimulation(SimulationParameters params){
-        this.simulationInformation.put(params.getSimulationClass(), Pair.makePair(false, Pair.makePair(params.getSimulation(), params.copy())));
+        this.simulationInformation.put(params.getSimulationClass(), Pair.makePair(new OptionalSimulationParameters(false, params.copy()), params.getSimulation()));
     }
 }

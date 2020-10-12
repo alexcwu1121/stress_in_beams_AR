@@ -17,8 +17,8 @@ import simulation.*;
 //Settings: Which simulations to turn on, markerbuffering, camera id setting
 //Menus: Calibrate camera, stop simulation at frame
 
-//TODO: 
-//Possible refactorings/extra features: include JSON parsing for complicated values, template SimulationParameters, make SimulationParameters optional wrapper class, remember settings between runs
+//TODO: template SimulationParameters, update SimulationPanel API to use OptionalSimulationParameters
+//Possible refactorings/extra features: include JSON parsing for complicated values, remember settings between runs
 
 //Current application design questions:
 //userinterface package/StrengthsGUI class too powerful?
@@ -132,11 +132,11 @@ public class StrengthsGUI{
 				throw new UncheckedIOException(e);
 			}
 			defaultParameters.add(defaultValues);
-			panelOptionList.add(new SimulationOption<SimulationPanel>(className, message, Pair.makePair(false, defaultValues), (panel) -> {
-				return new Pair<Boolean, SimulationParameters>(panel.getRunning(cl), panel.getParametersForSimulation(cl));
+			panelOptionList.add(new SimulationOption<SimulationPanel>(className, message, new OptionalSimulationParameters(false, defaultValues), (panel) -> {
+				return new OptionalSimulationParameters(panel.getRunning(cl), panel.getParametersForSimulation(cl));
 			}, (value, panel) -> {
-				panel.replaceParameters(value.second());
-				panel.setRunning(cl, value.first());
+				panel.replaceParameters(value.getParameters());
+				panel.setRunning(cl, value.isRunning());
 			}));
 		}
 		panelOptions = List.copyOf(panelOptionList);

@@ -27,6 +27,7 @@ public class UserInterfaceUtils {
 		optionClassMappings.put(float.class, FloatSpinnerOption.class);
 		optionClassMappings.put(Boolean.class, CheckboxOption.class);
 		optionClassMappings.put(boolean.class, CheckboxOption.class);
+		optionClassMappings.put(OptionalSimulationParameters.class, SimulationOption.class);
 	}
 
 	/**Returns an Option class which is suitable for use with values of the given class.
