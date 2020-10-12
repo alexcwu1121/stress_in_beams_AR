@@ -17,8 +17,8 @@ import simulation.*;
 //Settings: Which simulations to turn on, markerbuffering, camera id setting
 //Menus: Calibrate camera, stop simulation at frame
 
-//TODO: remember settings between runs, write documentation, write calibration instructions, write config generator
-//Possible refactorings/extra features: include JSON parsing for complicated values, template SimulationParameters, make SimulationParameters optional wrapper class
+//TODO: 
+//Possible refactorings/extra features: include JSON parsing for complicated values, template SimulationParameters, make SimulationParameters optional wrapper class, remember settings between runs
 
 //Current application design questions:
 //userinterface package/StrengthsGUI class too powerful?
@@ -45,6 +45,10 @@ public class StrengthsGUI{
 
 	private static final String CONFIG_PATH = "./config";
 	private static final String CALIBRATION_FILE = CONFIG_PATH + File.separator + "calibration.json";
+	private static final String CALIBRATION_INSTRUCTIONS = "<html><center>Camera Calibration Started.<br>"
+	 				+ "Press C to capture a frame, and press ENTER to calibrate.<br>"
+	 				+ "In order to ensure good calibration, capture frames featuring the board from several different distances and angles.<br>"
+	 				+ "You must capture a minimum of 10 frames. Note that upon pressing enter, calibration may take several seconds.";
 
 	private static VideoCap webcam = new VideoCap();
 
@@ -238,7 +242,9 @@ public class StrengthsGUI{
 		//this.frame.requestFocusInWindow(); 
 		this.frame.addKeyListener(ccp);
 		new Thread(() -> {
-			JOptionPane.showMessageDialog(this.frame, "Camera Calibration Started [instructions].");
+			JLabel label = new JLabel(CALIBRATION_INSTRUCTIONS);
+			label.setHorizontalAlignment(SwingConstants.CENTER);
+			JOptionPane.showMessageDialog(this.frame, label);
 			CalibrationInformation calibrationInformation;
 			try{
 				calibrationInformation = ccp.calibrateCamera();
