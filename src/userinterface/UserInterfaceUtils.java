@@ -12,7 +12,7 @@ import java.awt.GridBagConstraints;
 public class UserInterfaceUtils {
 	private UserInterfaceUtils(){}
 
-	private static final Map<Class<?>, Class<? extends Option>> optionClassMappings = new HashMap<>();;
+	private static final Map<Class<?>, Class<? extends Option>> optionClassMappings = new HashMap<>();
 	static {
 		optionClassMappings.put(Integer.class, IntSpinnerOption.class);
 		optionClassMappings.put(int.class, IntSpinnerOption.class);

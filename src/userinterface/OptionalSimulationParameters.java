@@ -1,24 +1,32 @@
 package userinterface;
 
+import simulation.*;
+
 /**Class which stores a SimulationParameters and a boolean. The boolean represents whether the Simulation is running, but has no immediate effect.
 @author Owen Kulik
 */
 
-public class OptionalSimulationParameters{
+public class OptionalSimulationParameters<T extends Simulation>{
 	private boolean running;
-	private SimulationParameters params;
+	private SimulationParameters<T> params;
 
 	/**Constructs an OptionalSimulationParameters from the given values.
 	@param running Whether the Simulation is running
 	@param params The simulation parameters. Cannot be null.
 	@throws NullPointerException if params is null
 	*/
-	public OptionalSimulationParameters(boolean running, SimulationParameters params){
+	public OptionalSimulationParameters(boolean running, SimulationParameters<T> params){
 		if(params == null){
 			throw new NullPointerException();
 		}
 		this.running = running;
 		this.params = params;
+	}
+
+	/**Convienience method to allow construction without specification of type. Works exactly the same as the constructor.
+	*/
+	public static <T extends Simulation> OptionalSimulationParameters<T> of(boolean running, SimulationParameters<T> params){
+		return new OptionalSimulationParameters<T>(running, params);
 	}
 
 	/**Returns whether this simulation is running.
@@ -31,7 +39,7 @@ public class OptionalSimulationParameters{
 	/**Returns the parameters stored in this OptionSimulationParameters.
 	@return the parameters stored in this OptionSimulationParameters.
 	*/
-	public SimulationParameters getParameters(){
+	public SimulationParameters<T> getParameters(){
 		return this.params;
 	}
 
@@ -46,7 +54,7 @@ public class OptionalSimulationParameters{
 	@param params SimulationParameters to set to. Cannot be null.
 	@throws NullPointerException if params is null.
 	*/
-	public void setParameters(SimulationParameters params){
+	public void setParameters(SimulationParameters<T> params){
 		if(params == null){
 			throw new NullPointerException();
 		}
@@ -57,8 +65,8 @@ public class OptionalSimulationParameters{
 	This method uses the SimulationParameters.copy() method to copy the SimulationParameters, meaning that they are shallow-copied.
 	@return a deep copy of this OptionSimulationParamters.
 	*/
-	public OptionalSimulationParameters copy(){
-		return new OptionalSimulationParameters(this.running, this.params.copy());
+	public OptionalSimulationParameters<T> copy(){
+		return new OptionalSimulationParameters<T>(this.running, this.params.copy());
 	}
 
 	/**Return a hash code for this OptionSimulationParameters

@@ -21,11 +21,11 @@ Once all paramters have been filled in, getSimulation can be called.<br>
 This method will feed these parameters into the Simulation's constructor and return the resulting Simulation.<br>
 */
 
-public class SimulationParameters {
-	private final Class<? extends Simulation> simulation;
+public class SimulationParameters<T extends Simulation> {
+	private final Class<? extends T> simulation;
 	private final List<Parameter> parameterTypes;
 	private final List<Object> parameters;
-	private Constructor<? extends Simulation> constructor;
+	private Constructor<? extends T> constructor;
 
 	/**Value assigned to uninitialized parameters.<br>
 	This value can be compared with the == operator.
@@ -33,7 +33,7 @@ public class SimulationParameters {
 	public static final Object UNINITIALIZED = new Uninitialized();
 
 	//Used by the copy method.
-	private SimulationParameters(Class<? extends Simulation> sim, List<Parameter> types, List<Object> params, Constructor<? extends Simulation> cons){
+	private SimulationParameters(Class<? extends T> sim, List<Parameter> types, List<Object> params, Constructor<? extends T> cons){
 		this.simulation = sim;
 		this.parameterTypes = types;
 		this.parameters = params;
@@ -45,12 +45,12 @@ public class SimulationParameters {
 	@throws IllegalArgumentException if the simulation does not have any public constructors which are not marked with the @internal annotation.
 	*/
 	@SuppressWarnings("unchecked")
-	public SimulationParameters(Class<? extends Simulation> simulation){
+	public SimulationParameters(Class<? extends T> simulation){
 		this.simulation = simulation;
 		Constructor<?>[] constructors = simulation.getConstructors();
 		for(Constructor<?> constructor : constructors){
 			if(constructor.getAnnotation(Internal.class) == null){
-				this.constructor = (Constructor<? extends Simulation>)constructor;
+				this.constructor = (Constructor<? extends T>)constructor;
 			}
 		}
 		if(this.constructor == null){
@@ -131,7 +131,7 @@ public class SimulationParameters {
 	/**Returns the class that this SimulationParameters refers to.
 	@return the class that this SimulationParameters refers to.
 	*/
-	public Class<? extends Simulation> getSimulationClass(){
+	public Class<? extends T> getSimulationClass(){
 		return this.simulation;
 	}
 
@@ -148,7 +148,7 @@ public class SimulationParameters {
 	@throws RuntimeException if the Simulation's constructor throws an exception.
 	@return the constructed Simulation.
 	*/
-	public Simulation getSimulation(){
+	public T getSimulation(){
 		for(Object o : this.parameters){
 			if(o == UNINITIALIZED){
 				throw new IllegalStateException("A parameter was uninitialized.");
@@ -165,8 +165,8 @@ public class SimulationParameters {
 	Note: This method returns a shallow copy. As such, this may produce problems if Simulation objects produced have representation exposure.
 	@return a copy of this SimulationParamters.
 	*/
-	public SimulationParameters copy(){
-		return new SimulationParameters(this.simulation, new ArrayList<Parameter>(this.parameterTypes), new ArrayList<Object>(this.parameters), this.constructor);
+	public SimulationParameters<T> copy(){
+		return new SimulationParameters<T>(this.simulation, new ArrayList<Parameter>(this.parameterTypes), new ArrayList<Object>(this.parameters), this.constructor);
 	}
 
 	/**Returns a hash code for this SimulationParamters.

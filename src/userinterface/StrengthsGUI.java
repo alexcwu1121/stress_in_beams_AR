@@ -64,7 +64,7 @@ public class StrengthsGUI{
 		SimpleSimulation.class
 	);
 
-	private static final List<SimulationParameters> defaultParameters = new ArrayList<SimulationParameters>();
+	private static final List<SimulationParameters<?>> defaultParameters = new ArrayList<SimulationParameters<?>>();
 
 	private static final Calibrator calibrator = new ArucoCalibrator();
 
@@ -122,22 +122,7 @@ public class StrengthsGUI{
 		//In order to make an option which applies to each SimulationPanel, add it to panelOptions list.
 		List<Option<?, SimulationPanel>> panelOptionList = new LinkedList<Option<?, SimulationPanel>>();
 		for(Class<? extends Simulation> cl : getAllEligibleSimulations()){
-			String className = cl.getSimpleName();
-			HumanReadableName hrn = cl.getAnnotation(HumanReadableName.class);
-			String message = hrn == null ? className : hrn.value();
-			SimulationParameters defaultValues;
-			try{
-				defaultValues = getDefaultValuesForSimulation(cl);
-			} catch(IOException e){
-				throw new UncheckedIOException(e);
-			}
-			defaultParameters.add(defaultValues);
-			panelOptionList.add(new SimulationOption<SimulationPanel>(className, message, new OptionalSimulationParameters(false, defaultValues), (panel) -> {
-				return new OptionalSimulationParameters(panel.getRunning(cl), panel.getParametersForSimulation(cl));
-			}, (value, panel) -> {
-				panel.replaceParameters(value.getParameters());
-				panel.setRunning(cl, value.isRunning());
-			}));
+			panelOptionList.add(getOptionForSimulation(cl));
 		}
 		panelOptions = List.copyOf(panelOptionList);
 
@@ -153,7 +138,7 @@ public class StrengthsGUI{
 				if(i < gui.numPanels){
 					panels.add(gui.simulationPanels.get(i));
 				} else {
-					panels.add(new SimulationPanel(defaultParameters));
+					panels.add(SimulationPanel.fromSimulationParameters(defaultParameters));
 				}
 			}
 			gui.numPanels = value;
@@ -293,8 +278,26 @@ public class StrengthsGUI{
 		}
 	}
 
-	private static SimulationParameters getDefaultValuesForSimulation(Class<? extends Simulation> simulationClass) throws IOException {
-		SimulationParameters answer = new SimulationParameters(simulationClass);
+	private static <T extends Simulation> SimulationOption<T, SimulationPanel> getOptionForSimulation(Class<T> cl){
+		String className = cl.getSimpleName();
+		HumanReadableName hrn = cl.getAnnotation(HumanReadableName.class);
+		String message = hrn == null ? className : hrn.value();
+		SimulationParameters<T> defaultValues;
+		try{
+			defaultValues = getDefaultValuesForSimulation(cl);
+		} catch(IOException e){
+			throw new UncheckedIOException(e);
+		}
+		defaultParameters.add(defaultValues);
+		return new SimulationOption<T, SimulationPanel>(className, message, new OptionalSimulationParameters<T>(false, defaultValues), (panel) -> {
+			return panel.getOptionalParametersForSimulation(cl);
+		}, (value, panel) -> {
+			panel.replaceOptionalParameters(value);
+		});
+	}
+
+	private static <T extends Simulation> SimulationParameters<T> getDefaultValuesForSimulation(Class<T> simulationClass) throws IOException {
+		SimulationParameters<T> answer = new SimulationParameters<T>(simulationClass);
 		if(answer.numberOfParameters() == 0){
 			return answer;
 		}

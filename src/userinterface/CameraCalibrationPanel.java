@@ -19,12 +19,11 @@ public class CameraCalibrationPanel extends SimulationPanel implements KeyListen
 	private Calibrator calibrator;
 
     //Java mandates this stupid design pattern
-    private CameraCalibrationPanel(Calibrator calibrator, SimulationParameters ccs){
-    	super(List.of(ccs));
+    private CameraCalibrationPanel(Calibrator calibrator, SimulationParameters<CameraCalibrationSimulation> ccs){
+    	super(List.of(OptionalSimulationParameters.of(true, ccs)));
     	if(calibrator == null){
     		throw new NullPointerException();
     	}
-    	this.setRunning(CameraCalibrationSimulation.class, true);
     	this.simulation = this.getRunningSimulation(CameraCalibrationSimulation.class);
     	this.calibrator = calibrator;
     }
@@ -34,7 +33,7 @@ public class CameraCalibrationPanel extends SimulationPanel implements KeyListen
     @throws NullPointerException if calibrator is null.
     */
 	public CameraCalibrationPanel(Calibrator calibrator){
-		this(calibrator, new SimulationParameters(CameraCalibrationSimulation.class));
+		this(calibrator, new SimulationParameters<CameraCalibrationSimulation>(CameraCalibrationSimulation.class));
 	}
 
 	/**Returns the results of camera calibration, blocking until results are available.
