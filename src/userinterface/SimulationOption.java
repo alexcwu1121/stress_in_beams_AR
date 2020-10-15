@@ -1,5 +1,6 @@
 package userinterface;
 
+import simulation.*;
 import java.util.List;
 import java.util.ArrayList;
 import java.awt.*;
@@ -8,12 +9,12 @@ import java.lang.reflect.*;
 import util.*;
 
 /**Option class used for Simulations.<br>
-The type of this option class is OptionalSimulationParameters. <br>
+The type of this option class is OptionalSimulationParameters<Q>. <br>
 This allows for the paramters to be remembered even when the simulation is not running.
 @author Owen Kulik
 */
 
-public class SimulationOption<V> extends Option<OptionalSimulationParameters, V>{
+public class SimulationOption<Q extends Simulation, V> extends Option<OptionalSimulationParameters<Q>, V>{
 	/**Constructs a SimulationOption from the given values.<br> 
 	@param name the option's name. Can be null.
 	@param message the option's message. This is what is displayed to users explaining what the option is, it should be human-readable. Can be null.
@@ -22,7 +23,7 @@ public class SimulationOption<V> extends Option<OptionalSimulationParameters, V>
 	@param enactor the function which enacts an option value.
 	@throws NullPointerException if reader, enactor or DefaultValue is null.
 	*/
-	public SimulationOption(String name, String message, OptionalSimulationParameters defaultValue, Reader<OptionalSimulationParameters, V> reader, Enactor<OptionalSimulationParameters, V> enactor){
+	public SimulationOption(String name, String message, OptionalSimulationParameters<Q> defaultValue, Reader<OptionalSimulationParameters<Q>, V> reader, Enactor<OptionalSimulationParameters<Q>, V> enactor){
 		super(name, message, defaultValue, reader, enactor);
 	}
 
@@ -35,17 +36,17 @@ public class SimulationOption<V> extends Option<OptionalSimulationParameters, V>
 	@return an OptionEvaluator for this SimulationOption. 
 	*/
 	@Override
-	public OptionEvaluator<OptionalSimulationParameters> getEvaluator(OptionalSimulationParameters currentValue){
+	public OptionEvaluator<OptionalSimulationParameters<Q>> getEvaluator(OptionalSimulationParameters<Q> currentValue){
 		return this.new SimulationOptionEvaluator(currentValue);
 	}
 
-	private class SimulationOptionEvaluator implements OptionEvaluator<OptionalSimulationParameters>{
+	private class SimulationOptionEvaluator implements OptionEvaluator<OptionalSimulationParameters<Q>>{
 		private JPanel component;
-		private SimulationParameters params;
+		private SimulationParameters<Q> params;
 		private JCheckBox checkbox;
 
 		@SuppressWarnings("unchecked")
-		private SimulationOptionEvaluator(OptionalSimulationParameters currentValue){
+		private SimulationOptionEvaluator(OptionalSimulationParameters<Q> currentValue){
 			this.params = currentValue.getParameters();
 			this.component = new JPanel();
 			this.checkbox = new JCheckBox();
@@ -72,8 +73,8 @@ public class SimulationOption<V> extends Option<OptionalSimulationParameters, V>
 			return this.component;
 		}
 
-		public OptionalSimulationParameters evaluate(){
-			return new OptionalSimulationParameters(this.checkbox.isSelected(), this.params.copy());
+		public OptionalSimulationParameters<Q> evaluate(){
+			return new OptionalSimulationParameters<Q>(this.checkbox.isSelected(), this.params.copy());
 		}
 
 		@SuppressWarnings("unchecked")
