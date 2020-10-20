@@ -17,7 +17,7 @@ import simulation.*;
 //Settings: Which simulations to turn on, markerbuffering, camera id setting
 //Menus: Calibrate camera, stop simulation at frame
 
-//TODO: template SimulationParameters, update SimulationPanel API to use OptionalSimulationParameters
+//TODO: make descriptive exception messages, move eligible simulations to config file.
 //Possible refactorings/extra features: include JSON parsing for complicated values, remember settings between runs
 
 //Current application design questions:
@@ -313,8 +313,27 @@ public class StrengthsGUI{
 	}
 
 	//Returns all eligible simulations, ie simulations which users can manually enable. Change this method if a better way of marking eligible simulations is found.
+	@SuppressWarnings("unchecked")
 	private static List<Class<? extends Simulation>> getAllEligibleSimulations(){
-		return eligibleSimulations;
+		String configFilePath = CONFIG_PATH +  File.separator + "eligibleSimulations.json";
+		String content;
+		try{
+			content = new Scanner(new File(configFilePath)).useDelimiter("\\Z").next();
+		} catch(IOException e){
+			throw new UncheckedIOException("Eligible simulations config file not found. You may have forgotten to run ConfigGenerator.java.", e);
+		}
+		JSONArray obj = new JSONArray(content);
+		List<Class<? extends Simulation>> sims = new ArrayList<>();
+		for(int i = 0; i < obj.length(); i++){
+			try{
+				sims.add((Class<? extends Simulation>)Class.forName(obj.getString(i)));
+			} catch(ClassNotFoundException e){
+				throw new JSONException("Class " + obj.getString(i) + " not found. You may have forgotten to use the class' fully qualified name.");
+			} catch(ClassCastException e){
+				throw new JSONException("Class " + obj.getString(i) + " not a subclass of Simulation.");
+			}	
+		}
+		return sims;
 	}
 
 	//Returns the calibrator currently being used. Change if a different method of determining the calibrator is used.

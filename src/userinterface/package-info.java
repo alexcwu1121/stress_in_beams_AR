@@ -4,18 +4,22 @@ I just wrote a Simulation class. How do I get it on the GUI?<br>
 You have to follow a couple of steps.
 The GUI will get a copy of your Simulation by using a particular constructor in that Simulation.<br>
 The first step is to choose which constructor the GUI will use.<br>
-This constructor's parameters must all be representable as JSON literals (ie integers, floats, strings, booleans). (A feature to make more complicated types eligible is currently in the works.)
-Once you have chosen the constructor to use, mark all other constructors with the @Internal annotation. This signals to the GUI not to use them.<br>
+This constructor's parameters must all be representable as JSON literals (ie integers, floats, strings, booleans). (A feature to make more complicated types eligible could be implemented with a little bit of work. Ask Owen if you want him to do it.)
+Once you have chosen the constructor to use, mark all other constructors in the class with the @Internal annotation. This signals to the GUI not to use them.<br>
 Additionally, consider marking the paramters of the constructor with the @Description annotation, which will be the name that the paramter is displayed with on the GUI.
 (An example of this can be found in the SimpleSimulation class.)<br>
-Next, go into the StrengthsGUI class. On approximately line 60, a field called "eligibleSimulations" is declared.<br>
-This field is a hardcoded list of all simulations to be shown on the GUI.<br>
-Add your Simulation to this list.<br>
+
+Next, edit the config/eligibleSimulations.json file to add the name of your simulation's class to the array. 
+The class name must be fully-qualified (ie for a class MySimulation in package simulation, the fully qualified name is simulation.MySimulation.)<br>
+
 Finally, the GUI needs to know default values for your Simulation's parameters. The final step is to specify these default values.<br>
 This is done by making a default value config file.<br>
-Go into the config folder and create a JSON file whose name is the same as your class with ".json" on the end.<br>
+Go into the config folder and create a JSON file whose name is the same as your class (case-sensitive) with ".json" on the end.<br>
 List the default values you'd like to use for the constructor in a JSON array.<br>
-Examples of this can be found for the currently-used simulations.<br> <br>
+Examples of this can be found for the currently-used simulations.<br>
+Once you have completed all of these steps, your simulation will display on the GUI.<br> <br>
+
+The rest of this package-info talks about the architecture of the userinterface package, and how to extend it.<br> <br>
 
 The Skeleton Interface<br>
 The Skeleton interface allows classes to statically specify GUI components in a single line of code.<br>
