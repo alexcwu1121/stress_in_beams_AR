@@ -285,6 +285,8 @@ public class StrengthsGUI{
 		SimulationParameters<T> defaultValues;
 		try{
 			defaultValues = getDefaultValuesForSimulation(cl);
+		} catch(FileNotFoundException e){
+			throw new UncheckedIOException("Simulation config file not found for " + cl.toString() + ". You may have forgotten to run ConfigGenerator.java or make a config for a custom Simulation.", e);
 		} catch(IOException e){
 			throw new UncheckedIOException(e);
 		}
