@@ -17,8 +17,9 @@ import java.awt.image.*;
 import java.util.*;
 import java.io.*;
 
-import util.Pair;
+import util.*;
 import markerdetector.*;
+import userinterface.*;
 
 public class Driver{
 	private static VideoCap webcam = new VideoCap();
@@ -28,16 +29,12 @@ public class Driver{
         String detectorParameters = args[0];
         String cameraParameters = args[1];
         MarkerDetector detector = new MarkerDetector(detectorParameters, cameraParameters);
-        Pair<Mat, Mat> cameraInfo = detector.getCameraInformation();
-        List<Simulation> s = new LinkedList<Simulation>();
-        s.add(new DividedSimulation(cameraInfo.first(), cameraInfo.second(), new Pair<Integer, Integer>(0, 9), new Pair<Integer, Integer>(10, 19)));
-        s.add(new CoordinateTestSimulation(cameraInfo.first(), cameraInfo.second(), 8));
-        SimulationFrame frame = new SimulationFrame(s);
+        CalibrationInformation cameraInfo = detector.getCameraInformation();
+        StrengthsGUI gui = new StrengthsGUI(cameraInfo);
         while(true){
             Mat m = webcam.getOneFrame();
             DetectorResults results = detector.detectMarkers(m, 4);
-            frame.simulate(results);
-            frame.repaint();
+            gui.updateSimulations(results);
         }
 	}
 }

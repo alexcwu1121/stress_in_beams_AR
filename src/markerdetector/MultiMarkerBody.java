@@ -145,6 +145,7 @@ public class MultiMarkerBody{
       return finalRotVector;
    }
 
+   //Shouldn't this return a pose?
    public Pair<Mat, Mat> predictCenter(DetectorResults results){
       Mat ids = results.getIds();
       if(ids.rows() == 0){

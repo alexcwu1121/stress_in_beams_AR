@@ -1,4 +1,4 @@
-package driver;
+package simulation;
 
 import org.opencv.core.*;
 import markerdetector.*;
@@ -6,20 +6,20 @@ import org.opencv.imgproc.Imgproc;
 import util.*;
 import org.opencv.calib3d.Calib3d;
 
+@HumanReadableName("Multimarker Body Test Simulation")
 public class CoordinateTestSimulation implements Simulation {
-	private final Mat cameraMatrix;
-	private final Mat distCoeffs;
 	private final int secondid;
 	private final MultiMarkerBody body;
 
-	public CoordinateTestSimulation(Mat cameraMatrix, Mat distCoeffs, int secondid){
-		if(cameraMatrix == null || distCoeffs == null){
-			throw new NullPointerException();
-		}
-		this.cameraMatrix = cameraMatrix;
-		this.distCoeffs = distCoeffs;
+	@Internal
+	public CoordinateTestSimulation(int secondid){
 		this.secondid = secondid;
 		body = new MultiMarkerBody(new MarkerOffset(secondid, 0, 0, 0, 0, 0, 0));
+	}
+
+	public CoordinateTestSimulation(int drawingID, double xRotation, double yRotation, double zRotation, double xTranslation, double yTranslation, double zTranslation){
+		this.secondid = drawingID;
+		body = new MultiMarkerBody(new MarkerOffset(secondid, xRotation, yRotation, zRotation, xTranslation, yTranslation, zTranslation));
 	}
 
 	public Mat run(DetectorResults results){
@@ -41,7 +41,8 @@ public class CoordinateTestSimulation implements Simulation {
 		//MarkerUtils.printmat(prediction.second());
 		//System.out.println();
 		//Pair<Mat, Mat> back = MarkerUtils.get3DCoords(prediction.first(), prediction.second());
-		Calib3d.drawFrameAxes(finalMatrix, this.cameraMatrix, this.distCoeffs, prediction.first(), prediction.second(), 0.5F);
+		CalibrationInformation ci = results.calibrationInformation();
+		Calib3d.drawFrameAxes(finalMatrix, ci.cameraMatrix(), ci.distCoeffs(), prediction.first(), prediction.second(), 0.5F);
 		return finalMatrix;
 	}
 }

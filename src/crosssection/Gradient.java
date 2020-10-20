@@ -40,7 +40,7 @@ public class Gradient extends JPanel{
 
 	    frame.setVisible(true);
 	    while (true){
-		    cross.planeUpdate(vec1,vec2);
+		    //cross.planeUpdate(vec1,vec2);
   
 			try
 			{

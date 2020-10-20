@@ -1,19 +1,23 @@
-package driver;
+package simulation;
 
 import org.opencv.core.*;
 import org.opencv.calib3d.Calib3d;
 import markerdetector.*;
+import util.*;
 
 /**Simulation which draws axes on all detected markers.
 */
 
+@HumanReadableName("Simple Simulation")
 public class SimpleSimulation implements Simulation {
-	private Mat cameraMatrix;
-	private Mat distCoeffs;
+	private final float length;
 
-	public SimpleSimulation(Mat cameraMatrix, Mat distCoeffs){
-		this.cameraMatrix = cameraMatrix;
-		this.distCoeffs = distCoeffs;
+	/*public SimpleSimulation(){
+		this.length = 1.0F;
+	}*/
+
+	public SimpleSimulation(@Description("Axis Lengths") double length){
+		this.length = (float)length;
 	}
 
 	public Mat run(DetectorResults results){
@@ -21,8 +25,9 @@ public class SimpleSimulation implements Simulation {
 		results.baseImage().copyTo(finalMatrix);
 		Mat rotationMatrix = results.rotationVectors();
 		Mat translationMatrix = results.translationVectors();
+		CalibrationInformation ci = results.calibrationInformation();
 		for(int i = 0; i < rotationMatrix.rows(); i++){
-			Calib3d.drawFrameAxes(finalMatrix, this.cameraMatrix, this.distCoeffs, rotationMatrix.row(i), translationMatrix.row(i), 0.5F);
+			Calib3d.drawFrameAxes(finalMatrix, ci.cameraMatrix(), ci.distCoeffs(), rotationMatrix.row(i), translationMatrix.row(i), this.length);
 		}
 		return finalMatrix;
 	}

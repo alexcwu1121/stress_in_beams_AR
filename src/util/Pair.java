@@ -16,6 +16,15 @@ public class Pair<F, S> {
 		second = s;
 	}
 
+	/**Creates a pair with the first and second values. Method included for convenience.
+	@param f the first value in the pair.
+	@param s the second value in the pair.
+	@return the pair.
+	*/
+	public static <F, S> Pair<F, S> makePair(F first, S second){
+		return new Pair<F, S>(first, second);
+	}
+
 	/**Returns the first value in the pair.
 	@return the first value in the pair.
 	*/

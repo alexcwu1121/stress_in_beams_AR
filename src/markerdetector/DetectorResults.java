@@ -7,6 +7,8 @@ import java.util.LinkedList;
 
 /**Container class containing all results from a marker detection operation, including the base image, 
 dictionary used, corners of detected markers, corners of rejected markers, rotation vectors, and translation vectors.
+@author Owen Kulik
+@author Nicholas Mataczynski
 */
 
 public class DetectorResults {
@@ -17,10 +19,11 @@ public class DetectorResults {
 	private final List<Mat> rejected;
 	private final Mat rotationVectors;
 	private final Mat translationVectors;
+	private final CalibrationInformation calibrationInformation;
 
 	/**Constructs a DetectorResults with the specified values.
 	*/
-	DetectorResults(Mat base, Dictionary dict, Mat ids, List<Mat> corners, List<Mat> rejected, Mat rotationVectors, Mat translationVectors){
+	DetectorResults(Mat base, Dictionary dict, Mat ids, List<Mat> corners, List<Mat> rejected, Mat rotationVectors, Mat translationVectors, CalibrationInformation ci){
 		this.baseMatrix = base;
 		this.dict = dict;
 		this.ids = ids;
@@ -28,6 +31,7 @@ public class DetectorResults {
 		this.rejected = rejected;
 		this.rotationVectors = rotationVectors;
 		this.translationVectors = translationVectors;
+		this.calibrationInformation = ci;
 	}
 
 	/**Constructs a DetectorResults with the same values as the original, but a new base Mat
@@ -40,6 +44,7 @@ public class DetectorResults {
 		this.rejected = oldDetector.rejected;
 		this.rotationVectors = oldDetector.rotationVectors;
 		this.translationVectors = oldDetector.translationVectors;
+		this.calibrationInformation = oldDetector.calibrationInformation;
 	}
 
 	/**Returns a MarkerInformation object representing information for the marker specified by id.
@@ -118,5 +123,12 @@ public class DetectorResults {
 	*/
 	public Mat translationVectors(){
 		return MarkerUtils.copyof(this.translationVectors);
+	}
+
+	/**Returns the calibration information used in this marker detection.
+	@return the calibration information used in this marker detection.
+	*/
+	public CalibrationInformation calibrationInformation(){
+		return this.calibrationInformation;
 	}
 }

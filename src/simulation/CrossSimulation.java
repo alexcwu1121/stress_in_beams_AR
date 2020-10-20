@@ -1,4 +1,4 @@
-package driver;
+package simulation;
 
 import markerdetector.*;
 import crosssection.*;
@@ -7,6 +7,7 @@ import org.opencv.core.*;
 import org.opencv.aruco.*;
 import org.opencv.calib3d.Calib3d;
 import org.opencv.imgproc.Imgproc;
+import util.HumanReadableName;
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;
@@ -18,31 +19,22 @@ Additionally, lines are drawn from the crosssection to the marker as a visual ai
 @author Owen Kulik
 */
 
+@HumanReadableName("Cross-Section Simulation")
 public class CrossSimulation implements Simulation {
     private final Plane cross;
-    private final Mat cameraMatrix;
-    private final Mat distCoeffs;
     private final int trackingID;
     //Replace these later with multi-marker bodies
     private final int firstId;
     private final int secondId;
 
     /**Constructs a CrossSimulation using the given values.
-    @param cameraMatrix the camera matrix to use.
-    @param distCoeffs the distortion coefficients to use.
     @param idToTrack the marker id to base data off of.
     @throws IllegalArgumentException if idToTrack is negative.
     */
-    //Will probably need to change the signature of this constructor to take extra data about which IDs to look for.
-    public CrossSimulation(Mat cameraMatrix, Mat distCoeffs, int firstId, int secondId, int drawingId){
+    public CrossSimulation(int firstId, int secondId, int drawingId){
         if(firstId < 0 || secondId < 0 || drawingId < 0){
             throw new IllegalArgumentException("Marker ids cannot be negative");
         }
-        if(cameraMatrix == null || distCoeffs == null){
-            throw new NullPointerException();
-        }
-        this.cameraMatrix = cameraMatrix;
-        this.distCoeffs = distCoeffs;
         this.trackingID = drawingId;
         this.firstId = firstId;
         this.secondId = secondId;
