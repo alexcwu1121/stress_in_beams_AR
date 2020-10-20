@@ -1,7 +1,7 @@
 # stress_in_beams_AR
 Augmented reality visualization of stresses in beams.
 
-#Build and run
+# Build and run
 
 To build:
 
