@@ -9,25 +9,30 @@ import org.opencv.calib3d.Calib3d;
 
 public class MultiMarkerBody{
 	private Map<Integer, MarkerOffset> offsets;
+   private double filterTol;
 
-   public MultiMarkerBody(List<MarkerOffset> offsets){
+   public MultiMarkerBody(double filterTol, List<MarkerOffset> offsets){
       this.offsets = new HashMap<Integer, MarkerOffset>();
       for(MarkerOffset offset: offsets){
          this.offsets.put(offset.id(), offset);
       }
+      this.filterTol = filterTol;
    }
 
-   public MultiMarkerBody(MarkerOffset... offsets){
-      this(Arrays.asList(offsets));
+   public MultiMarkerBody(double filterTol, MarkerOffset... offsets){
+      this(filterTol, Arrays.asList(offsets));
+      this.filterTol = filterTol;
    }
 
-   public MultiMarkerBody(Map<Integer, MarkerOffset> offsets){
+   public MultiMarkerBody(double filterTol, Map<Integer, MarkerOffset> offsets){
       this.offsets = Map.copyOf(offsets);
+      this.filterTol = filterTol;
    }
 
 	public MultiMarkerBody(){
 		MarkerOffset testOffset = new MarkerOffset(0, 1, 1, 1, 3, 3, 3);
       this.offsets.put(testOffset.id(), testOffset);
+      this.filterTol = .05;
    }
 
    /**Constructs and returns a MultiMarkerBody containing the Marker Offsets as specified in the given JSON file. (use test_marker_offset.json as a template)
@@ -36,10 +41,10 @@ public class MultiMarkerBody{
    @throws NullPointerException if file is null.
    @return a MultiMarkerBody containing the Marker Offsets as specified in the given JSON file.
    */
-   public static MultiMarkerBody fromJSONFile(String file) throws IOException {
+   public static MultiMarkerBody fromJSONFile(double filterTol, String file) throws IOException {
       String content = new Scanner(new File(file)).useDelimiter("\\Z").next();
         JSONObject obj = new JSONObject(content);
-        return fromJSONObject(obj);
+        return fromJSONObject(filterTol, obj);
    }
 
    /**Constructs and returns a MultiMarkerBody containing the Marker Offsets as specified in the given JSON object. (use test_marker_offset.json as a template)
@@ -47,14 +52,14 @@ public class MultiMarkerBody{
    @throws NullPointerException if source is null.
    @return a MultiMarkerBody containing the Marker Offsets as specified in the given JSON object.
    */
-   public static MultiMarkerBody fromJSONObject(JSONObject source){
+   public static MultiMarkerBody fromJSONObject(double filterTol, JSONObject source){
       Map<Integer, MarkerOffset> answer = new HashMap<Integer, MarkerOffset>();
       for(String s : source.keySet()){
          int id = Integer.valueOf(s);
          JSONObject js = source.getJSONObject(s);
          answer.put(id, new MarkerOffset(id, js.getDouble("xRot"), js.getDouble("yRot"), js.getDouble("zRot"), js.getDouble("xTrans"), js.getDouble("yTrans"), js.getDouble("zTrans")));
       }
-      return new MultiMarkerBody(answer);
+      return new MultiMarkerBody(filterTol, answer);
    }
 
    public Mat averagePrediction(LinkedList<Mat> entries){
@@ -86,7 +91,7 @@ public class MultiMarkerBody{
       transOffset.put(1, 0, offsets.get(id).yTranslation());
       transOffset.put(2, 0, offsets.get(id).zTranslation());
 
-      transOffset = MarkerUtils.crossMultiply(rotationMatrix, transOffset);
+      transOffset = MarkerUtils.matMultiply(rotationMatrix, transOffset);
 
       double[] xtransFinal = translation.get(0, 0);
       double[] ytransFinal = translation.get(0, 0);
@@ -135,9 +140,9 @@ public class MultiMarkerBody{
       Mat xRotated = new Mat(3, 1, CvType.CV_64FC1);
       Mat yRotated = new Mat(3, 1, CvType.CV_64FC1);
       Mat zRotated = new Mat(3, 1, CvType.CV_64FC1);
-      zRotated = MarkerUtils.crossMultiply(rotationMatrix, zRotOffset);
-      yRotated = MarkerUtils.crossMultiply(zRotated, yRotOffset);
-      xRotated = MarkerUtils.crossMultiply(yRotated, xRotOffset);
+      zRotated = MarkerUtils.matMultiply(rotationMatrix, zRotOffset);
+      yRotated = MarkerUtils.matMultiply(zRotated, yRotOffset);
+      xRotated = MarkerUtils.matMultiply(yRotated, xRotOffset);
 
       Mat finalRotVector = new Mat();
       Calib3d.Rodrigues(xRotated, finalRotVector);
@@ -145,7 +150,62 @@ public class MultiMarkerBody{
       return finalRotVector;
    }
 
-   //Shouldn't this return a pose?
+   public Pair<LinkedList<Mat>,LinkedList<Mat>> filterPose(LinkedList<Mat> rPreds, LinkedList<Mat> tPreds){
+      // Index at which new buckets are introduced
+      int bucketIdx = 0;
+
+      // Index of maximum bucket
+      int maxBucketIdx = 0;
+
+      // Histogram buckets labeled by first deviated pose
+      Pair<LinkedList<Mat>,LinkedList<Mat>>[] histogram = (Pair<LinkedList<Mat>,LinkedList<Mat>>[]) new Pair<?,?>[rPreds.size()];
+      
+      for(int i = 0; i < rPreds.size(); i++){
+         Mat rvec = rPreds.get(i);
+         Mat tvec = tPreds.get(i);
+
+         if(bucketIdx == 0){
+            histogram[bucketIdx] = new Pair<LinkedList<Mat>,LinkedList<Mat>>(new LinkedList<Mat>(), new LinkedList<Mat>());
+            histogram[bucketIdx].first().add(rvec);
+            histogram[bucketIdx].second().add(tvec);
+            bucketIdx++;
+         }else{
+            boolean matched = false;
+            for(int bucket = 0; bucket < bucketIdx; bucket++){
+               if(compareRot(rvec, histogram[bucket].first().get(0))){
+                  histogram[bucket].first().add(rvec);
+                  histogram[bucket].second().add(tvec);
+                  matched = true;
+
+                  if(histogram[bucket].first().size() > histogram[maxBucketIdx].first().size()){
+                     maxBucketIdx = bucket;
+                  }
+                  break;
+               }
+            }
+            if(!matched){
+               histogram[bucketIdx] = new Pair<LinkedList<Mat>,LinkedList<Mat>>(new LinkedList<Mat>(), new LinkedList<Mat>());
+               histogram[bucketIdx].first().add(rvec);
+               histogram[bucketIdx].second().add(tvec);
+               bucketIdx++;
+            }
+         }
+      }
+      return histogram[maxBucketIdx];
+   }
+
+   public boolean compareRot(Mat rot1, Mat rot2){
+      boolean rotationMatch = true;
+      for(int j = 0; j < 3; j++){
+         if(rot1.get(j, 0)[0] + this.filterTol < rot2.get(j, 0)[0] ||
+            rot1.get(j, 0)[0] - this.filterTol > rot2.get(j, 0)[0]){
+            rotationMatch = false;
+            break;
+         }
+      }
+      return rotationMatch;
+   }
+
    public Pair<Mat, Mat> predictCenter(DetectorResults results){
       Mat ids = results.getIds();
       if(ids.rows() == 0){
@@ -156,15 +216,15 @@ public class MultiMarkerBody{
       LinkedList<Mat> rotationPredictions = new LinkedList<Mat>();
 
       for(int i = 0; i < ids.rows(); i++){
+         // Iterate over all detected ids. If id is not a member of this MMB, skip
          int id = (int)ids.get(i, 0)[0];
-         if(!this.offsets.keySet().contains(id)){
-            continue;
-         }
+         if(!this.offsets.keySet().contains(id)){ continue;}
 
-         MarkerInformation intermediate = results.getMarkerInformation(id);
+         MarkerInformation currMarker = results.getMarkerInformation(id);
+         Pose currPose = currMarker.pose();
 
-         Mat rotation = intermediate.pose().rotationVector();
-         Mat translation = intermediate.pose().translationVector();
+         Mat rotation = currPose.rotationVector();
+         Mat translation = currPose.translationVector();
 
          Mat predictedRotation = predictRotation(id, rotation);
          Mat predictedTranslation = predictTranslation(id, rotation, translation);
@@ -172,6 +232,12 @@ public class MultiMarkerBody{
          translationPredictions.add(predictedTranslation);
          rotationPredictions.add(predictedRotation);
       }
-      return new Pair<Mat, Mat>(averagePrediction(rotationPredictions), averagePrediction(translationPredictions));
+      
+      Pair<LinkedList<Mat>,LinkedList<Mat>> filtered = filterPose(rotationPredictions, translationPredictions);
+
+      // Check agreement
+      //System.out.println(filtered.first().size());
+
+      return new Pair<Mat, Mat>(averagePrediction(filtered.first()), averagePrediction(filtered.second()));
    }
 }
