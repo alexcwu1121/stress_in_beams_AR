@@ -29,13 +29,13 @@ public class CompoundMarkerSimulation implements Simulation {
 	}
 
 	public Mat run(DetectorResults results){
-		for(int i = 0; i < 4; i++){
-			if(results.getMarkerInformation(this.ids.get(i)) == null){
-				return results.baseImage();
-			}
-		}
-
+		/*
+		Example usage of multi marker body must include null checking
+		*/
 		Pair<Mat, Mat> prediction = this.cMarker.predictCenter(results);
+		if(prediction == null){
+			return results.baseImage();
+		}
 
 		Mat finalMatrix = results.baseImage();
 
