@@ -309,7 +309,7 @@ public class StrengthsGUI{
         JSONArray obj = new JSONArray(content);
         for(int i = 0; i < answer.numberOfParameters(); i++){
         	Object o = obj.get(i);
-        	if(o instanceof JSONObject && !answer.getParameterType().getType().equals(JSONObject.class)){
+        	if(o instanceof JSONObject && !answer.getParameterType(i).getType().equals(JSONObject.class)){
         		JSONObject js = (JSONObject)o;
         		o = parseObjectFromJSON(js, answer.getParameterType(i).getType());
         	}
