@@ -5,6 +5,7 @@ import javax.swing.*;
 import java.awt.GridLayout;
 import java.awt.event.*;
 import java.io.*;
+import java.lang.reflect.*;
 
 import org.json.*;
 import org.opencv.core.*;
@@ -18,7 +19,7 @@ import simulation.*;
 //Menus: Calibrate camera, stop simulation at frame
 
 //TODO: make descriptive exception messages, move eligible simulations to config file.
-//Possible refactorings/extra features: include JSON parsing for complicated values, remember settings between runs
+//Possible refactorings/extra features: include JSON parsing for complicated values, remember settings between runs (would require saving JSON values)
 
 //Current application design questions:
 //userinterface package/StrengthsGUI class too powerful?
@@ -307,9 +308,75 @@ public class StrengthsGUI{
 		String content = new Scanner(new File(configFilePath)).useDelimiter("\\Z").next();
         JSONArray obj = new JSONArray(content);
         for(int i = 0; i < answer.numberOfParameters(); i++){
-        	answer.fillInParameter(i, obj.get(i));
+        	Object o = obj.get(i);
+        	if(o instanceof JSONObject){
+        		JSONObject js = (JSONObject)o;
+        		o = parseObjectFromJSON(js, answer.getParameterType(i).getType());
+        	}
+        	answer.fillInParameter(i, o);
         }
         return answer;
+	}
+
+	private static Object parseObjectFromJSON(JSONObject obj, Class<?> argumentClass){
+		Constructor<?> validConstructor;
+		Method parseMethod;
+		Method givenMethod;
+		try{
+			validConstructor = argumentClass.getConstructor(JSONObject.class);
+		} catch(NoSuchMethodException e){
+			validConstructor = null;
+		}
+		parseMethod = suitableMethod(argumentClass, argumentClass, "fromJSONObject");
+
+		try{
+			JSONObject parsing = obj.getJSONObject("parseMethod");
+			givenMethod = suitableMethod(Class.forName(parsing.getString("class")), argumentClass, parsing.optString("method", "fromJSONObject"));
+		} catch(JSONException e){
+			givenMethod = null;
+		} catch(ClassNotFoundException e){
+			givenMethod = null;
+		}
+		
+		try{
+			if(givenMethod != null){
+				Object o  = givenMethod.invoke(null, obj.get("data"));
+				if(o == null){
+					throw new JSONException("given parse method returned null for input " + obj.toString());
+				}
+				return o;
+			}
+			if(parseMethod != null){
+				Object o  = parseMethod.invoke(null, obj);
+				if(o == null){
+					throw new JSONException(argumentClass.toString() + " parse method returned null for input " + obj.toString());
+				}
+				return o;
+			} else if(validConstructor != null){
+				return validConstructor.newInstance(obj);
+			} else {
+				throw new JSONException(argumentClass.toString() + " did not define a constructor or fromJSONObject method with a single JSONObject parameter, and no alternate parse method was given.");
+			}
+		} catch(ReflectiveOperationException e){
+			throw new JSONException(e);
+		} catch(IllegalArgumentException e){
+			throw new JSONException("Input " + obj.toString() + " could not be parsed.", e);
+		}
+	}
+
+	private static Method suitableMethod(Class<?> fromClass, Class<?> targetClass, String methodName){
+		//System.out.println(fromClass);
+		//System.out.println(targetClass);
+		//System.out.println(methodName);
+		try{
+			Method parseMethod = fromClass.getMethod(methodName, JSONObject.class);
+			if(!targetClass.isAssignableFrom(parseMethod.getReturnType())){
+				return null;
+			}
+			return parseMethod;
+		} catch(NoSuchMethodException e){
+			return null;
+		}
 	}
 
 	//Returns all eligible simulations, ie simulations which users can manually enable. Change this method if a better way of marking eligible simulations is found.
