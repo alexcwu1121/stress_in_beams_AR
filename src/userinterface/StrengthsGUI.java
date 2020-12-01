@@ -309,7 +309,7 @@ public class StrengthsGUI{
         JSONArray obj = new JSONArray(content);
         for(int i = 0; i < answer.numberOfParameters(); i++){
         	Object o = obj.get(i);
-        	if(o instanceof JSONObject){
+        	if(o instanceof JSONObject && !answer.getParameterType().getType().equals(JSONObject.class)){
         		JSONObject js = (JSONObject)o;
         		o = parseObjectFromJSON(js, answer.getParameterType(i).getType());
         	}
@@ -340,18 +340,9 @@ public class StrengthsGUI{
 		
 		try{
 			if(givenMethod != null){
-				Object o  = givenMethod.invoke(null, obj.get("data"));
-				if(o == null){
-					throw new JSONException("given parse method returned null for input " + obj.toString());
-				}
-				return o;
-			}
-			if(parseMethod != null){
-				Object o  = parseMethod.invoke(null, obj);
-				if(o == null){
-					throw new JSONException(argumentClass.toString() + " parse method returned null for input " + obj.toString());
-				}
-				return o;
+				return givenMethod.invoke(null, obj.get("data"));
+			} else if(parseMethod != null){
+				return parseMethod.invoke(null, obj);
 			} else if(validConstructor != null){
 				return validConstructor.newInstance(obj);
 			} else {
