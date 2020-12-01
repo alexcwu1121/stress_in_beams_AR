@@ -7,18 +7,13 @@ import java.util.*;
 import util.*;
 import org.opencv.calib3d.Calib3d;
 
+@HumanReadableName("Compound Marker Simulation")
 public class CompoundMarkerSimulation implements Simulation {
-	private final Mat cameraMatrix;
-	private final Mat distCoeffs;
 	private final LinkedList<Integer> ids;
 	private final MultiMarkerBody cMarker;
 
-	public CompoundMarkerSimulation(Mat cameraMatrix, Mat distCoeffs, LinkedList<Integer> ids){
-		if(cameraMatrix == null || distCoeffs == null){
-			throw new NullPointerException();
-		}
-		this.cameraMatrix = cameraMatrix;
-		this.distCoeffs = distCoeffs;
+	@Internal
+	public CompoundMarkerSimulation(LinkedList<Integer> ids){
 		this.ids = ids;
 
 		this.cMarker = new MultiMarkerBody(.2, new HashMap<Integer, MarkerOffset>() {{
@@ -39,7 +34,8 @@ public class CompoundMarkerSimulation implements Simulation {
 
 		Mat finalMatrix = results.baseImage();
 
-		Calib3d.drawFrameAxes(finalMatrix, this.cameraMatrix, this.distCoeffs, prediction.first(), prediction.second(), 0.5F);
+		CalibrationInformation ci = results.calibrationInformation();
+		Calib3d.drawFrameAxes(finalMatrix, ci.cameraMatrix(), ci.distCoeffs(), prediction.first(), prediction.second(), 0.5F);
 		return finalMatrix;
 	}
 }
