@@ -4,6 +4,8 @@ import javax.swing.*;
 import java.util.*;
 import java.awt.GridBagLayout;
 import java.awt.GridBagConstraints;
+import java.io.*;
+import org.json.*;
 
 /**Uninstantiatable class containing utility methods for the userinterface package.
 @author Owen Kulik
@@ -28,6 +30,8 @@ public class UserInterfaceUtils {
 		optionClassMappings.put(Boolean.class, CheckboxOption.class);
 		optionClassMappings.put(boolean.class, CheckboxOption.class);
 		optionClassMappings.put(OptionalSimulationParameters.class, SimulationOption.class);
+		optionClassMappings.put(String.class, StringOption.class);
+		optionClassMappings.put(File.class, FileOption.class);
 	}
 
 	/**Returns an Option class which is suitable for use with values of the given class.
@@ -74,6 +78,17 @@ public class UserInterfaceUtils {
 			options.addAll(me.getValue());
 		}
 		return optionPaneWithContent(panel, options);
+	}
+
+	/**Returns a File object parsed from the given JSONObject.<br>
+	The JSONObject should have a key called "filename" which points to a String giving the file name to use.
+	@param data the JSONObject to parse
+	@throws NullPointerException if data is null
+	@throws JSONException if data is malformed
+	@return the parsed File.
+	*/
+	public static File fileFromJSON(JSONObject data){
+		return new File(data.getString("filename"));
 	}
 
 	//Returns a JOptionPane with "Apply and Close", "Reset to Defaults", and "Cancel" buttons which work for the given options, and has content as its content panel.
