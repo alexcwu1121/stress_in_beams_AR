@@ -4,9 +4,10 @@ I just wrote a Simulation class. How do I get it on the GUI?<br>
 You have to follow a couple of steps.
 The GUI will get a copy of your Simulation by using a particular constructor in that Simulation.<br>
 The first step is to choose which constructor the GUI will use.<br>
-This constructor's parameters must all be representable as JSON literals (ie integers, floats, strings, booleans). (A feature to make more complicated types eligible could be implemented with a little bit of work. Ask Owen if you want him to do it.)
+There must be an Option class for each of the parameter types. A list of Option classes can be found in UserInterfaceUtils.java.<br>
+In addition, each parameter type must meet the requirements listed below.<br>
 Once you have chosen the constructor to use, mark all other constructors in the class with the @Internal annotation. This signals to the GUI not to use them.<br>
-Additionally, consider marking the paramters of the constructor with the @Description annotation, which will be the name that the paramter is displayed with on the GUI.
+Additionally, consider marking the paramters of the constructor with the @Description annotation, which will be the name that the paramter is displayed with on the GUI.<br>
 (An example of this can be found in the SimpleSimulation class.)<br>
 
 Next, edit the config/eligibleSimulations.json file to add the name of your simulation's class to the array. 
@@ -16,8 +17,24 @@ Finally, the GUI needs to know default values for your Simulation's parameters. 
 This is done by making a default value config file.<br>
 Go into the config folder and create a JSON file whose name is the same as your class (case-sensitive) with ".json" on the end.<br>
 List the default values you'd like to use for the constructor in a JSON array.<br>
-Examples of this can be found for the currently-used simulations.<br>
-Once you have completed all of these steps, your simulation will display on the GUI.<br> <br>
+Since the default values are read from a JSON file, they must be representable in JSON. To satisfy this, the type must either:
+<ol>
+	<li>Be representable as a JSON literal. The types representable as a JSON literal are int, long, double, boolean, String, JSONObject and JSONArray.</li>
+	<li>Have a constructor which takes JSONObject as its only parameter. This constructor will be used to construct the value.</li>
+	<li>Have a static method called fromJSONObject which takes JSONObject as its only parameter and returns the parameter type or a subclass of the parameter type.
+	This method will be called, and the returned value will be passed to the simulation.</li>
+	<li>In addition to methods in the class, the user can specify an alternate parsing method in the config. This is useful for classes which are already written.
+	How to do this is desribed below.</li>
+</ol>
+If multiple of these options are present, they are prioritized in the following order: Literal interpretation, specified parse method, fromJSONObject method, JSONObject constructor.
+Once you have completed all of these steps, your simulation will display on the GUI.<br> 
+
+To specify an alternate parsing method for a class, you must add key called "parseMethod" to the parameter. This key should point to a JSONObject with two keys:
+"class", the fully-qualified name of the class which contains the alternate parsing method, and "method", the name of the alternate parsing method.<br>
+Within the parameter, a key called "data" will point to JSON data passed to the parse method.<br>
+For example, to use a method called fromJSON in class package.Example, the parameter would look like this: 
+{"parseMethod" : {"class" : package.Example, "method" : fromJSON}, "data" : {...data which is passed to the parse method...}}
+<br>
 
 The rest of this package-info talks about the architecture of the userinterface package, and how to extend it.<br> <br>
 
