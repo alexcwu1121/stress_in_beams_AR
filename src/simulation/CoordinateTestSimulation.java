@@ -22,7 +22,7 @@ public class CoordinateTestSimulation implements Simulation {
 
 	public CoordinateTestSimulation(int drawingID, double xRotation, double yRotation, double zRotation, double xTranslation, double yTranslation, double zTranslation){
 		this.secondid = drawingID;
-		body = new MultiMarkerBody(new MarkerOffset(secondid, xRotation, yRotation, zRotation, xTranslation, yTranslation, zTranslation));
+		body = new MultiMarkerBody(1, new MarkerOffset(secondid, xRotation, yRotation, zRotation, xTranslation, yTranslation, zTranslation));
 	}
 
 	public Mat run(DetectorResults results){
