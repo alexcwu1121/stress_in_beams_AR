@@ -8,11 +8,11 @@ import org.json.*;
 import org.opencv.calib3d.Calib3d;
 
 public class MultiMarkerBody{
-	private Map<Integer, MarkerOffset> offsets;
+	private SortedMap<Integer, MarkerOffset> offsets;
    private double filterTol;
 
    public MultiMarkerBody(double filterTol, List<MarkerOffset> offsets){
-      this.offsets = new HashMap<Integer, MarkerOffset>();
+      this.offsets = new TreeMap<>();
       for(MarkerOffset offset: offsets){
          this.offsets.put(offset.id(), offset);
       }
@@ -25,26 +25,8 @@ public class MultiMarkerBody{
    }
 
    public MultiMarkerBody(double filterTol, Map<Integer, MarkerOffset> offsets){
-      this.offsets = Map.copyOf(offsets);
+      this.offsets = new TreeMap<>(offsets);
       this.filterTol = filterTol;
-   }
-
-	public MultiMarkerBody(){
-		MarkerOffset testOffset = new MarkerOffset(0, 1, 1, 1, 3, 3, 3);
-      this.offsets.put(testOffset.id(), testOffset);
-      this.filterTol = .05;
-   }
-
-   /**Constructs and returns a MultiMarkerBody containing the Marker Offsets as specified in the given JSON file. (use test_marker_offset.json as a template)
-   @param file Path to the JSON file.
-   @throws IOException if an IO error occurs.
-   @throws NullPointerException if file is null.
-   @return a MultiMarkerBody containing the Marker Offsets as specified in the given JSON file.
-   */
-   public static MultiMarkerBody fromJSONFile(double filterTol, String file) throws IOException {
-      String content = new Scanner(new File(file)).useDelimiter("\\Z").next();
-        JSONObject obj = new JSONObject(content);
-        return fromJSONObject(filterTol, obj);
    }
 
    /**Constructs and returns a MultiMarkerBody containing the Marker Offsets as specified in the given JSON object. (use test_marker_offset.json as a template)
@@ -60,6 +42,56 @@ public class MultiMarkerBody{
          answer.put(id, new MarkerOffset(id, js.getDouble("xRot"), js.getDouble("yRot"), js.getDouble("zRot"), js.getDouble("xTrans"), js.getDouble("yTrans"), js.getDouble("zTrans")));
       }
       return new MultiMarkerBody(filterTol, answer);
+   }
+
+   /**Returns a JSONObject representation of this MultiMarkerBody, suitable for use with the fromJSONObject method.
+   @return a JSONObject representation of this MultiMarkerBody
+   */
+   public JSONObject toJSONObject(){
+      JSONObject answer = new JSONObject();
+      answer.put("filterTol", this.filterTol);
+      JSONArray offs = new JSONArray();
+      for(MarkerOffset mo : this.offsets.values()){
+         offs.put(mo);
+      }
+      answer.put("offsets", offs);
+      return answer;
+   }
+
+   /**Constructs and returns a MultiMarkerBody from the given JSONObject.<br>
+   JSONObjects produced by the toJSONObject() method are compatible for use with this method.
+   @param source the JSONObject to parse
+   @throws JSONException if source is malformed
+   @throws NullPointerException if source is null
+   @return the parsed MultiMarkerBody
+   */
+   public static MultiMarkerBody fromJSONObject(JSONObject source){
+      double filterTol = source.getDouble("filterTol");
+      JSONArray data = source.getJSONArray("offsets");
+      List<MarkerOffset> offsets = new ArrayList<>();
+      for(Object o : data){
+         JSONObject jo = (JSONObject)o;
+         offsets.add(MarkerOffset.fromJSONObject(jo));
+      }
+      return new MultiMarkerBody(filterTol, offsets);
+   }
+
+   /**Returns this MultiMarkerBody's filter tolerance.
+   @return this MultiMarkerBody's filter tolerance.
+   */
+   public double getFilterTol(){
+      return this.filterTol;
+   }
+
+   /**Returns this MultiMarkerBody's offsets, in a set sorted by marker ID.
+   @return this MultiMarkerBody's offsets
+   */
+   public SortedSet<MarkerOffset> getOffsets(){
+      TreeSet<MarkerOffset> answer = new TreeSet<>((offset1, offset2) -> {
+         return ((Integer)offset1.id()).compareTo(offset2.id());
+      });
+      answer.addAll(this.offsets.values());
+      return answer;
    }
 
    public Mat averagePrediction(LinkedList<Mat> entries){

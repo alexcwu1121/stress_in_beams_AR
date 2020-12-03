@@ -102,6 +102,32 @@ public class MarkerOffset {
 		return translationVector;
 	}
 
+	/**Returns a JSONObject representation of this MarkerOffset, suitable for use with the fromJSONObject method.
+	@return a JSONObject representation of this MarkerOffset.
+	*/
+	public JSONObject toJSONObject(){
+		JSONObject marker = new JSONObject();
+		marker.put("id", this.id);
+		marker.put("xRot", this.xRotation);
+		marker.put("yRot", this.yRotation);
+		marker.put("zRot", this.zRotation);
+		marker.put("xTrans", this.xTranslation);
+		marker.put("yTrans", this.yTranslation);
+		marker.put("zTrans", this.zTranslation);
+		return marker;
+	}
+
+	/**Constructs and returns a MarkerOffset from the given JSONObject.<br>
+	JSONObjects produced by the toJSONObject method are compatible with this method.
+	@param js The JSONObject to parse
+	@throws JSONException if js is malformed
+	@throws NullPointerException if js is null
+	@return the constructed MarkerOffset.
+	*/
+	public static MarkerOffset fromJSONObject(JSONObject js){
+		return new MarkerOffset(js.getInt("id"), js.getDouble("xRot"), js.getDouble("yRot"), js.getDouble("zRot"), js.getDouble("xTrans"), js.getDouble("yTrans"), js.getDouble("zTrans"));
+	}
+
 	/**Returns a hash code for this MarkerOffset.
 	@return a hash code for this MarkerOffset.
 	*/
@@ -138,9 +164,9 @@ public class MarkerOffset {
 	}
 
 	//Test cases
-	public static void main(String[] args) throws IOException {
+	/*public static void main(String[] args) throws IOException {
 		System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
 		MultiMarkerBody lmo = MultiMarkerBody.fromJSONFile("markerdetector/test_marker_offset.json");
 		System.out.println(lmo);
-	}
+	}*/
 }
