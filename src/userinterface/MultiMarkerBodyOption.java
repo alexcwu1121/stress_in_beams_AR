@@ -90,6 +90,7 @@ public class MultiMarkerBodyOption<V> extends Option<MultiMarkerBody, V>{
 
 		@Override
 		public MultiMarkerBody evaluate(){
+			//Change this to take this.numberOfButtons into account
 			for(InstanceOption<MarkerOffset, MultiMarkerBodyOptionEvaluator> io : this.offsetButtons){
 				io.enact();
 			}
@@ -104,14 +105,14 @@ public class MultiMarkerBodyOption<V> extends Option<MultiMarkerBody, V>{
 				}
 			}
 			if(duplicate){
-				JOptionPane.showMessageDialog(null, "Warning: Multiple offsets had same marker ID value. The resulting Multi-Marker Body may behave unexpectedly.", "Warning", JOptionPane.WARNING_MESSAGE);
+				JOptionPane.showMessageDialog(null, "Multiple offsets had same marker ID value. The resulting Multi-Marker Body may behave unexpectedly.", "Warning", JOptionPane.WARNING_MESSAGE);
 			}
-			return new MultiMarkerBody((double)this.filterTol.getValue(), this.offsets);
+			return new MultiMarkerBody((double)this.filterTol.getValue(), this.offsets.subList(0, this.numberOfButtons));
 		}
 
 		private void updateButtons(){
 			//System.out.println("updateButtons called");
-			int oldNumber = numberOfButtons;
+			int oldNumber = this.numberOfButtons;
 			int newNumber = (int)this.numberOfOffsets.getValue();
 			if(newNumber < oldNumber){
 				for(int i = newNumber; i < oldNumber; i++){
