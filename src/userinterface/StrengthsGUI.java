@@ -5,6 +5,7 @@ import javax.swing.*;
 import java.awt.GridLayout;
 import java.awt.event.*;
 import java.io.*;
+import java.nio.file.*;
 import java.lang.reflect.*;
 
 import org.json.*;
@@ -44,8 +45,9 @@ public class StrengthsGUI{
 		}
 	}
 
-	private static final String CONFIG_PATH = "./config";
-	private static final String CALIBRATION_FILE = CONFIG_PATH + File.separator + "calibration.json";
+	private static final String CONFIG_PATH = resolveConfigPath();
+	private static final String STORAGE_PATH = resolveStoragePath();
+	private static final String CALIBRATION_FILE = STORAGE_PATH + File.separator + "calibration.json";
 	private static final String CALIBRATION_INSTRUCTIONS = "<html><center>Camera Calibration Started.<br>"
 	 				+ "Press C to capture a frame, and press ENTER to calibrate.<br>"
 	 				+ "In order to ensure good calibration, capture frames featuring the board from several different distances and angles.<br>"
@@ -392,6 +394,40 @@ public class StrengthsGUI{
 			}	
 		}
 		return sims;
+	}
+
+	private static String resolveConfigPath(){
+		List<String> pathsToInspect = List.of(".", "..", "./src", "../src", "./app/strengths", "./strengths", "../app/strengths", "../strengths", "./app", "../app");
+		for(String s : pathsToInspect){
+			String dir = s + File.separator + "config";
+			if(Files.exists(Path.of(dir))){
+				return dir;
+			}
+		}
+		//This is the worst piece of code that I have ever written
+		try{
+			throw new IOException("Could not find config folder.");
+		} catch(IOException e){
+			throw new UncheckedIOException(e);
+		}
+	}
+
+	//This is pretty bad too though
+	private static String resolveStoragePath(){
+		if(System.getProperty("os.name").equalsIgnoreCase("windows 10") && CONFIG_PATH.contains("app")){
+			String appDataPath = System.getenv("APPDATA");
+			if(appDataPath == null){
+				return CONFIG_PATH;
+			}
+			String strengthsAppDataPath = appDataPath + File.separator + "Strengths";
+			File dir = new File(strengthsAppDataPath);
+			if(!dir.exists()){
+				dir.mkdir();
+			}
+			return strengthsAppDataPath;
+		} else{
+			return CONFIG_PATH;
+		}
 	}
 
 	//Returns the calibrator currently being used. Change if a different method of determining the calibrator is used.
