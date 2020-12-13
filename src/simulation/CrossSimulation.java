@@ -1,7 +1,8 @@
 package simulation;
 
 import markerdetector.*;
-import crosssection.*;
+import lwjglrendering.*;
+import lwjglrendering.crosssection.*;
 
 import org.opencv.core.*;
 import org.opencv.aruco.*;
@@ -23,8 +24,8 @@ Additionally, lines are drawn from the crosssection to the marker as a visual ai
 
 @HumanReadableName("Cross-Section Simulation")
 public class CrossSimulation implements Simulation {
-    private final Plane cross;
 
+    private final Crosssection cross;
     private final MultiMarkerBody trackingGroup;
     //Replace these later with multi-marker bodies
     private final MultiMarkerBody firstGroup;
@@ -43,7 +44,12 @@ public class CrossSimulation implements Simulation {
         this.secondGroup = lastGroup;
 
         //Hardcoded values, feel free to change
-        cross = new Plane(1.0, .2, 1.5);
+        cross = new Crosssection();
+        cross.start();
+        for (int i = 0; i < 2; i++){
+          cross.newframe();
+        }
+
     }
 
     /**Runs the simulation.
@@ -70,10 +76,11 @@ public class CrossSimulation implements Simulation {
         Pose second_pose = new Pose(p_second.first(), p_second.second());
 
         //Edit this section of code to change the values put into the crossection.
-        cross.planeUpdate(first_pose.flipCoords().rotationVector(), second_pose.flipCoords().rotationVector());
+        //cross.planeUpdate(first_pose.flipCoords().rotationVector(), second_pose.flipCoords().rotationVector());
+        cross.newframe();
         //End section
 
-        BufferedImage bi = cross.getImage();
+        BufferedImage bi = cross.newframe();
         Mat mat = /*results.baseImage();*/new Mat(bi.getHeight(), bi.getWidth(), CvType.CV_8UC3);
         byte[] data = ((DataBufferByte) bi.getRaster().getDataBuffer()).getData();
         mat.put(0, 0, data);
