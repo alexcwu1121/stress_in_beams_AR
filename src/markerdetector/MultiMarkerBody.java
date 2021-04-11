@@ -259,12 +259,16 @@ public class MultiMarkerBody{
          Mat translation = currPose.translationVector();
 
          Mat predictedRotation = predictRotation(id, rotation);
-         Mat predictedTranslation = predictTranslation(id, rotation, translation);
+         Mat predictedTranslation = predictTranslation(id, predictedRotation, translation);
 
          translationPredictions.add(predictedTranslation);
          rotationPredictions.add(predictedRotation);
       }
       
+      if(rotationPredictions.size() == 0){
+         return null;
+      }
+
       Pair<LinkedList<Mat>,LinkedList<Mat>> filtered = filterPose(rotationPredictions, translationPredictions);
 
       // Check agreement

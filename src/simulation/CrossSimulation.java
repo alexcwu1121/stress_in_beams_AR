@@ -8,6 +8,8 @@ import org.opencv.aruco.*;
 import org.opencv.calib3d.Calib3d;
 import org.opencv.imgproc.Imgproc;
 import util.HumanReadableName;
+import java.util.*;
+import util.*;
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;
@@ -22,22 +24,23 @@ Additionally, lines are drawn from the crosssection to the marker as a visual ai
 @HumanReadableName("Cross-Section Simulation")
 public class CrossSimulation implements Simulation {
     private final Plane cross;
-    private final int trackingID;
+
+    private final MultiMarkerBody trackingGroup;
     //Replace these later with multi-marker bodies
-    private final int firstId;
-    private final int secondId;
+    private final MultiMarkerBody firstGroup;
+    private final MultiMarkerBody secondGroup;
 
     /**Constructs a CrossSimulation using the given values.
     @param idToTrack the marker id to base data off of.
     @throws IllegalArgumentException if idToTrack is negative.
     */
-    public CrossSimulation(int firstId, int secondId, int drawingId){
-        if(firstId < 0 || secondId < 0 || drawingId < 0){
-            throw new IllegalArgumentException("Marker ids cannot be negative");
-        }
-        this.trackingID = drawingId;
-        this.firstId = firstId;
-        this.secondId = secondId;
+    public CrossSimulation(@Description("Multi-Marker Body") MultiMarkerBody firstGroup,
+        @Description("Multi-Marker Body") MultiMarkerBody middleGroup,
+        @Description("Multi-Marker Body") MultiMarkerBody lastGroup){
+
+        this.firstGroup = firstGroup;
+        this.trackingGroup = middleGroup;
+        this.secondGroup = lastGroup;
 
         //Hardcoded values, feel free to change
         cross = new Plane(1.0, .2, 1.5);
@@ -49,16 +52,25 @@ public class CrossSimulation implements Simulation {
     */
     public Mat run(DetectorResults results){
         //Edit this section of code to change the conditions on which the simulation does not run, as well as declare variables holding marker information.
-        MarkerInformation information = results.getMarkerInformation(this.trackingID);
-        MarkerInformation first = results.getMarkerInformation(this.firstId);
-        MarkerInformation second = results.getMarkerInformation(this.secondId);
-        if(information == null || first == null || second == null){
+        MarkerInformation information = results.getMarkerInformation(10);
+        MarkerInformation first = results.getMarkerInformation(2);
+        MarkerInformation second = results.getMarkerInformation(18);
+        
+        Pair<Mat, Mat> p_tracking = this.trackingGroup.predictCenter(results);
+        Pair<Mat, Mat> p_first = this.firstGroup.predictCenter(results);
+        Pair<Mat, Mat> p_second = this.secondGroup.predictCenter(results);
+
+        if(information == null || first == null || second == null || p_tracking == null || p_first == null || p_second == null){
             return results.baseImage();
         }
         //End section
 
+        Pose tracking_pose = new Pose(p_tracking.first(), p_tracking.second());
+        Pose first_pose = new Pose(p_first.first(), p_first.second());
+        Pose second_pose = new Pose(p_second.first(), p_second.second());
+
         //Edit this section of code to change the values put into the crossection.
-        cross.planeUpdate(first.pose().flipCoords().rotationVector(), second.pose().flipCoords().rotationVector());
+        cross.planeUpdate(first_pose.flipCoords().rotationVector(), second_pose.flipCoords().rotationVector());
         //End section
 
         BufferedImage bi = cross.getImage();
@@ -115,6 +127,12 @@ public class CrossSimulation implements Simulation {
                 }
             }
         }
+
+        CalibrationInformation ci = results.calibrationInformation();
+        Calib3d.drawFrameAxes(answer, ci.cameraMatrix(), ci.distCoeffs(), p_tracking.first(), p_tracking.second(), 1F);
+        Calib3d.drawFrameAxes(answer, ci.cameraMatrix(), ci.distCoeffs(), p_first.first(), p_first.second(), 1F);
+        Calib3d.drawFrameAxes(answer, ci.cameraMatrix(), ci.distCoeffs(), p_second.first(), p_second.second(), 1F);
+
         return answer;
     }
 

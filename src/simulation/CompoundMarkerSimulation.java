@@ -20,7 +20,7 @@ public class CompoundMarkerSimulation implements Simulation {
 	public CompoundMarkerSimulation(LinkedList<Integer> ids){
 		this.ids = ids;
 
-		this.cMarker = new MultiMarkerBody(.2, new HashMap<Integer, MarkerOffset>() {{
+		this.cMarker = new MultiMarkerBody(.1, new HashMap<Integer, MarkerOffset>() {{
         put(ids.get(0), new MarkerOffset(ids.get(0), 0, 0, 0, .85, -.85, 0));
         put(ids.get(1), new MarkerOffset(ids.get(1), 0, 0, 0, -.85, -.85, 0));
     	put(ids.get(2), new MarkerOffset(ids.get(2), 0, 0, 0, .85, .85, 0));

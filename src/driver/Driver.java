@@ -22,7 +22,7 @@ import markerdetector.*;
 import userinterface.*;
 
 public class Driver{
-	private static VideoCap webcam = new VideoCap(0);
+	private static VideoCap webcam = new VideoCap(1);
 
 	public static void main(String[] args) throws IOException {
         //Might want some more preprocessing on this one, like using a CLI library or ensuring that the file exists.
