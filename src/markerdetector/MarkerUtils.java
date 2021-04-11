@@ -54,7 +54,7 @@ public class MarkerUtils {
 	@throws IllegalArgumentException if first.cols() != second.rows() or if the matrices have different numbers of channels.
 	@return the result of the cross multiplication.
 	*/
-	public static Mat crossMultiply(Mat first, Mat second){
+	public static Mat matMultiply(Mat first, Mat second){
 		if(first.cols() != second.rows()){
 			throw new IllegalArgumentException("First matrix columns and second matrix rows do not match.");
 		}

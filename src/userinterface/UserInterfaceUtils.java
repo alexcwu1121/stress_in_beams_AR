@@ -32,6 +32,8 @@ public class UserInterfaceUtils {
 		optionClassMappings.put(OptionalSimulationParameters.class, SimulationOption.class);
 		optionClassMappings.put(String.class, StringOption.class);
 		optionClassMappings.put(File.class, FileOption.class);
+		optionClassMappings.put(markerdetector.MultiMarkerBody.class, MultiMarkerBodyOption.class);
+		optionClassMappings.put(markerdetector.MarkerOffset.class, MarkerOffsetOption.class);
 	}
 
 	/**Returns an Option class which is suitable for use with values of the given class.
@@ -138,7 +140,7 @@ public class UserInterfaceUtils {
 	}
 
 	//Method to easily construct a GridBagConstratints object.
-	private static GridBagConstraints makeGridBagConstraint(int x, int y, int width, int height, int anchor){
+	public static GridBagConstraints makeGridBagConstraint(int x, int y, int width, int height, int anchor){
 		GridBagConstraints gbc = new GridBagConstraints();
 		gbc.gridx = x;
 		gbc.gridy = y;

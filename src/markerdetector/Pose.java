@@ -2,18 +2,20 @@ package markerdetector;
 
 import org.opencv.core.*;
 import org.opencv.calib3d.*;
+import java.lang.Math;
 
 /**Class holding a rotation vector and translation vector.
 @author Owen Kulik
 */
 
 public class Pose {
-	private final double xRotation;
-	private final double yRotation;
-	private final double zRotation;
+	private double xRotation;
+	private double yRotation;
+	private double zRotation;
 	private final double xTranslation;
 	private final double yTranslation;
 	private final double zTranslation;
+	public int counter = 0;
 
 	/**Constructs a Pose with the given vector values.
 	*/
@@ -36,6 +38,7 @@ public class Pose {
 		if(rvecs == null || tvecs == null){
 			throw new NullPointerException();
 		}
+
 		if(rvecs.rows() == 3 && rvecs.cols() == 1 && rvecs.channels() == 1){
 			this.xRotation = rvecs.get(0, 0)[0];
 			this.yRotation = rvecs.get(1, 0)[0];
@@ -66,6 +69,12 @@ public class Pose {
 		} else {
 			throw new IllegalArgumentException("tvecs had incompatible dimensions: " + tvecs.rows() + " rows, " + tvecs.cols() + " cols, " + tvecs.channels() + " channels.");
 		}
+	}
+
+	public void setRotationVector(Mat rvecs){
+		this.xRotation = rvecs.get(0,0)[0];
+		this.yRotation = rvecs.get(1,0)[0];
+		this.zRotation = rvecs.get(2,0)[0];
 	}
 
 	/**Returns this Pose's x rotation.
@@ -151,7 +160,7 @@ public class Pose {
 		translationVector3D.put(0, 0, value1);
 		translationVector3D.put(1, 0, value2);
 		translationVector3D.put(2, 0, value3);*/
-		translationVector3D = MarkerUtils.scalarMultiply(MarkerUtils.crossMultiply(r, tvec), -1);
+		translationVector3D = MarkerUtils.scalarMultiply(MarkerUtils.matMultiply(r, tvec), -1);
 		Calib3d.Rodrigues(r, rotationVector3D);
 		return new Pose(rotationVector3D, translationVector3D);
 	}

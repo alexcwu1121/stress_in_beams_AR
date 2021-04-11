@@ -74,7 +74,7 @@ public class Plane extends JPanel {
     */
     public void planeUpdate(double rotL[], double rotR[]) {
 
-        double lStress = Math.toDegrees(rotL[0]) - Math.toDegrees(rotR[0]);
+        double lStress = Math.toDegrees(rotL[2]) - Math.toDegrees(rotR[2]);
         double rStress = Math.toDegrees(rotL[1]) - Math.toDegrees(rotR[1]);
         int xMiddle = xSpaces / 2;
         int yMiddle = ySpaces / 2;

@@ -14,12 +14,15 @@ public class CoordinateTestSimulation implements Simulation {
 	@Internal
 	public CoordinateTestSimulation(int secondid){
 		this.secondid = secondid;
-		body = new MultiMarkerBody(new MarkerOffset(secondid, 0, 0, 0, 0, 0, 0));
+		//body = new MultiMarkerBody(1, new MarkerOffset(secondid, 0, 0, 0, .85, -.85, 0));
+		//body = new MultiMarkerBody(1, new MarkerOffset(this.secondid+1, 0, 0, 0, -.85, -.85, 0));
+		//body = new MultiMarkerBody(1, new MarkerOffset(this.secondid+2, 0, 0, 0, .85, .85, 0));
+		body = new MultiMarkerBody(1, new MarkerOffset(this.secondid+3, 0, 0, 0, -.85, .85, 0));
 	}
 
 	public CoordinateTestSimulation(int drawingID, double xRotation, double yRotation, double zRotation, double xTranslation, double yTranslation, double zTranslation){
 		this.secondid = drawingID;
-		body = new MultiMarkerBody(new MarkerOffset(secondid, xRotation, yRotation, zRotation, xTranslation, yTranslation, zTranslation));
+		body = new MultiMarkerBody(1, new MarkerOffset(secondid, xRotation, yRotation, zRotation, xTranslation, yTranslation, zTranslation));
 	}
 
 	public Mat run(DetectorResults results){
@@ -28,14 +31,7 @@ public class CoordinateTestSimulation implements Simulation {
 			return results.baseImage();
 		}
 		Pair<Mat, Mat> prediction = this.body.predictCenter(results);
-		/*MarkerUtils.printmat(prediction.first());
-		MarkerUtils.printmat(prediction.second());
-		System.out.println();
-		MarkerUtils.printmat(second.rotationVector3D());
-		MarkerUtils.printmat(second.translationVector3D());
-		System.out.println();
-		System.out.println();
-		System.out.println();*/
+
 		Mat finalMatrix = results.baseImage();
 		//MarkerUtils.printmat(prediction.first());
 		//MarkerUtils.printmat(prediction.second());
