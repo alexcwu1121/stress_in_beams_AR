@@ -32,73 +32,34 @@ public class MaskSimulation implements Simulation {
         this.secondGroup = lastGroup;
     }
 
-    public Mat run(DetectorResults results){
-        Mat answer = results.baseImage();
-        //Edit this section of code to change the conditions on which the simulation does not run, as well as declare variables holding marker information.
+    public Mat drawVaxis(Mat answer, Mat p2, double width, Mat v, CalibrationInformation ci, MatOfDouble dMat, Mat zeros){
+        // Draw v axis
+        Mat v_top = new Mat(3, 1, CvType.CV_64FC1);
+        Mat v_bot = new Mat(3, 1, CvType.CV_64FC1);
+        Core.add(MarkerUtils.scalarMultiply(v,width/2),p2,v_top);
+        Core.subtract(p2,MarkerUtils.scalarMultiply(v,width/2),v_bot);
+        MatOfPoint3f v_top_point = new MatOfPoint3f(new Point3(v_top.get(0,0)[0],v_top.get(1,0)[0],v_top.get(2,0)[0]));
+        MatOfPoint3f v_bot_point = new MatOfPoint3f(new Point3(v_bot.get(0,0)[0],v_bot.get(1,0)[0],v_bot.get(2,0)[0]));
+        MatOfPoint2f v_top_projected = new MatOfPoint2f();
+        MatOfPoint2f v_bot_projected = new MatOfPoint2f();
 
-        CalibrationInformation ci = results.calibrationInformation();
-        
-        Pair<Mat, Mat> p_tracking = this.trackingGroup.predictCenter(results);
-        Pair<Mat, Mat> p_first = this.firstGroup.predictCenter(results);
-        Pair<Mat, Mat> p_second = this.secondGroup.predictCenter(results);
+        Calib3d.projectPoints(v_top_point, zeros, zeros, ci.cameraMatrix(), dMat, v_top_projected);
+        Calib3d.projectPoints(v_bot_point, zeros, zeros, ci.cameraMatrix(), dMat, v_bot_projected);
 
-        if(p_tracking == null || p_first == null || p_second == null){
-            return results.baseImage();
-        }
-        //End section
+        Imgproc.line(answer, new Point(v_top_projected.get(0,0)[0],v_top_projected.get(0,0)[1]),
+                new Point(v_bot_projected.get(0,0)[0],v_bot_projected.get(0,0)[1]),
+                new Scalar(0, 165, 255),5);
 
-        Pose tracking_pose = new Pose(p_tracking.first(), p_tracking.second());
-        Pose first_pose = new Pose(p_first.first(), p_first.second());
-        Pose second_pose = new Pose(p_second.first(), p_second.second());
+        return answer;
+    }
 
-        // Get 3D positions of each marker
-        Mat p1 = first_pose.translationVector();
-        Mat p2 = tracking_pose.translationVector();
-        Mat p3 = second_pose.translationVector();
-
+    public Mat drawNeutralAxis(Mat answer, Mat p1, Mat p2, Mat p3, double width, Mat u, Mat v, CalibrationInformation ci, MatOfDouble dMat, Mat zeros){
         // Calculate normal vector w cross product and compare to z vector of p3
         Mat v_p2p1 = new Mat(3, 1, CvType.CV_64FC1);Core.subtract(p1,p2,v_p2p1);
         Mat v_p2p3 = new Mat(3, 1, CvType.CV_64FC1);Core.subtract(p3,p2,v_p2p3);
         Mat u_p2p1 = MatMathUtils.unitVector(v_p2p1,MatMathUtils.norm(v_p2p1));
         Mat u_p2p3 = MatMathUtils.unitVector(v_p2p3,MatMathUtils.norm(v_p2p3));
         Mat norm = MatMathUtils.crossProduct(u_p2p1,u_p2p3);
-
-        // Project vectors v_p2p1 and v_p2p3 onto norm
-        Mat proj_p2p1 = MarkerUtils.dotMultiply(v_p2p1,norm);
-        Mat proj_p2p3 = MarkerUtils.dotMultiply(v_p2p3,norm);
-
-        // Subtract norm projected vectors to derive planar coordinates
-        Mat planar_p2p1 = new Mat(3, 1, CvType.CV_64FC1);Core.subtract(v_p2p1,proj_p2p1,planar_p2p1);
-        Mat planar_p2p3 = new Mat(3, 1, CvType.CV_64FC1);Core.subtract(v_p2p3,proj_p2p3,planar_p2p3);
-
-        // Derive u and v coordinate axes of tracking marker
-        Mat ex = new Mat(3, 1, CvType.CV_64FC1);ex.put(0, 0, 1);ex.put(1, 0, 0);ex.put(2, 0, 0);
-        Mat ey = new Mat(3, 1, CvType.CV_64FC1);ey.put(0, 0, 0);ey.put(1, 0, 1);ey.put(2, 0, 0);
-        Mat rot_t = new Mat();Calib3d.Rodrigues(tracking_pose.rotationVector(), rot_t);
-        Mat u = MarkerUtils.matMultiply(rot_t, ex);
-        Mat v = MarkerUtils.matMultiply(rot_t, ey);
-
-        // Test draw u and v axes
-        /*
-        Mat u_axis = new Mat(3, 1, CvType.CV_64FC1);
-        Mat v_axis = new Mat(3, 1, CvType.CV_64FC1);
-        Core.add(MarkerUtils.scalarMultiply(u,3.0),p2,u_axis);
-        Core.add(MarkerUtils.scalarMultiply(v,3.0),p2,v_axis);
-       
-        MatOfPoint3f u_axis_point = new MatOfPoint3f(new Point3(u_axis.get(0,0)[0],u_axis.get(1,0)[0],u_axis.get(2,0)[0]));
-        MatOfPoint3f v_axis_point = new MatOfPoint3f(new Point3(v_axis.get(0,0)[0],v_axis.get(1,0)[0],v_axis.get(2,0)[0]));
-        MatOfPoint3f tracking_point = new MatOfPoint3f(new Point3(p2.get(0,0)[0],p2.get(1,0)[0],p2.get(2,0)[0]));
-       
-        MatOfPoint2f u_projected = new MatOfPoint2f();
-        MatOfPoint2f v_projected = new MatOfPoint2f();
-        MatOfPoint2f tracking_projected = new MatOfPoint2f();
-        MatOfDouble dMat = new MatOfDouble(0,0,0,0,0);
-        Calib3d.projectPoints(u_axis_point, new Mat(3, 1, CvType.CV_64FC1), new Mat(3, 1, CvType.CV_64FC1), ci.cameraMatrix(), dMat, u_projected);
-        Calib3d.projectPoints(v_axis_point, new Mat(3, 1, CvType.CV_64FC1), new Mat(3, 1, CvType.CV_64FC1), ci.cameraMatrix(), dMat, v_projected);
-        Calib3d.projectPoints(tracking_point, new Mat(3, 1, CvType.CV_64FC1), new Mat(3, 1, CvType.CV_64FC1), ci.cameraMatrix(), dMat, tracking_projected);
-        Imgproc.line(answer, new Point(u_projected.get(0,0)[0],u_projected.get(0,0)[1]), new Point(tracking_projected.get(0,0)[0],tracking_projected.get(0,0)[1]),new Scalar(100, 100, 0),5);
-        Imgproc.line(answer, new Point(v_projected.get(0,0)[0],v_projected.get(0,0)[1]), new Point(tracking_projected.get(0,0)[0],tracking_projected.get(0,0)[1]),new Scalar(100, 100, 0),5);
-        */
 
         // Find magnitude of components of vectors p2p1 and p2p3 on u and v axes w/ dot product
         // Generate a parabolic curve to planar points (p2p1_u,p2p1_v), (0,0), (p2p3_u,p2p3_v)
@@ -132,9 +93,8 @@ public class MaskSimulation implements Simulation {
         MatOfPoint3f world_points = new MatOfPoint3f(world_para.toArray(new Point3[world_para.size()]));
 
         // Temporary null distortional matrix for camera projection
-        MatOfDouble dMat = new MatOfDouble(0,0,0,0,0);
         MatOfPoint2f para_projected = new MatOfPoint2f();
-        Calib3d.projectPoints(world_points, new Mat(3, 1, CvType.CV_64FC1), new Mat(3, 1, CvType.CV_64FC1), ci.cameraMatrix(), dMat, para_projected);
+        Calib3d.projectPoints(world_points, zeros, zeros, ci.cameraMatrix(), dMat, para_projected);
 
         // Draw line components
         for(int i = 1; i < 20; i++){
@@ -142,29 +102,63 @@ public class MaskSimulation implements Simulation {
                 new Point(para_projected.get(i-1,0)[0],para_projected.get(i-1,0)[1]),
                 new Scalar(0, 255, 0),5);
         }
+        return answer;
+    }
+
+    public Mat run(DetectorResults results){
+        Mat answer = results.baseImage();
+        
+        Mat zeros = new Mat(3, 1, CvType.CV_64FC1);zeros.put(0, 0, 0);zeros.put(1, 0, 0);zeros.put(2, 0, 0);
 
         // Beam width
         double width = 6;
 
+        CalibrationInformation ci = results.calibrationInformation();
+        MatOfDouble dMat = new MatOfDouble(ci.distCoeffs());
+        
+        Pair<Mat, Mat> p_tracking = this.trackingGroup.predictCenter(results);
+        Pair<Mat, Mat> p_first = this.firstGroup.predictCenter(results);
+        Pair<Mat, Mat> p_second = this.secondGroup.predictCenter(results);
+
+        if(p_tracking == null || p_first == null || p_second == null){
+            return results.baseImage();
+        }
+
+        Pose tracking_pose = new Pose(p_tracking.first(), p_tracking.second());
+        Pose first_pose = new Pose(p_first.first(), p_first.second());
+        Pose second_pose = new Pose(p_second.first(), p_second.second());
+
+        // Get 3D positions of each marker
+        Mat p1 = first_pose.translationVector();
+        Mat p2 = tracking_pose.translationVector();
+        Mat p3 = second_pose.translationVector();
+
+        /*
+        Experimental: planar projection for finer 3D curve fitting
+
+        // Project vectors v_p2p1 and v_p2p3 onto norm
+        Mat proj_p2p1 = MarkerUtils.dotMultiply(v_p2p1,norm);
+        Mat proj_p2p3 = MarkerUtils.dotMultiply(v_p2p3,norm);
+
+        // Subtract norm projected vectors to derive planar coordinates
+        Mat planar_p2p1 = new Mat(3, 1, CvType.CV_64FC1);Core.subtract(v_p2p1,proj_p2p1,planar_p2p1);
+        Mat planar_p2p3 = new Mat(3, 1, CvType.CV_64FC1);Core.subtract(v_p2p3,proj_p2p3,planar_p2p3);
+        */
+
+        // Derive u and v coordinate axes of tracking marker
+        Mat ex = new Mat(3, 1, CvType.CV_64FC1);ex.put(0, 0, 1);ex.put(1, 0, 0);ex.put(2, 0, 0);
+        Mat ey = new Mat(3, 1, CvType.CV_64FC1);ey.put(0, 0, 0);ey.put(1, 0, 1);ey.put(2, 0, 0);
+        Mat rot_t = new Mat();Calib3d.Rodrigues(tracking_pose.rotationVector(), rot_t);
+        Mat u = MarkerUtils.matMultiply(rot_t, ex);
+        Mat v = MarkerUtils.matMultiply(rot_t, ey);
+
+        // Draw neutral axis
+        answer = drawNeutralAxis(answer,p1,p2,p3,width,u,v,ci,dMat,zeros);
         // Draw v axis
-        Mat v_top = new Mat(3, 1, CvType.CV_64FC1);
-        Mat v_bot = new Mat(3, 1, CvType.CV_64FC1);
-        Core.add(MarkerUtils.scalarMultiply(v,width/2),p2,v_top);
-        Core.subtract(p2,MarkerUtils.scalarMultiply(v,width/2),v_bot);
-        MatOfPoint3f v_top_point = new MatOfPoint3f(new Point3(v_top.get(0,0)[0],v_top.get(1,0)[0],v_top.get(2,0)[0]));
-        MatOfPoint3f v_bot_point = new MatOfPoint3f(new Point3(v_bot.get(0,0)[0],v_bot.get(1,0)[0],v_bot.get(2,0)[0]));
-        MatOfPoint2f v_top_projected = new MatOfPoint2f();
-        MatOfPoint2f v_bot_projected = new MatOfPoint2f();
-
-        Calib3d.projectPoints(v_top_point, new Mat(3, 1, CvType.CV_64FC1), new Mat(3, 1, CvType.CV_64FC1), ci.cameraMatrix(), dMat, v_top_projected);
-        Calib3d.projectPoints(v_bot_point, new Mat(3, 1, CvType.CV_64FC1), new Mat(3, 1, CvType.CV_64FC1), ci.cameraMatrix(), dMat, v_bot_projected);
-
-        Imgproc.line(answer, new Point(v_top_projected.get(0,0)[0],v_top_projected.get(0,0)[1]),
-                new Point(v_bot_projected.get(0,0)[0],v_bot_projected.get(0,0)[1]),
-                new Scalar(0, 165, 255),5);
+        answer = drawVaxis(answer,p2,width,v,ci,dMat,zeros);
 
         // Determine compressive/tensile side
-        // Project n number of arrowed anchored onto the v axis, linearly increasing or decreasing in length.
+        // Project n number of arrowedlines anchored onto the v axis, linearly increasing or decreasing in length.
         // Also calculate axial stress and move origin accordingly. Needs reference length
         // Compressive are red and inward facing.
         // Tensile are blue and outward facing.
@@ -173,27 +167,36 @@ public class MaskSimulation implements Simulation {
         double scale = 3;
         List<Point3> line_def = new ArrayList<Point3>();
         List<Boolean> line_type = new ArrayList<Boolean>();
+
+        // Angular (z/roll) comparison
+        double p1_roll = first_pose.rotationVector().get(1,0)[0];
+        double p3_roll = second_pose.rotationVector().get(1,0)[0];
+        double ang_defl_roll = p1_roll-p3_roll;
+
+        // Angular (y/yaw) comparison
+        double p1_yaw = first_pose.rotationVector().get(2,0)[0];
+        double p3_yaw = second_pose.rotationVector().get(2,0)[0];
+        double ang_defl_yaw = p1_yaw-p3_yaw;
+
+        if(Math.abs(ang_defl_roll) < .2){
+            ang_defl_roll = 0;
+        }
+
+        if(Math.abs(ang_defl_yaw) < .2){
+            ang_defl_yaw = 0;
+        }
+
         for(int i = 0; i < precision; i++){
             double y = (i+1)*y_inc - width/2;
+
+            // Anchor point on v axis
             Mat axis_ref = new Mat(3, 1, CvType.CV_64FC1);
             Core.add(MarkerUtils.scalarMultiply(v,y),p2,axis_ref);
 
-            // Angular (z) comparison
-            double p1_yaw = first_pose.rotationVector().get(1,0)[0];
-            double p3_yaw = second_pose.rotationVector().get(1,0)[0];
-            double ang_defl = p1_yaw-p3_yaw;
+            // vector length
+            //double vec_scale = scale*Math.abs(ang_defl)*Math.abs(y)/3;
+            double vec_scale = scale/3*(ang_defl_roll*y + ang_defl_yaw);
 
-            // Angular (y) comparison
-            //double p1_yaw = first_pose.rotationVector().get(2,0)[0];
-            //double p3_yaw = second_pose.rotationVector().get(2,0)[0];
-            //double ang_defl = p1_yaw-p3_yaw;
-
-            if(Math.abs(ang_defl) < .1){
-                ang_defl = 0;
-            }
-
-            // Length of longest vector
-            double vec_scale = scale*Math.abs(ang_defl)*Math.abs(y)/3;
             // End of vector
             Mat vec_end1 = new Mat(3, 1, CvType.CV_64FC1);
             Mat vec_end2 = new Mat(3, 1, CvType.CV_64FC1);
@@ -205,7 +208,8 @@ public class MaskSimulation implements Simulation {
             line_def.add(new Point3(vec_end2.get(0,0)[0],vec_end2.get(1,0)[0],vec_end2.get(2,0)[0]));
 
             // Determine direction and color of vector based on angular comparison and positioning along v
-            if(i>precision/2 && ang_defl<0 || i<precision/2 && ang_defl>0){
+            //if(i>precision/2 && ang_defl<0 || i<precision/2 && ang_defl>0){
+            if(vec_scale < 0){
                 // Compressive
                 line_type.add(false);
             }else{
@@ -217,7 +221,7 @@ public class MaskSimulation implements Simulation {
         // Project
         MatOfPoint2f line_def_projected = new MatOfPoint2f();
         Calib3d.projectPoints(new MatOfPoint3f(line_def.toArray(new Point3[line_def.size()])),
-            new Mat(3, 1, CvType.CV_64FC1), new Mat(3, 1, CvType.CV_64FC1), ci.cameraMatrix(), dMat, line_def_projected);
+            zeros, zeros, ci.cameraMatrix(), dMat, line_def_projected);
     
         for(int i = 1; i < precision; i++){
             if(line_type.get(i) == true){
@@ -243,7 +247,7 @@ public class MaskSimulation implements Simulation {
         /*
         Calib3d.drawFrameAxes(answer, ci.cameraMatrix(), ci.distCoeffs(), p_tracking.first(), p_tracking.second(), 1F);
         Calib3d.drawFrameAxes(answer, ci.cameraMatrix(), ci.distCoeffs(), p_first.first(), p_first.second(), 1F);
-        Calib3d.drawFrameAxes(answer, ci.cameraMatrix(), ci.distCoeffs(), p_second.first(), p_second.second(), 1F);        
+        Calib3d.drawFrameAxes(answer, ci.cameraMatrix(), ci.distCoeffs(), p_second.first(), p_second.second(), 1F);
         */
 
         // Return final image
