@@ -102,7 +102,15 @@ public class ConfigGenerator {
 		
 		saveConfig("./config/CrossSimulation.json", coreGroups);
 		saveConfig("./config/MaskSimulation.json", coreGroups);
-		saveConfig("./config/TensorSimulation.json", coreGroups);
+
+		// change to clone
+		JSONArray tensorConfig = coreGroups;
+		tensorConfig.put(0.01);
+		tensorConfig.put(0.01);
+		tensorConfig.put(0.01);
+		tensorConfig.put(0.01);
+
+		saveConfig("./config/TensorSimulation.json", tensorConfig);
 	}
 
 	public static JSONObject markerObject(int id, Double xrot, Double yrot, Double zrot, Double xtrans, Double ytrans, Double ztrans){
