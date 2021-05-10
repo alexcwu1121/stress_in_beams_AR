@@ -9,7 +9,8 @@ public class ConfigGenerator {
 		saveConfig("./config/SimpleSimulation.json", "[1.0]");
 		saveConfig("./config/DividedSimulation.json", "[0, 10, 20]");
 		saveConfig("./config/CoordinateTestSimulation.json", "[1, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]");
-		saveConfig("./config/eligibleSimulations.json", "[\"simulation.CompoundMarkerSimulation\", \"simulation.CoordinateTestSimulation\", \"simulation.CrossSimulation\", \"simulation.DividedSimulation\", \"simulation.SimpleSimulation\"]");
+		saveConfig("./config/eligibleSimulations.json",
+			"[\"simulation.CompoundMarkerSimulation\",\"simulation.CoordinateTestSimulation\", \"simulation.CrossSimulation\", \"simulation.DividedSimulation\", \"simulation.SimpleSimulation\", \"simulation.MaskSimulation\"]");
 		
 		JSONObject mmb = new JSONObject();
 		mmb.put("filterTol", .25);
@@ -23,6 +24,7 @@ public class ConfigGenerator {
 		ja.put(mmb);
 		saveConfig("./config/CompoundMarkerSimulation.json", ja);
 
+		/*
 		JSONArray coreGroups = new JSONArray();
 		JSONObject firstGroup = new JSONObject();
 		firstGroup.put("filterTol", .25);
@@ -65,8 +67,41 @@ public class ConfigGenerator {
 		lastParams.put(markerObject(23, -.785, 0d, 0d, -.85, 2.85, -1.08));
 		lastGroup.put("offsets", lastParams);
 		coreGroups.put(lastGroup);
+		*/
+
+		JSONArray coreGroups = new JSONArray();
+		JSONObject firstGroup = new JSONObject();
+		firstGroup.put("filterTol", .25);
+		JSONArray firstParams = new JSONArray();
+		firstParams.put(markerObject(0, 0d, 0d, 0d, .85, -.85, 0d));
+		firstParams.put(markerObject(1, 0d, 0d, 0d, -.85, -.85, 0d));
+		firstParams.put(markerObject(2, 0d, 0d, 0d, .85, .85, 0d));
+		firstParams.put(markerObject(3, 0d, 0d, 0d, -.85, .85, 0d));
+		firstGroup.put("offsets", firstParams);
+		coreGroups.put(firstGroup);
+
+		JSONObject middleGroup = new JSONObject();
+		middleGroup.put("filterTol", .25);
+		JSONArray middleParams = new JSONArray();
+		middleParams.put(markerObject(4, 0d, 0d, 0d, .85, -.85, 0d));
+		middleParams.put(markerObject(5, 0d, 0d, 0d, -.85, -.85, 0d));
+		middleParams.put(markerObject(6, 0d, 0d, 0d, .85, .85, 0d));
+		middleParams.put(markerObject(7, 0d, 0d, 0d, -.85, .85, 0d));
+		middleGroup.put("offsets", middleParams);
+		coreGroups.put(middleGroup);
+
+		JSONObject lastGroup = new JSONObject();
+		lastGroup.put("filterTol", .25);
+		JSONArray lastParams = new JSONArray();
+		lastParams.put(markerObject(10, 0d, 0d, 0d, .85, -.85, 0d));
+		lastParams.put(markerObject(11, 0d, 0d, 0d, -.85, -.85, 0d));
+		lastParams.put(markerObject(12, 0d, 0d, 0d, .85, .85, 0d));
+		lastParams.put(markerObject(13, 0d, 0d, 0d, -.85, .85, 0d));
+		lastGroup.put("offsets", lastParams);
+		coreGroups.put(lastGroup);
 		
 		saveConfig("./config/CrossSimulation.json", coreGroups);
+		saveConfig("./config/MaskSimulation.json", coreGroups);
 	}
 
 	public static JSONObject markerObject(int id, Double xrot, Double yrot, Double zrot, Double xtrans, Double ytrans, Double ztrans){
