@@ -10,7 +10,7 @@ public class ConfigGenerator {
 		saveConfig("./config/DividedSimulation.json", "[0, 10, 20]");
 		saveConfig("./config/CoordinateTestSimulation.json", "[1, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]");
 		saveConfig("./config/eligibleSimulations.json",
-			"[\"simulation.CompoundMarkerSimulation\",\"simulation.CoordinateTestSimulation\", \"simulation.CrossSimulation\", \"simulation.DividedSimulation\", \"simulation.SimpleSimulation\", \"simulation.MaskSimulation\"]");
+			"[\"simulation.CompoundMarkerSimulation\",\"simulation.CoordinateTestSimulation\", \"simulation.CrossSimulation\", \"simulation.DividedSimulation\", \"simulation.SimpleSimulation\", \"simulation.MaskSimulation\", \"simulation.TensorSimulation\"]");
 		
 		JSONObject mmb = new JSONObject();
 		mmb.put("filterTol", .25);
@@ -102,6 +102,7 @@ public class ConfigGenerator {
 		
 		saveConfig("./config/CrossSimulation.json", coreGroups);
 		saveConfig("./config/MaskSimulation.json", coreGroups);
+		saveConfig("./config/TensorSimulation.json", coreGroups);
 	}
 
 	public static JSONObject markerObject(int id, Double xrot, Double yrot, Double zrot, Double xtrans, Double ytrans, Double ztrans){
