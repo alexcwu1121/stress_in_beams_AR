@@ -162,12 +162,15 @@ public class MaskSimulation implements Simulation {
         // Also calculate axial stress and move origin accordingly. Needs reference length
         // Compressive are red and inward facing.
         // Tensile are blue and outward facing.
-        double precision = 10;
+        double precision = 16;
         double y_inc = width/precision;
         double scale = 3;
         List<Point3> line_def = new ArrayList<Point3>();
         List<Boolean> line_type = new ArrayList<Boolean>();
 
+        /* WRONG - Cannot subtract euler angles. Keeping here for reference
+        Either perform vector projection math or Rodriguez the rot vecs, find
+        transformation rot between them, and convert back into euler angles
         // Angular (z/roll) comparison
         double p1_roll = first_pose.rotationVector().get(1,0)[0];
         double p3_roll = second_pose.rotationVector().get(1,0)[0];
@@ -177,6 +180,18 @@ public class MaskSimulation implements Simulation {
         double p1_yaw = first_pose.rotationVector().get(2,0)[0];
         double p3_yaw = second_pose.rotationVector().get(2,0)[0];
         double ang_defl_yaw = p1_yaw-p3_yaw;
+        */
+
+        Mat rot_p1 = new Mat();Calib3d.Rodrigues(first_pose.rotationVector(), rot_p1);
+        Mat rot_p2 = new Mat();Calib3d.Rodrigues(second_pose.rotationVector(), rot_p2);
+        Mat t_rot_p1 = new Mat();Core.transpose(rot_p1, t_rot_p1);
+
+        // Find transformation rotation mat
+        Mat rot_trans = MarkerUtils.matMultiply(rot_p2,t_rot_p1);
+        Mat euler_trans = new Mat();Calib3d.Rodrigues(rot_trans, euler_trans);
+
+        double ang_defl_roll = euler_trans.get(2,0)[0];
+        double ang_defl_yaw = euler_trans.get(1,0)[0];
 
         if(Math.abs(ang_defl_roll) < .2){
             ang_defl_roll = 0;
@@ -184,7 +199,7 @@ public class MaskSimulation implements Simulation {
 
         if(Math.abs(ang_defl_yaw) < .2){
             ang_defl_yaw = 0;
-        }
+       }
 
         for(int i = 0; i < precision; i++){
             double y = (i+1)*y_inc - width/2;
@@ -194,8 +209,8 @@ public class MaskSimulation implements Simulation {
             Core.add(MarkerUtils.scalarMultiply(v,y),p2,axis_ref);
 
             // vector length
-            //double vec_scale = scale*Math.abs(ang_defl)*Math.abs(y)/3;
-            double vec_scale = scale/3*(ang_defl_roll*y + ang_defl_yaw);
+            double vec_scale = scale/3*(-1*ang_defl_roll*y + ang_defl_yaw);
+            //double vec_scale = scale/3*(ang_defl_roll*y);
 
             // End of vector
             Mat vec_end1 = new Mat(3, 1, CvType.CV_64FC1);
@@ -244,11 +259,9 @@ public class MaskSimulation implements Simulation {
         }
 
         // Debug, draw coordinate axes on markers
-        /*
-        Calib3d.drawFrameAxes(answer, ci.cameraMatrix(), ci.distCoeffs(), p_tracking.first(), p_tracking.second(), 1F);
-        Calib3d.drawFrameAxes(answer, ci.cameraMatrix(), ci.distCoeffs(), p_first.first(), p_first.second(), 1F);
-        Calib3d.drawFrameAxes(answer, ci.cameraMatrix(), ci.distCoeffs(), p_second.first(), p_second.second(), 1F);
-        */
+        //Calib3d.drawFrameAxes(answer, ci.cameraMatrix(), ci.distCoeffs(), p_tracking.first(), p_tracking.second(), 1F);
+        //Calib3d.drawFrameAxes(answer, ci.cameraMatrix(), ci.distCoeffs(), p_first.first(), p_first.second(), 1F);
+        //Calib3d.drawFrameAxes(answer, ci.cameraMatrix(), ci.distCoeffs(), p_second.first(), p_second.second(), 1F);
 
         // Return final image
         return answer;
