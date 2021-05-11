@@ -118,9 +118,11 @@ public class TensorSimulation implements Simulation {
         // Derive u and v coordinate axes of tracking marker
         Mat ex = Mat.zeros(3, 1, CvType.CV_64FC1);ex.put(0, 0, 1);
         Mat ey = Mat.zeros(3, 1, CvType.CV_64FC1);ey.put(1, 0, 1);
+        Mat ez = Mat.zeros(3, 1, CvType.CV_64FC1);ez.put(2, 0, 1);
         Mat rot_t = new Mat();Calib3d.Rodrigues(tracking_pose.rotationVector(), rot_t);
         Mat u = MarkerUtils.matMultiply(rot_t, MarkerUtils.matMultiply(zRotm,ex));
         Mat v = MarkerUtils.matMultiply(rot_t, MarkerUtils.matMultiply(zRotm,ey));
+        Mat w = MarkerUtils.matMultiply(rot_t, MarkerUtils.matMultiply(zRotm,ez));
 
         // Euler rotation difference from coordinate frame of mmb 1 to mmb 3
         // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
@@ -130,12 +132,20 @@ public class TensorSimulation implements Simulation {
 
         // Find transformation rotation mat
         Mat rot_trans = MarkerUtils.matMultiply(rot_p2,t_rot_p1);
-        Mat euler_trans = new Mat();Calib3d.Rodrigues(rot_trans, euler_trans);
+        Mat axis_angle = MatMathUtils.toAxisAngle(rot_trans);
+
+        // Dot product axis to ey and ez, then multiply by angle to determing roll and yaw deflection
+        Mat axis = new Mat(3, 1, CvType.CV_64FC1);
+        axis.put(0,0,axis_angle.get(1,0)[0]);
+        axis.put(1,0,axis_angle.get(2,0)[0]);
+        axis.put(2,0,axis_angle.get(3,0)[0]);
+
+        // Find rotation components along z and y axes using dot product projection
+        double ang_defl_roll = -1*MatMathUtils.dotProduct(axis,w)*axis_angle.get(0,0)[0];
+        double ang_defl_yaw = -1*MatMathUtils.dotProduct(axis,v)*axis_angle.get(0,0)[0];
         // <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
         // Assemble 2D tensor matrix under uniaxial load
-        double ang_defl_roll = euler_trans.get(2,0)[0];
-        double ang_defl_yaw = euler_trans.get(1,0)[0];
         if(Math.abs(ang_defl_roll) < .2){
             ang_defl_roll = 0;}
         if(Math.abs(ang_defl_yaw) < .2){
