@@ -3,7 +3,7 @@ Augmented reality visualization of stresses in beams.
 
 # Setup Guide
 
-https://docs.google.com/document/d/1kPT82dE_BzUuAHPY2UtxD6zXL-2t52tvAKhk561Pn2o/edit?usp=sharing
+Look at [SETUP.md](https://github.com/alexcwu1121/stress_in_beams_AR/blob/master/SETUP.md)
 
 # Build and run
 
