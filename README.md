@@ -1,7 +1,7 @@
 # stress_in_beams_AR
 Augmented reality visualization of stresses in beams.
 
-# Setup Guide
+# Setup Guide (For OpenCV updates only)
 
 Look at [SETUP.md](https://github.com/alexcwu1121/stress_in_beams_AR/blob/master/SETUP.md)
 
