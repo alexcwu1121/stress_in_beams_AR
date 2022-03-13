@@ -11,6 +11,12 @@ To build:
 
 `javac -cp (your classpath) -parameters driver/*.java markerdetector/*.java crosssection/*.java userinterface/*.java simulation/*.java config/*.java`
 
+Specifically, you should be in the src/ directory where you type this command, where your classpath is in quotation marks ("") and each classpath is separated by semicolons (for Windows) or colons (for Ubuntu).
+
+Example as shown below (for Ubuntu): </br>
+`javac -cp "../../opencvjar_directory/*:../../jsonjar_directory/*:." -parameters driver/*.java markerdetector/*.java crosssection/*.java userinterface/*.java simulation/*.java config/*.java`
+
+
 Once built, run ConfigGenerator to generate config files (you only have to do this once):
 
 `java config/ConfigGenerator`
