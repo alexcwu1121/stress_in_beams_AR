@@ -78,7 +78,7 @@ Also look at: https://docs.opencv.org/4.x/d7/d9f/tutorial_linux_install.html
 ### Change file name:
 If the build completed successfully, you should see opencv-xxx.jar in build/bin, </br>
 where xxx is the OpenCV version number. In build/lib, you should see a file called </br>
-libopencv_javaxxx.dll. Rename this file to just opencv_javaxxx.dll.
+libopencv_javaxxx.so. (so for Ubuntu, dll for Windows)
 
 # Windows:
 Basically do the same installations (CMake, Apache Ant, Java), add each to PATH. </br>
