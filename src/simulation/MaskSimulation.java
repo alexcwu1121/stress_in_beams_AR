@@ -53,7 +53,7 @@ public class MaskSimulation implements Simulation {
         return answer;
     }
 
-    public Mat drawNeutralAxis(Mat answer, Mat p1, Mat p2, Mat p3, double width, Mat u, Mat v, CalibrationInformation ci, MatOfDouble dMat, Mat zeros){
+    public Mat drawNeutralAxis(Mat answer, Mat p1, Mat p2, Mat p3, double width, Mat u, Mat v, CalibrationInformation ci, MatOfDouble dMat, Mat zeros, double offset){
         // Calculate normal vector w cross product and compare to z vector of p3
         Mat v_p2p1 = new Mat(3, 1, CvType.CV_64FC1);Core.subtract(p1,p2,v_p2p1);
         Mat v_p2p3 = new Mat(3, 1, CvType.CV_64FC1);Core.subtract(p3,p2,v_p2p3);
@@ -86,6 +86,7 @@ public class MaskSimulation implements Simulation {
             Mat p_3d = new Mat(3, 1, CvType.CV_64FC1);
             Core.add(u_3d,v_3d,p_3d);
             Core.add(p_3d,p2,p_3d);
+            Core.add(p_3d,MarkerUtils.scalarMultiply(v,offset),p_3d);
 
             world_para.add(new Point3(p_3d.get(0,0)[0],p_3d.get(1,0)[0],p_3d.get(2,0)[0]));
         }
@@ -148,12 +149,12 @@ public class MaskSimulation implements Simulation {
         // Derive u and v coordinate axes of tracking marker
         Mat ex = new Mat(3, 1, CvType.CV_64FC1);ex.put(0, 0, 1);ex.put(1, 0, 0);ex.put(2, 0, 0);
         Mat ey = new Mat(3, 1, CvType.CV_64FC1);ey.put(0, 0, 0);ey.put(1, 0, 1);ey.put(2, 0, 0);
+        Mat ez = new Mat(3, 1, CvType.CV_64FC1);ez.put(0, 0, 0);ez.put(1, 0, 0);ez.put(2, 0, 1);
         Mat rot_t = new Mat();Calib3d.Rodrigues(tracking_pose.rotationVector(), rot_t);
         Mat u = MarkerUtils.matMultiply(rot_t, ex);
         Mat v = MarkerUtils.matMultiply(rot_t, ey);
+        Mat w = MarkerUtils.matMultiply(rot_t, ez);
 
-        // Draw neutral axis
-        answer = drawNeutralAxis(answer,p1,p2,p3,width,u,v,ci,dMat,zeros);
         // Draw v axis
         answer = drawVaxis(answer,p2,width,v,ci,dMat,zeros);
 
@@ -188,18 +189,36 @@ public class MaskSimulation implements Simulation {
 
         // Find transformation rotation mat
         Mat rot_trans = MarkerUtils.matMultiply(rot_p2,t_rot_p1);
-        Mat euler_trans = new Mat();Calib3d.Rodrigues(rot_trans, euler_trans);
+        // Axis angle
+        Mat axis_angle = MatMathUtils.toAxisAngle(rot_trans);
 
+        // Dot product axis to ey and ez, then multiply by angle to determing roll and yaw deflection
+        Mat axis = new Mat(3, 1, CvType.CV_64FC1);
+        axis.put(0,0,axis_angle.get(1,0)[0]);
+        axis.put(1,0,axis_angle.get(2,0)[0]);
+        axis.put(2,0,axis_angle.get(3,0)[0]);
+
+        // Find rotation components along z and y axes using dot product projection
+        double ang_defl_roll = -1*MatMathUtils.dotProduct(axis,w)*axis_angle.get(0,0)[0];
+        double ang_defl_yaw = -1*MatMathUtils.dotProduct(axis,v)*axis_angle.get(0,0)[0];
+
+        /* Also incorrect. Still can't use euler angles as direct differences
+        Mat euler_trans = new Mat();Calib3d.Rodrigues(rot_trans, euler_trans); 
         double ang_defl_roll = euler_trans.get(2,0)[0];
         double ang_defl_yaw = euler_trans.get(1,0)[0];
+        */
 
         if(Math.abs(ang_defl_roll) < .2){
-            ang_defl_roll = 0;
-        }
-
+            ang_defl_roll = 0;}
         if(Math.abs(ang_defl_yaw) < .2){
-            ang_defl_yaw = 0;
-       }
+            ang_defl_yaw = 0;}
+
+        // Draw neutral axis
+        if(Math.abs(ang_defl_roll) > 0){
+            answer = drawNeutralAxis(answer,p1,p2,p3,width,u,v,ci,dMat,zeros,y_inc*ang_defl_yaw/ang_defl_roll);
+        }else{
+            answer = drawNeutralAxis(answer,p1,p2,p3,width,u,v,ci,dMat,zeros,0);
+        }
 
         for(int i = 0; i < precision; i++){
             double y = (i+1)*y_inc - width/2;
