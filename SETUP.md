@@ -124,9 +124,10 @@ We need to make a symlink by hand, which has to be done in Command Prompt (admin
 cd c:\<your msys installation path>\mingw64\bin
 mklink make mingw32-make.exe
 ```
-The next part seems extremely weird, but this is the only way I was able to get it to work (somewhat). </br>
-- Go to MinGW x64 again and run `mingw32-make` in the build directory.
-- If there are errors that spawn, you can then attempt running `make` and switch them if they don't work.
-- DO NOT USE -j# flag, ie; `mingw32-make -j5`. This will break, and there is no way to circumvent this.
+The next part must be done without interrupting the process, otherwise it will have to be reset from the start (CMake again)
+- Go to MinGW x64 again and run `make -j2` in the build directory. (You can try to increase the number for j#, but I would highly advise not to)
+- If there are errors that spawn, you can attempt running without a -j flag.
+- If running without a -j flag doesn't work, then start fresh and attempt using `mingw32-make`
+- If you do use -j# flag, ie; `make -j5`, this is very likely to break, not sure what the reason is. Just a fair warning for those who attempt this.
 
 Compared to Ubuntu, you will have to deal with just mingw32-make without any extra flags.
