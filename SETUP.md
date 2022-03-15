@@ -75,33 +75,58 @@ where you add a -D flag with the variable name, ANT_EXECUTABLE, set it to the pa
 
 Also look at: https://docs.opencv.org/4.x/d7/d9f/tutorial_linux_install.html
 
-### Change file name:
+### Verifying the installation worked:
 If the build completed successfully, you should see opencv-xxx.jar in build/bin, </br>
 where xxx is the OpenCV version number. In build/lib, you should see a file called </br>
 libopencv_javaxxx.so. (so for Ubuntu, dll for Windows)
 
 # Windows:
-Basically do the same installations (CMake, Apache Ant, Java), add each to PATH. </br>
-Download CMake-GUI, run it. </br>
-Follow the below steps:
 
-File->Delete Cache. Next, set the source directory to the location of the OpenCV installation. </br>
-In the OpenCV installation, create a directory called build if one does not already exist. If one does already exist, make sure it is empty. </br>
-In the CMake GUI, set the build directory to the build folder that was just created. Finally, hit configure and select “Unix Makefiles” from the drop down list. </br>
-(doesn’t really matter as long as it outputs the jar file and dll file)
+This is done using MSYS2, where cmake and make are required for creating OpenCV. (cannot be done separately with WSL, must be CMake+Make in same environment)
+- Note: Make sure your CMakeLists.txt file is reset if transitioning from WSL (as WSL cannot detect webcam currently)
 
-After configuring, uncheck the variable BUILD_SHARED_LIBS. Additionally, set the variable OPENCV_EXTRA_MODULES_PATH to the modules folder in the opencv-contrib installation. </br>
-Configure and generate. Hit configure for a second time. Once this is done, hit generate.
+- Install MSYS2 so that you can use CMake and Make. https://www.msys2.org/
+- Install Ant zip file and extract. https://ant.apache.org/bindownload.cgi
+- Install Java JDK
+
+Follow MSYS2 guide properly, installing all necessary packages. Then install cmake: </br>
+`pacman -S mingw-w64-x86_64-cmake` </br>
+Make as well (x86_64 as well as i686 just in case): </br>
+```
+pacman -S mingw-w64-x86_64-toolchain
+pacman -S mingw-w64-i686-toolchain
+```
+
+## CMake:
+
+CMake on its own is already pretty complicated. Detecting JDK is one thing, while Ant is another. </br>
+- Go to MinGW x64 (installed with MSYS2) and create a new folder. `mkdir build && cd build`
+- Export JAVA_HOME and ANT_HOME directly, because for some reason it doesn't work otherwise.
+```
+export JAVA_HOME="/c/Program Files/Java/jdk-16.0.1"
+export ANT_HOME="/c/apache-ant-1.10.12"
+export PATH=$PATH:${JAVA_HOME}/bin:${ANT_HOME}/bin;
+echo $PATH                                                //verify Java and Ant path were properly concatenated to path
+```
+- Attempt CMake. `cmake -G "MinGW Makefiles" -DOPENCV_EXTRA_MODULES_PATH=../opencv_contrib/modules ../opencv`
 
 ## After cmake:
-Verify generate worked by looking at output on bottom of cmake-gui. Ctrl-A and copy-paste into a text file for better readability. </br>
-If it says “Java wrappers: Yes” as mentioned above, the installation worked.
 
-If having issues, click add entry in cmake-gui, then add accordingly: </br>
-```
-Name: ANT_EXECUTABLE
-Type: FILEPATH
-Value: <path where ant exists>
-```
+Verify that CMake has worked (Ant was properly detected in the right directory, as well as Java. Java wrappers is indicated as Yes) </br>
+If it doesn't work properly, unfortunately you will have to try to rebind Ant and Java to the PATH variable. </br>
+There are multiple ways to do this in Windows but none of the other ways worked for me.
 
-And so on for java related variables as well (as shown above).
+## Make:
+
+You may be wondering why we needed to install x86_64 and i686 toolchain. both were necessary because I had issues running make without them. </br>
+We need to make a symlink by hand, which has to be done in Command Prompt (admin mode).
+```
+cd c:\<your msys installation path>\mingw64\bin
+mklink make mingw32-make.exe
+```
+The next part seems extremely weird, but this is the only way I was able to get it to work (somewhat). </br>
+- Go to MinGW x64 again and run `mingw32-make` in the build directory.
+- If there are errors that spawn, you can then attempt running `make` and switch them if they don't work.
+- DO NOT USE -j# flag, ie; `mingw32-make -j5`. This will break, and there is no way to circumvent this.
+
+Compared to Ubuntu, you will have to deal with just mingw32-make without any extra flags.
