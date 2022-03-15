@@ -20,8 +20,10 @@ Once built, run ConfigGenerator to generate config files (you only have to do th
 
 `java -cp (your classpath) config/ConfigGenerator`
 
-To run the program:
+To run the program (due to issues with WSL detecting video cameras on Windows, Powershell should be used instead):
 
-`java -cp (your classpath) -Djava.library.path="(your opencv installation)\build\lib" userinterface/StrengthsGUI`
+`java -cp (your classpath) "-Djava.library.path=(your opencv installation)\build\lib" userinterface/StrengthsGUI`
+
+This command is specifically for Powershell, where -Djava.library.path is in the quotes as it is misinterpreted by the compiler.
 
 The program will ask you to calibrate your camera on your first run.
