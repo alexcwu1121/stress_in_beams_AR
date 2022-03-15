@@ -130,4 +130,4 @@ The next part must be done without interrupting the process, otherwise it will h
 - If running without a -j flag doesn't work, then start fresh and attempt using `mingw32-make`
 - If you do use -j# flag, ie; `make -j5`, this is very likely to break, not sure what the reason is. Just a fair warning for those who attempt this.
 
-Compared to Ubuntu, you will have to deal with just mingw32-make without any extra flags.
+Compared to Ubuntu, this is considerably slower with higher margin of error. Not extensively tested as this is a time consuming task.
