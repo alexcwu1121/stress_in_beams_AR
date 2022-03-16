@@ -64,12 +64,12 @@ set(ANT_EXECUTABLE "$ENV{ANT_HOME}/bin/ant")
 
 ```
 mkdir build && cd build
-cmake -DOPENCV_EXTRA_MODULES_PATH=../opencv_contrib/modules ../opencv
+cmake -DBUILD_SHARED_LIBS=OFF -DOPENCV_EXTRA_MODULES_PATH=../opencv_contrib/modules ../opencv
 ```
 
 Verify that the cmake worked by looking at output, ie; if it says "Java wrappers: Yes" at the end. </br>
 Otherwise set the variables we set above manually by concat-ing arguments into cmake command like so: </br>
-`cmake -DANT_EXECUTABLE=/usr/share/ant/bin/ant -DOPENCV_EXTRA_MODULES_PATH=<opencv_contrib>/modules <opencv_source_directory>` </br>
+`cmake -DANT_EXECUTABLE=/usr/share/ant/bin/ant -DBUILD_SHARED_LIBS=OFF -DOPENCV_EXTRA_MODULES_PATH=<opencv_contrib>/modules <opencv_source_directory>` </br>
 where you add a -D flag with the variable name, ANT_EXECUTABLE, set it to the path.  </br>
 `make -j5`
 
