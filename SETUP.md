@@ -108,13 +108,26 @@ export ANT_HOME="/c/apache-ant-1.10.12"
 export PATH=$PATH:${JAVA_HOME}/bin:${ANT_HOME}/bin;
 echo $PATH                                                //verify Java and Ant path were properly concatenated to path
 ```
-- Attempt CMake. `cmake -G "MinGW Makefiles" -DOPENCV_EXTRA_MODULES_PATH=../opencv_contrib/modules ../opencv`
+- Attempt CMake. `cmake -G "MinGW Makefiles" -DBUILD_SHARED_LIBS=OFF -DOPENCV_EXTRA_MODULES_PATH=../opencv_contrib/modules ../opencv`
 
 ## After cmake:
 
 Verify that CMake has worked (Ant was properly detected in the right directory, as well as Java. Java wrappers is indicated as Yes) </br>
 If it doesn't work properly, unfortunately you will have to try to rebind Ant and Java to the PATH variable. </br>
 There are multiple ways to do this in Windows but none of the other ways worked for me.
+
+You also need to add MinGW to your PATH through Windows (since we plan to use powershell later). </br>
+Type Advanced system settings in Windows Start Menu -> Environment Variables... -> System variables -> PATH -> Edit... </br>
+Add all 4 bin files, ie; </br>
+```
+C:\Program Files\Java\jdk-16.0.1\bin
+C:\apache-ant-1.10.12\bin
+C:\msys64\mingw64\bin
+C:\msys64\mingw32\bin
+```
+Alternative: </br>
+Type this command if completely using MinGW x64 even in compilation (from README, note you still have to make sure Java and Ant are exported as seen above) </br>
+`export PATH=$PATH:/c/msys64/mingw64/bin:/c/msys64/mingw32/bin;`
 
 ## Make:
 
@@ -125,9 +138,7 @@ cd c:\<your msys installation path>\mingw64\bin
 mklink make mingw32-make.exe
 ```
 The next part must be done without interrupting the process, otherwise it will have to be reset from the start (CMake again)
-- Go to MinGW x64 again and run `make -j2` in the build directory. (You can try to increase the number for j#, but I would highly advise not to)
+- Go to MinGW x64 again and run `make -j5` in the build directory. Estimated runtime is 30 minutes. (You can try to increase the number for j#, but I would highly advise not to)
 - If there are errors that spawn, you can attempt running without a -j flag.
 - If running without a -j flag doesn't work, then start fresh and attempt using `mingw32-make`
 - If you do use -j# flag, ie; `make -j5`, this is very likely to break, not sure what the reason is. Just a fair warning for those who attempt this.
-
-Compared to Ubuntu, this is considerably slower with higher margin of error. Not extensively tested as this is a time consuming task.

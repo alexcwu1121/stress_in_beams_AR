@@ -7,7 +7,9 @@ Look at [SETUP.md](https://github.com/alexcwu1121/stress_in_beams_AR/blob/master
 
 # Build and run
 
-To build (requires OpenCV jar file, JSON jar file located in https://github.com/stleary/JSON-java, and cloned repository):
+To build (requires OpenCV jar file, its corresponding .dll/.so file, JSON jar file located in https://mvnrepository.com/artifact/org.json/json/20190722, and cloned repository):
+
+For the JSON jar file, click the bundle hyperlink on the webpage listed above to download the appropriate JSON version.
 
 `javac -cp (your classpath) -parameters driver/*.java markerdetector/*.java crosssection/*.java userinterface/*.java simulation/*.java config/*.java`
 
