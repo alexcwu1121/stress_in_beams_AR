@@ -160,7 +160,7 @@ public class Pose {
 		translationVector3D.put(0, 0, value1);
 		translationVector3D.put(1, 0, value2);
 		translationVector3D.put(2, 0, value3);*/
-		translationVector3D = MarkerUtils.scalarMultiply(MarkerUtils.matMultiply(r, tvec), -1);
+		translationVector3D = MatMathUtils.scalarMultiply(MatMathUtils.matMultiply(r, tvec), -1);
 		Calib3d.Rodrigues(r, rotationVector3D);
 		return new Pose(rotationVector3D, translationVector3D);
 	}

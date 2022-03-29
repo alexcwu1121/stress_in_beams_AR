@@ -33,10 +33,10 @@ public class CoordinateTestSimulation implements Simulation {
 		Pair<Mat, Mat> prediction = this.body.predictCenter(results);
 
 		Mat finalMatrix = results.baseImage();
-		//MarkerUtils.printmat(prediction.first());
-		//MarkerUtils.printmat(prediction.second());
+		//MatMathUtils.printmat(prediction.first());
+		//MatMathUtils.printmat(prediction.second());
 		//System.out.println();
-		//Pair<Mat, Mat> back = MarkerUtils.get3DCoords(prediction.first(), prediction.second());
+		//Pair<Mat, Mat> back = MatMathUtils.get3DCoords(prediction.first(), prediction.second());
 		CalibrationInformation ci = results.calibrationInformation();
 		Calib3d.drawFrameAxes(finalMatrix, ci.cameraMatrix(), ci.distCoeffs(), prediction.first(), prediction.second(), 0.5F);
 		return finalMatrix;

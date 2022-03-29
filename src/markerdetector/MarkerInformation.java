@@ -32,7 +32,7 @@ public class MarkerInformation {
 	@return this marker's corners.
 	*/
 	public Mat corners(){
-		return MarkerUtils.copyof(this.corners);
+		return MatMathUtils.copyof(this.corners);
 	}
 
 	/**Returns this marker's pose object

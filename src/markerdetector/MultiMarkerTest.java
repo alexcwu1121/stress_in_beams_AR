@@ -43,12 +43,12 @@ public class MultiMarkerTest {
 		testTranslation.put(0, 0, expected.get(3));
 		testTranslation.put(1, 0, expected.get(4));
 		testTranslation.put(2, 0, expected.get(5));
-		MarkerUtils.printmat(body.first());
-		MarkerUtils.printmat(body.second());
-		MarkerUtils.printmat(testRotation);
-		MarkerUtils.printmat(testTranslation);
-		assertThat(MarkerUtils.matEquals(body.first(), testRotation, 0.1));
-		assertThat(MarkerUtils.matEquals(body.second(), testTranslation, 0.1));
+		MatMathUtils.printmat(body.first());
+		MatMathUtils.printmat(body.second());
+		MatMathUtils.printmat(testRotation);
+		MatMathUtils.printmat(testTranslation);
+		assertThat(MatMathUtils.matEquals(body.first(), testRotation, 0.1));
+		assertThat(MatMathUtils.matEquals(body.second(), testTranslation, 0.1));
 	}
 
 	private static void assertThat(boolean statement){

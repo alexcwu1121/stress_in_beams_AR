@@ -28,25 +28,25 @@ public class CalibrationInformation {
 	@return this CalibrationInformation's camera matrix.
 	*/
 	public Mat cameraMatrix(){
-		return MarkerUtils.copyof(this.cameraMatrix);
+		return MatMathUtils.copyof(this.cameraMatrix);
 	}
 
 	/**Returns this CalibrationInformation's distortion coefficients matrix.
 	@return this CalibrationInformation's distortion coefficients matrix.
 	*/
 	public Mat distCoeffs(){
-		return MarkerUtils.copyof(this.distCoeffs);
+		return MatMathUtils.copyof(this.distCoeffs);
 	}
 
 	/**Constructs and returns a JSON object representing this CalibrationInformation.<br>
 	This json object will have two keys: {@code "camera_matrix"} pointing to the camera matrix, and {@code "distortion_coefficients"} pointing to the distortion coefficients matrix.<br>
-	The matices' JSON representation will be as specified in the MarkerUtils.matToJSON method.
+	The matices' JSON representation will be as specified in the MatMathUtils.matToJSON method.
 	@return the JSON object.
 	*/
 	public JSONObject toJSONObject(){
 		JSONObject answer = new JSONObject();
-		answer.put("camera_matrix", MarkerUtils.matToJSON(this.cameraMatrix));
-		answer.put("distortion_coefficients", MarkerUtils.matToJSON(this.distCoeffs));
+		answer.put("camera_matrix", MatMathUtils.matToJSON(this.cameraMatrix));
+		answer.put("distortion_coefficients", MatMathUtils.matToJSON(this.distCoeffs));
 		return answer;
 	}
 
@@ -57,6 +57,6 @@ public class CalibrationInformation {
 	@throws JSONException if the given JSON object does not meet the specification.
 	*/
 	public static CalibrationInformation fromJSONObject(JSONObject obj){
-		return new CalibrationInformation(MarkerUtils.jsonToMat(obj.getJSONObject("camera_matrix")), MarkerUtils.jsonToMat(obj.getJSONObject("distortion_coefficients")));
+		return new CalibrationInformation(MatMathUtils.jsonToMat(obj.getJSONObject("camera_matrix")), MatMathUtils.jsonToMat(obj.getJSONObject("distortion_coefficients")));
 	}
 }

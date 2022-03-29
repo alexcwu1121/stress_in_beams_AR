@@ -72,7 +72,7 @@ public class DetectorResults {
 	@return the base image.
 	*/
 	public Mat baseImage(){
-		return MarkerUtils.copyof(this.baseMatrix);
+		return MatMathUtils.copyof(this.baseMatrix);
 	}
 
 	/**Returns the dictionary used to detect markers.
@@ -86,7 +86,7 @@ public class DetectorResults {
 	@return a list of all ids detected in a frame.
 	*/
 	public Mat getIds(){
-		return MarkerUtils.copyof(ids);
+		return MatMathUtils.copyof(ids);
 	}
 
 	/**Returns the corners of all detected markers.
@@ -95,7 +95,7 @@ public class DetectorResults {
 	public List<Mat> corners(){
 		List<Mat> answer = new LinkedList<Mat>();
 		for(Mat m : this.corners){
-			answer.add(MarkerUtils.copyof(m));
+			answer.add(MatMathUtils.copyof(m));
 		}
 		return List.copyOf(answer);
 	}
@@ -106,7 +106,7 @@ public class DetectorResults {
 	public List<Mat> rejected(){
 		List<Mat> answer = new LinkedList<Mat>();
 		for(Mat m : this.rejected){
-			answer.add(MarkerUtils.copyof(m));
+			answer.add(MatMathUtils.copyof(m));
 		}
 		return List.copyOf(answer);
 	}
@@ -115,14 +115,14 @@ public class DetectorResults {
 	@return the rotation vectors for all detected markers.
 	*/
 	public Mat rotationVectors(){
-		return MarkerUtils.copyof(this.rotationVectors);
+		return MatMathUtils.copyof(this.rotationVectors);
 	}
 
 	/**Returns the translation vectors for all detected markers.
 	@return the translation vectors for all detected markers.
 	*/
 	public Mat translationVectors(){
-		return MarkerUtils.copyof(this.translationVectors);
+		return MatMathUtils.copyof(this.translationVectors);
 	}
 
 	/**Returns the calibration information used in this marker detection.
