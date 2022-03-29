@@ -114,28 +114,9 @@ public class MultiMarkerBody{
    }
 
    public Mat predictTranslation(Integer id, Mat rotation, Mat translation){
-      Mat rotationMatrix = new Mat();
-      Calib3d.Rodrigues(rotation, rotationMatrix);
-      Mat predictedTranslation = new Mat(3, 1, CvType.CV_64FC1);
-
-      Mat transOffset = Mat.zeros(3, 1, CvType.CV_64FC1);
-      transOffset.put(0, 0, offsets.get(id).xTranslation());
-      transOffset.put(1, 0, offsets.get(id).yTranslation());
-      transOffset.put(2, 0, offsets.get(id).zTranslation());
-
-      transOffset = MatMathUtils.matMultiply(rotationMatrix, transOffset);
-
-      double[] xtransFinal = translation.get(0, 0);
-      double[] ytransFinal = translation.get(0, 0);
-      double[] ztransFinal = translation.get(0, 0);
-      xtransFinal[0] = translation.get(0, 0)[0] + transOffset.get(0, 0)[0];
-      ytransFinal[0] = translation.get(1, 0)[0] + transOffset.get(1, 0)[0];
-      ztransFinal[0] = translation.get(2, 0)[0] + transOffset.get(2, 0)[0];
-      predictedTranslation.put(0, 0, xtransFinal);
-      predictedTranslation.put(1, 0, ytransFinal);
-      predictedTranslation.put(2, 0, ztransFinal);
-
-      return predictedTranslation;
+      MarkerOffset pOff = offsets.get(id);
+      Pose proxyPose = new Pose(pOff.xRotation(), pOff.yRotation(), pOff.zRotation(), pOff.xTranslation(), pOff.yTranslation(), pOff.zTranslation());
+      return MatMathUtils.predictTranslation(rotation, translation, proxyPose);
    }
 
    public Mat predictRotation(Integer id, Mat rotation){
