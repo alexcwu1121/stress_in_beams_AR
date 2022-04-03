@@ -168,6 +168,7 @@ public class Pose {
 	/**Returns a hash code for this Pose.
 	@return a hash code for this Pose.
 	*/
+	@Override
 	public int hashCode(){
 		return (int)(this.zRotation + this.yRotation + this.zRotation + this.xTranslation + this.yTranslation + this.zTranslation);
 	}
@@ -177,6 +178,7 @@ public class Pose {
 	@param other The object to compare to
 	@return a boolean indicating whether this Pose is equals to the provided object.
 	*/
+	@Override
 	public boolean equals(Object other){
 		if(other == null){
 			return false;
@@ -218,6 +220,7 @@ public class Pose {
 	/**Returns a String representation of this Pose.
 	@return a String representation of this Pose.
 	*/
+	@Override
 	public String toString(){
 		return "Pose - rvec: [" + this.xRotation + ", " + this.yRotation + ", " + this.zRotation + 
 					"] tvec: [" + this.xTranslation + ", " + this.yTranslation + ", " + this.zTranslation + "]";

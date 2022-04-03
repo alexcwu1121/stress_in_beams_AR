@@ -115,13 +115,13 @@ public class MultiMarkerBody{
 
    public Mat predictTranslation(Integer id, Mat rotation, Mat translation){
       MarkerOffset pOff = offsets.get(id);
-      Pose proxyPose = new Pose(pOff.xRotation(), pOff.yRotation(), pOff.zRotation(), pOff.xTranslation(), pOff.yTranslation(), pOff.zTranslation());
+      Pose proxyPose = pOff;
       return MatMathUtils.predictTranslation(rotation, translation, proxyPose);
    }
 
    public Mat predictRotation(Integer id, Mat rotation){
       MarkerOffset pOff = offsets.get(id);
-      Pose proxyPose = new Pose(pOff.xRotation(), pOff.yRotation(), pOff.zRotation(), pOff.xTranslation(), pOff.yTranslation(), pOff.zTranslation());
+      Pose proxyPose = pOff;
       return MatMathUtils.predictRotation(rotation, proxyPose);
    }
 

@@ -54,6 +54,7 @@ public class MarkerOffset extends Pose {
 	/**Returns a hash code for this MarkerOffset.
 	@return a hash code for this MarkerOffset.
 	*/
+	@Override
 	public int hashCode(){
 		return (int)(this.id + this.zRotation + this.yRotation + this.zRotation + this.xTranslation + this.yTranslation + this.zTranslation);
 	}
@@ -63,6 +64,7 @@ public class MarkerOffset extends Pose {
 	@param other The object to compare to
 	@return a boolean indicating whether this MarkerOffset is equals to the provided object.
 	*/
+	@Override
 	public boolean equals(Object other){
 		if(other == null){
 			return false;
@@ -81,6 +83,7 @@ public class MarkerOffset extends Pose {
 	/**Returns a String representation of this MarkerOffset.
 	@return a String representation of this MarkerOffset.
 	*/
+	@Override
 	public String toString(){
 		return "MarkerOffset - id: " + this.id + " 3drvec: [" + this.xRotation + ", " + this.yRotation + ", " + this.zRotation + 
 					"] 3dtvec: [" + this.xTranslation + ", " + this.yTranslation + ", " + this.zTranslation + "]";
