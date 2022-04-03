@@ -206,9 +206,9 @@ public class Pose {
 	}
 
 	private boolean equalsInternal(Pose mo, double tolerance){
-		return withinTolerance(this.xRotation, mo.xRotation, tolerance) && withinTolerance(this.yRotation, mo.yRotation, tolerance) && 
-				withinTolerance(this.zRotation, mo.zRotation, tolerance) && withinTolerance(this.xTranslation, mo.xTranslation, tolerance) &&
-				withinTolerance(this.yTranslation, mo.yTranslation, tolerance) &&  withinTolerance(this.zTranslation, mo.zTranslation, tolerance);
+		return withinTolerance(this.xRotation, mo.xRotation(), tolerance) && withinTolerance(this.yRotation, mo.yRotation(), tolerance) && 
+				withinTolerance(this.zRotation, mo.zRotation(), tolerance) && withinTolerance(this.xTranslation, mo.xTranslation(), tolerance) &&
+				withinTolerance(this.yTranslation, mo.yTranslation(), tolerance) &&  withinTolerance(this.zTranslation, mo.zTranslation(), tolerance);
 	}
 
 	private static boolean withinTolerance(double first, double second, double tolerance){
