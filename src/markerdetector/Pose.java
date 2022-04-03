@@ -9,12 +9,12 @@ import java.lang.Math;
 */
 
 public class Pose {
-	private double xRotation;
-	private double yRotation;
-	private double zRotation;
-	private final double xTranslation;
-	private final double yTranslation;
-	private final double zTranslation;
+	protected double xRotation;
+	protected double yRotation;
+	protected double zRotation;
+	protected final double xTranslation;
+	protected final double yTranslation;
+	protected final double zTranslation;
 	public int counter = 0;
 
 	/**Constructs a Pose with the given vector values.

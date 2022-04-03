@@ -76,8 +76,8 @@ public class MarkerOffset extends Pose {
 			return false;
 		}
 		MarkerOffset mo = (MarkerOffset)other;
-		return this.id.equals(mo.id()) && this.xRotation.equals(mo.xRotation()) && this.yRotation.equals(mo.yRotation()) && this.zRotation.equals(mo.zRotation()) && 
-					this.xTranslation.equals(mo.xTranslation()) && this.yTranslation.equals(mo.yTranslation()) && this.zTranslation.equals(mo.zTranslation());
+		return this.id == mo.id() && this.xRotation == mo.xRotation() && this.yRotation == mo.yRotation() && this.zRotation == mo.zRotation() && 
+				this.xTranslation == mo.xTranslation() && this.yTranslation == mo.yTranslation() && this.zTranslation == mo.zTranslation();
 	}
 
 	/**Returns a String representation of this MarkerOffset.
