@@ -36,8 +36,8 @@ public class MaskSimulation implements Simulation {
         // Draw v axis
         Mat v_top = new Mat(3, 1, CvType.CV_64FC1);
         Mat v_bot = new Mat(3, 1, CvType.CV_64FC1);
-        Core.add(MarkerUtils.scalarMultiply(v,width/2),p2,v_top);
-        Core.subtract(p2,MarkerUtils.scalarMultiply(v,width/2),v_bot);
+        Core.add(MatMathUtils.scalarMultiply(v,width/2),p2,v_top);
+        Core.subtract(p2,MatMathUtils.scalarMultiply(v,width/2),v_bot);
         MatOfPoint3f v_top_point = new MatOfPoint3f(new Point3(v_top.get(0,0)[0],v_top.get(1,0)[0],v_top.get(2,0)[0]));
         MatOfPoint3f v_bot_point = new MatOfPoint3f(new Point3(v_bot.get(0,0)[0],v_bot.get(1,0)[0],v_bot.get(2,0)[0]));
         MatOfPoint2f v_top_projected = new MatOfPoint2f();
@@ -80,13 +80,13 @@ public class MaskSimulation implements Simulation {
             Double v_mag=para_c*Math.pow(u_mag,2.0);
             
             // Multiply by unit vectors u and v
-            Mat u_3d=MarkerUtils.scalarMultiply(u, u_mag);
-            Mat v_3d=MarkerUtils.scalarMultiply(v, v_mag);
+            Mat u_3d=MatMathUtils.scalarMultiply(u, u_mag);
+            Mat v_3d=MatMathUtils.scalarMultiply(v, v_mag);
 
             Mat p_3d = new Mat(3, 1, CvType.CV_64FC1);
             Core.add(u_3d,v_3d,p_3d);
             Core.add(p_3d,p2,p_3d);
-            Core.add(p_3d,MarkerUtils.scalarMultiply(v,offset),p_3d);
+            Core.add(p_3d,MatMathUtils.scalarMultiply(v,offset),p_3d);
 
             world_para.add(new Point3(p_3d.get(0,0)[0],p_3d.get(1,0)[0],p_3d.get(2,0)[0]));
         }
@@ -138,8 +138,8 @@ public class MaskSimulation implements Simulation {
         Experimental: planar projection for finer 3D curve fitting
 
         // Project vectors v_p2p1 and v_p2p3 onto norm
-        Mat proj_p2p1 = MarkerUtils.dotMultiply(v_p2p1,norm);
-        Mat proj_p2p3 = MarkerUtils.dotMultiply(v_p2p3,norm);
+        Mat proj_p2p1 = MatMathUtils.dotMultiply(v_p2p1,norm);
+        Mat proj_p2p3 = MatMathUtils.dotMultiply(v_p2p3,norm);
 
         // Subtract norm projected vectors to derive planar coordinates
         Mat planar_p2p1 = new Mat(3, 1, CvType.CV_64FC1);Core.subtract(v_p2p1,proj_p2p1,planar_p2p1);
@@ -151,9 +151,9 @@ public class MaskSimulation implements Simulation {
         Mat ey = new Mat(3, 1, CvType.CV_64FC1);ey.put(0, 0, 0);ey.put(1, 0, 1);ey.put(2, 0, 0);
         Mat ez = new Mat(3, 1, CvType.CV_64FC1);ez.put(0, 0, 0);ez.put(1, 0, 0);ez.put(2, 0, 1);
         Mat rot_t = new Mat();Calib3d.Rodrigues(tracking_pose.rotationVector(), rot_t);
-        Mat u = MarkerUtils.matMultiply(rot_t, ex);
-        Mat v = MarkerUtils.matMultiply(rot_t, ey);
-        Mat w = MarkerUtils.matMultiply(rot_t, ez);
+        Mat u = MatMathUtils.matMultiply(rot_t, ex);
+        Mat v = MatMathUtils.matMultiply(rot_t, ey);
+        Mat w = MatMathUtils.matMultiply(rot_t, ez);
 
         // Draw v axis
         answer = drawVaxis(answer,p2,width,v,ci,dMat,zeros);
@@ -188,7 +188,7 @@ public class MaskSimulation implements Simulation {
         Mat t_rot_p1 = new Mat();Core.transpose(rot_p1, t_rot_p1);
 
         // Find transformation rotation mat
-        Mat rot_trans = MarkerUtils.matMultiply(rot_p2,t_rot_p1);
+        Mat rot_trans = MatMathUtils.matMultiply(rot_p2,t_rot_p1);
         // Axis angle
         Mat axis_angle = MatMathUtils.toAxisAngle(rot_trans);
 
@@ -225,7 +225,7 @@ public class MaskSimulation implements Simulation {
 
             // Anchor point on v axis
             Mat axis_ref = new Mat(3, 1, CvType.CV_64FC1);
-            Core.add(MarkerUtils.scalarMultiply(v,y),p2,axis_ref);
+            Core.add(MatMathUtils.scalarMultiply(v,y),p2,axis_ref);
 
             // vector length
             double vec_scale = scale/3*(-1*ang_defl_roll*y + ang_defl_yaw);
@@ -234,8 +234,8 @@ public class MaskSimulation implements Simulation {
             // End of vector
             Mat vec_end1 = new Mat(3, 1, CvType.CV_64FC1);
             Mat vec_end2 = new Mat(3, 1, CvType.CV_64FC1);
-            Core.add(MarkerUtils.scalarMultiply(u,vec_scale),axis_ref,vec_end1);
-            Core.subtract(axis_ref,MarkerUtils.scalarMultiply(u,vec_scale),vec_end2);
+            Core.add(MatMathUtils.scalarMultiply(u,vec_scale),axis_ref,vec_end1);
+            Core.subtract(axis_ref,MatMathUtils.scalarMultiply(u,vec_scale),vec_end2);
 
             line_def.add(new Point3(axis_ref.get(0,0)[0],axis_ref.get(1,0)[0],axis_ref.get(2,0)[0]));
             line_def.add(new Point3(vec_end1.get(0,0)[0],vec_end1.get(1,0)[0],vec_end1.get(2,0)[0]));

@@ -9,12 +9,12 @@ import java.lang.Math;
 */
 
 public class Pose {
-	private double xRotation;
-	private double yRotation;
-	private double zRotation;
-	private final double xTranslation;
-	private final double yTranslation;
-	private final double zTranslation;
+	protected double xRotation;
+	protected double yRotation;
+	protected double zRotation;
+	protected final double xTranslation;
+	protected final double yTranslation;
+	protected final double zTranslation;
 	public int counter = 0;
 
 	/**Constructs a Pose with the given vector values.
@@ -160,7 +160,7 @@ public class Pose {
 		translationVector3D.put(0, 0, value1);
 		translationVector3D.put(1, 0, value2);
 		translationVector3D.put(2, 0, value3);*/
-		translationVector3D = MarkerUtils.scalarMultiply(MarkerUtils.matMultiply(r, tvec), -1);
+		translationVector3D = MatMathUtils.scalarMultiply(MatMathUtils.matMultiply(r, tvec), -1);
 		Calib3d.Rodrigues(r, rotationVector3D);
 		return new Pose(rotationVector3D, translationVector3D);
 	}
@@ -168,6 +168,7 @@ public class Pose {
 	/**Returns a hash code for this Pose.
 	@return a hash code for this Pose.
 	*/
+	@Override
 	public int hashCode(){
 		return (int)(this.zRotation + this.yRotation + this.zRotation + this.xTranslation + this.yTranslation + this.zTranslation);
 	}
@@ -177,6 +178,7 @@ public class Pose {
 	@param other The object to compare to
 	@return a boolean indicating whether this Pose is equals to the provided object.
 	*/
+	@Override
 	public boolean equals(Object other){
 		if(other == null){
 			return false;
@@ -206,9 +208,9 @@ public class Pose {
 	}
 
 	private boolean equalsInternal(Pose mo, double tolerance){
-		return withinTolerance(this.xRotation, mo.xRotation, tolerance) && withinTolerance(this.yRotation, mo.yRotation, tolerance) && 
-				withinTolerance(this.zRotation, mo.zRotation, tolerance) && withinTolerance(this.xTranslation, mo.xTranslation, tolerance) &&
-				withinTolerance(this.yTranslation, mo.yTranslation, tolerance) &&  withinTolerance(this.zTranslation, mo.zTranslation, tolerance);
+		return withinTolerance(this.xRotation, mo.xRotation(), tolerance) && withinTolerance(this.yRotation, mo.yRotation(), tolerance) && 
+				withinTolerance(this.zRotation, mo.zRotation(), tolerance) && withinTolerance(this.xTranslation, mo.xTranslation(), tolerance) &&
+				withinTolerance(this.yTranslation, mo.yTranslation(), tolerance) &&  withinTolerance(this.zTranslation, mo.zTranslation(), tolerance);
 	}
 
 	private static boolean withinTolerance(double first, double second, double tolerance){
@@ -218,6 +220,7 @@ public class Pose {
 	/**Returns a String representation of this Pose.
 	@return a String representation of this Pose.
 	*/
+	@Override
 	public String toString(){
 		return "Pose - rvec: [" + this.xRotation + ", " + this.yRotation + ", " + this.zRotation + 
 					"] tvec: [" + this.xTranslation + ", " + this.yTranslation + ", " + this.zTranslation + "]";

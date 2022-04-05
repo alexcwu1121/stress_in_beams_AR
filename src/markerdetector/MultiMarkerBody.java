@@ -114,72 +114,15 @@ public class MultiMarkerBody{
    }
 
    public Mat predictTranslation(Integer id, Mat rotation, Mat translation){
-      Mat rotationMatrix = new Mat();
-      Calib3d.Rodrigues(rotation, rotationMatrix);
-      Mat predictedTranslation = new Mat(3, 1, CvType.CV_64FC1);
-
-      Mat transOffset = Mat.zeros(3, 1, CvType.CV_64FC1);
-      transOffset.put(0, 0, offsets.get(id).xTranslation());
-      transOffset.put(1, 0, offsets.get(id).yTranslation());
-      transOffset.put(2, 0, offsets.get(id).zTranslation());
-
-      transOffset = MarkerUtils.matMultiply(rotationMatrix, transOffset);
-
-      double[] xtransFinal = translation.get(0, 0);
-      double[] ytransFinal = translation.get(0, 0);
-      double[] ztransFinal = translation.get(0, 0);
-      xtransFinal[0] = translation.get(0, 0)[0] + transOffset.get(0, 0)[0];
-      ytransFinal[0] = translation.get(1, 0)[0] + transOffset.get(1, 0)[0];
-      ztransFinal[0] = translation.get(2, 0)[0] + transOffset.get(2, 0)[0];
-      predictedTranslation.put(0, 0, xtransFinal);
-      predictedTranslation.put(1, 0, ytransFinal);
-      predictedTranslation.put(2, 0, ztransFinal);
-
-      return predictedTranslation;
+      MarkerOffset pOff = offsets.get(id);
+      Pose proxyPose = pOff;
+      return MatMathUtils.predictTranslation(rotation, translation, proxyPose);
    }
 
    public Mat predictRotation(Integer id, Mat rotation){
-      Mat predictedRotation = new Mat(3, 1, CvType.CV_64FC1);
-      Mat rotationMatrix = new Mat();
-      Calib3d.Rodrigues(rotation, rotationMatrix);
-
-      Mat rotOffset = Mat.zeros(1, 3, CvType.CV_64FC1);
-      rotOffset.put(0, 0, offsets.get(id).xRotation());
-      rotOffset.put(0, 1, offsets.get(id).yRotation());
-      rotOffset.put(0, 2, offsets.get(id).zRotation());
-
-      Mat xRotOffset = Mat.zeros(3, 3, CvType.CV_64FC1);
-      xRotOffset.put(0, 0, 1);
-      xRotOffset.put(1, 1, Math.cos(rotOffset.get(0, 0)[0]));
-      xRotOffset.put(1, 2, -Math.sin(rotOffset.get(0, 0)[0]));
-      xRotOffset.put(2, 1, Math.sin(rotOffset.get(0, 0)[0]));
-      xRotOffset.put(2, 2, Math.cos(rotOffset.get(0, 0)[0]));
-
-      Mat yRotOffset = Mat.zeros(3, 3, CvType.CV_64FC1);
-      yRotOffset.put(0, 0, Math.cos(rotOffset.get(0, 1)[0]));
-      yRotOffset.put(2, 0, -Math.sin(rotOffset.get(0, 1)[0]));
-      yRotOffset.put(0, 2, Math.sin(rotOffset.get(0, 1)[0]));
-      yRotOffset.put(2, 2, Math.cos(rotOffset.get(0, 1)[0]));
-      yRotOffset.put(1, 1, 1);
-
-      Mat zRotOffset = Mat.zeros(3, 3, CvType.CV_64FC1);
-      zRotOffset.put(0, 0, Math.cos(rotOffset.get(0, 2)[0]));
-      zRotOffset.put(1, 0, Math.sin(rotOffset.get(0, 2)[0]));
-      zRotOffset.put(0, 1, -Math.sin(rotOffset.get(0, 2)[0]));
-      zRotOffset.put(1, 1, Math.cos(rotOffset.get(0, 2)[0]));
-      zRotOffset.put(2, 2, 1);
-
-      Mat xRotated = new Mat(3, 1, CvType.CV_64FC1);
-      Mat yRotated = new Mat(3, 1, CvType.CV_64FC1);
-      Mat zRotated = new Mat(3, 1, CvType.CV_64FC1);
-      zRotated = MarkerUtils.matMultiply(rotationMatrix, zRotOffset);
-      yRotated = MarkerUtils.matMultiply(zRotated, yRotOffset);
-      xRotated = MarkerUtils.matMultiply(yRotated, xRotOffset);
-
-      Mat finalRotVector = new Mat();
-      Calib3d.Rodrigues(xRotated, finalRotVector);
-
-      return finalRotVector;
+      MarkerOffset pOff = offsets.get(id);
+      Pose proxyPose = pOff;
+      return MatMathUtils.predictRotation(rotation, proxyPose);
    }
 
    public Pair<LinkedList<Mat>,LinkedList<Mat>> filterPose(LinkedList<Mat> rPreds, LinkedList<Mat> tPreds){

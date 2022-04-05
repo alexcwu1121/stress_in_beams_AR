@@ -48,7 +48,7 @@ public class TensorSimulation implements Simulation {
 
     public Mat drawStress(Mat answer, Mat center, Mat offset, Mat u, double magnitude, CalibrationInformation ci, MatOfDouble dMat, Boolean shear){
         Mat anchor = new Mat();Core.add(center,offset,anchor);
-        Mat end = new Mat();Core.add(anchor,MarkerUtils.scalarMultiply(u,Math.abs(magnitude)),end);
+        Mat end = new Mat();Core.add(anchor,MatMathUtils.scalarMultiply(u,Math.abs(magnitude)),end);
         List<Point3> endpoints = new ArrayList<Point3>();
 
         endpoints.add(new Point3(anchor.get(0,0)[0],anchor.get(1,0)[0],anchor.get(2,0)[0]));
@@ -120,9 +120,9 @@ public class TensorSimulation implements Simulation {
         Mat ey = Mat.zeros(3, 1, CvType.CV_64FC1);ey.put(1, 0, 1);
         Mat ez = Mat.zeros(3, 1, CvType.CV_64FC1);ez.put(2, 0, 1);
         Mat rot_t = new Mat();Calib3d.Rodrigues(tracking_pose.rotationVector(), rot_t);
-        Mat u = MarkerUtils.matMultiply(rot_t, MarkerUtils.matMultiply(zRotm,ex));
-        Mat v = MarkerUtils.matMultiply(rot_t, MarkerUtils.matMultiply(zRotm,ey));
-        Mat w = MarkerUtils.matMultiply(rot_t, MarkerUtils.matMultiply(zRotm,ez));
+        Mat u = MatMathUtils.matMultiply(rot_t, MatMathUtils.matMultiply(zRotm,ex));
+        Mat v = MatMathUtils.matMultiply(rot_t, MatMathUtils.matMultiply(zRotm,ey));
+        Mat w = MatMathUtils.matMultiply(rot_t, MatMathUtils.matMultiply(zRotm,ez));
 
         // Euler rotation difference from coordinate frame of mmb 1 to mmb 3
         // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
@@ -131,7 +131,7 @@ public class TensorSimulation implements Simulation {
         Mat t_rot_p1 = new Mat();Core.transpose(rot_p1, t_rot_p1);
 
         // Find transformation rotation mat
-        Mat rot_trans = MarkerUtils.matMultiply(rot_p2,t_rot_p1);
+        Mat rot_trans = MatMathUtils.matMultiply(rot_p2,t_rot_p1);
         Mat axis_angle = MatMathUtils.toAxisAngle(rot_trans);
 
         // Dot product axis to ey and ez, then multiply by angle to determing roll and yaw deflection
@@ -164,11 +164,11 @@ public class TensorSimulation implements Simulation {
         rot_plane.put(1, 1, Math.cos(z_rot));
         Mat rot_plane_t = new Mat();Core.transpose(rot_plane,rot_plane_t);
         // Final stress tensor
-        Mat sigma_prime = MarkerUtils.matMultiply(MarkerUtils.matMultiply(rot_plane,sigma),rot_plane_t);
+        Mat sigma_prime = MatMathUtils.matMultiply(MatMathUtils.matMultiply(rot_plane,sigma),rot_plane_t);
 
         // Corner offsets
-        Mat u_off = MarkerUtils.scalarMultiply(u,side_length/2);
-        Mat v_off = MarkerUtils.scalarMultiply(v,side_length/2);
+        Mat u_off = MatMathUtils.scalarMultiply(u,side_length/2);
+        Mat v_off = MatMathUtils.scalarMultiply(v,side_length/2);
 
         // Project tensor world coordinates to camera frame
         Mat center = new Mat();Core.add(rel_pos,p2,center);
@@ -198,22 +198,22 @@ public class TensorSimulation implements Simulation {
         Imgproc.fillPoly(tensor_image,tensor_projection_list,new Scalar(0, 255, 0));
         Core.addWeighted(answer,1,tensor_image,0.7,1,answer);
 
-        Mat shear_offset1 = new Mat();Core.add(MarkerUtils.scalarMultiply(u_off,1.1),v_off,shear_offset1);
-        Mat shear_offset2 = new Mat();Core.add(u_off,MarkerUtils.scalarMultiply(v_off,1.1),shear_offset2);
-        Mat shear_offset5 = new Mat();Core.add(MarkerUtils.scalarMultiply(u_off,-1.1),MarkerUtils.scalarMultiply(v_off,-1.0),shear_offset5);
-        Mat shear_offset6 = new Mat();Core.add(MarkerUtils.scalarMultiply(u_off,-1.0),MarkerUtils.scalarMultiply(v_off,-1.1),shear_offset6);
+        Mat shear_offset1 = new Mat();Core.add(MatMathUtils.scalarMultiply(u_off,1.1),v_off,shear_offset1);
+        Mat shear_offset2 = new Mat();Core.add(u_off,MatMathUtils.scalarMultiply(v_off,1.1),shear_offset2);
+        Mat shear_offset5 = new Mat();Core.add(MatMathUtils.scalarMultiply(u_off,-1.1),MatMathUtils.scalarMultiply(v_off,-1.0),shear_offset5);
+        Mat shear_offset6 = new Mat();Core.add(MatMathUtils.scalarMultiply(u_off,-1.0),MatMathUtils.scalarMultiply(v_off,-1.1),shear_offset6);
 
         // Draw stress vectors onto tensor. Generally will only be eight.
         // Mat answer, Mat center, Mat offset, double magnitude, CameraInformation ci, Mat dMat
         answer = drawStress(answer, center, u_off, u, sigma_prime.get(0,0)[0],ci,dMat,false);
-        answer = drawStress(answer, center, MarkerUtils.scalarMultiply(u_off,-1), MarkerUtils.scalarMultiply(u,-1), sigma_prime.get(0,0)[0],ci,dMat,false);
+        answer = drawStress(answer, center, MatMathUtils.scalarMultiply(u_off,-1), MatMathUtils.scalarMultiply(u,-1), sigma_prime.get(0,0)[0],ci,dMat,false);
         answer = drawStress(answer, center, v_off, v, sigma_prime.get(1,1)[0],ci,dMat,false);
-        answer = drawStress(answer, center, MarkerUtils.scalarMultiply(v_off,-1), MarkerUtils.scalarMultiply(v,-1), sigma_prime.get(1,1)[0],ci,dMat,false);
+        answer = drawStress(answer, center, MatMathUtils.scalarMultiply(v_off,-1), MatMathUtils.scalarMultiply(v,-1), sigma_prime.get(1,1)[0],ci,dMat,false);
 
-        answer = drawStress(answer, center, shear_offset2, MarkerUtils.scalarMultiply(u,-1), -1*sigma_prime.get(0,1)[0],ci,dMat,true);
-        answer = drawStress(answer, center, shear_offset1, MarkerUtils.scalarMultiply(v,-1), -1*sigma_prime.get(0,1)[0],ci,dMat,true);
-        answer = drawStress(answer, center, shear_offset5, MarkerUtils.scalarMultiply(v,1), -1*sigma_prime.get(0,1)[0],ci,dMat,true);
-        answer = drawStress(answer, center, shear_offset6, MarkerUtils.scalarMultiply(u,1), -1*sigma_prime.get(0,1)[0],ci,dMat,true);
+        answer = drawStress(answer, center, shear_offset2, MatMathUtils.scalarMultiply(u,-1), -1*sigma_prime.get(0,1)[0],ci,dMat,true);
+        answer = drawStress(answer, center, shear_offset1, MatMathUtils.scalarMultiply(v,-1), -1*sigma_prime.get(0,1)[0],ci,dMat,true);
+        answer = drawStress(answer, center, shear_offset5, MatMathUtils.scalarMultiply(v,1), -1*sigma_prime.get(0,1)[0],ci,dMat,true);
+        answer = drawStress(answer, center, shear_offset6, MatMathUtils.scalarMultiply(u,1), -1*sigma_prime.get(0,1)[0],ci,dMat,true);
 
         return answer;
     }

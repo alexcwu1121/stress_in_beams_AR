@@ -59,13 +59,13 @@ public class CalibrateCamera {
 
         jsonObject.put("image_width", imageSize.width);
         jsonObject.put("image_height", imageSize.height);
-        jsonObject.put("camera_matrix", MarkerUtils.matToJSON(cameraMatrix));
-        jsonObject.put("distortion_coefficients", MarkerUtils.matToJSON(distCoeffs));
+        jsonObject.put("camera_matrix", MatMathUtils.matToJSON(cameraMatrix));
+        jsonObject.put("distortion_coefficients", MatMathUtils.matToJSON(distCoeffs));
         jsonObject.put("avg_reprojection_error", totalAvgErr);
 
-        MarkerUtils.printmat(cameraMatrix);
+        MatMathUtils.printmat(cameraMatrix);
         System.out.println();
-        MarkerUtils.printmat(distCoeffs);
+        MatMathUtils.printmat(distCoeffs);
 
         try{
             FileWriter file = new FileWriter(filename);
