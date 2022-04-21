@@ -72,23 +72,73 @@ public class Plane extends JPanel {
     @param rotL The rotational vectors of one end of the beam
     @param rotR The rotational vectors of the other end of the beam
     */
-    public void planeUpdate(double rotL[], double rotR[]) {
+    public void planeUpdate(double rotL[], double rotR[], double rotM[]) {
 
-        double lStress = Math.toDegrees(rotL[2]) - Math.toDegrees(rotR[2]);
-        double rStress = Math.toDegrees(rotL[1]) - Math.toDegrees(rotR[1]);
+        // z-rot / firstpose - secondpose 
+        double zStress = Math.toDegrees(rotL[2]) - Math.toDegrees(rotR[2]);
+        // y-rot / firstpose - secondpose 
+        double yStress = Math.toDegrees(rotL[1]) - Math.toDegrees(rotR[1]);
+        double stressAngle = Math.toDegrees(Math.atan(yStress/zStress));
+
+        //Deadzone 
+        if(Math.abs(zStress) < 15 && Math.abs(yStress) < 15){
+            paintGrid(0,0);
+        }
+        //Bending in the y-axis
+        else if (Math.abs(stressAngle) >= 67.5){
+            paintGrid(yStress,0);
+        }
+        else if (67.5 > stressAngle && stressAngle >= 22.5){
+            if (yStress > 0 && zStress > 0){
+                paintGrid((yStress+zStress)/2,(yStress+zStress)/2);
+            }
+            else {
+                paintGrid((yStress+zStress)/2,(yStress+zStress)/2);
+            }
+        }
+        //Bending in the z-axis
+        else if(22.5 > stressAngle && stressAngle >= -22.5){
+            paintGrid(0,zStress);
+        }
+        else if(-22.5 > stressAngle && stressAngle > -67.5){
+            if (zStress > 0){
+                paintGrid(-(-yStress+zStress)/2,(-yStress+zStress)/2);
+            }
+            else {
+                paintGrid((yStress-zStress)/2,-(yStress-zStress)/2);
+            }
+        }
+    }
+
+    public void paintGrid(double yStress, double zStress) {
         int xMiddle = xSpaces / 2;
         int yMiddle = ySpaces / 2;
         int magnifier = 4;
-
         for (int i = 0; i < xSpaces; i++){
             for (int j = 0; j < ySpaces; j++){
-                int lColor = (int)(((double)i / (double)xMiddle - 1) * Math.min(Math.max(lStress, -stressCap), stressCap) * magnifier);
-                int rColor = (int)(((double)j / (double)yMiddle - 1) * Math.min(Math.max(rStress, -stressCap), stressCap) * magnifier);
+                int lColor = (int)(((double)i / (double)xMiddle - 1) * Math.min(Math.max(zStress, -stressCap), stressCap) * magnifier);
+                int rColor = (int)(((double)j / (double)yMiddle - 1) * Math.min(Math.max(yStress, -stressCap), stressCap) * magnifier);
                 int combinedColor = lColor - rColor;
                 if (combinedColor >= 0){
-                    boxes[i][j].setColor(255, Math.max(255 - combinedColor, 0), Math.max(255 - combinedColor, 0));
+                    // BLUE / TENSION
+                    //if (Math.toDegrees(rotM[0]) >=0){
+                        //flipped
+                    //    boxes[i][j].setColor(Math.max(255 - Math.abs(combinedColor), 0), Math.max(255 - Math.abs(combinedColor), 0), 255);
+                    //}
+                    //else{
+                        //orginial
+                        boxes[i][j].setColor(255, Math.max(255 - combinedColor, 0), Math.max(255 - combinedColor, 0));
+                    //}
                 } else {
-                    boxes[i][j].setColor(Math.max(255 - Math.abs(combinedColor), 0), Math.max(255 - Math.abs(combinedColor), 0), 255);
+                    // RED / COMPRESSION
+                    //if (Math.toDegrees(rotM[0]) >=0){
+                        //flipped
+                        //boxes[i][j].setColor(255, Math.max(255 - Math.abs(combinedColor), 0), Math.max(255 - Math.abs(combinedColor), 0));
+                    //}
+                    //else{
+                        //orginial
+                        boxes[i][j].setColor(Math.max(255 - Math.abs(combinedColor), 0), Math.max(255 - Math.abs(combinedColor), 0), 255);
+                    //}
                 }
             }
         }
@@ -99,8 +149,8 @@ public class Plane extends JPanel {
     @param rotL The rotational vectors of one end of the beam
     @param rotR The rotational vectors of the other end of the beam
     */
-    public void planeUpdate(Mat rotL, Mat rotR) {
-        planeUpdate(new double[]{rotL.get(0,0)[0], rotL.get(1,0)[0], rotL.get(2,0)[0]}, new double[]{rotR.get(0,0)[0],rotR.get(1,0)[0],rotR.get(2,0)[0]});
+    public void planeUpdate(Mat rotL, Mat rotR, Mat rotM) {
+        planeUpdate(new double[]{rotL.get(0,0)[0], rotL.get(1,0)[0], rotL.get(2,0)[0]}, new double[]{rotR.get(0,0)[0],rotR.get(1,0)[0],rotR.get(2,0)[0]}, new double[]{rotM.get(0,0)[0], rotM.get(1,0)[0], rotM.get(2,0)[0]});
     }
 
     /**Returns a BufferedImage representing this Plane. The image is in BufferedImage.TYPE_3BYTE_BGR.
