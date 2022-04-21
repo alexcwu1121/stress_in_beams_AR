@@ -1,6 +1,6 @@
 :: Command line arguments: path to class files, path to config files, path to OpenCV installation, any other dependencies.
 :: ./pack.bat ../src ../src/config ../../jar1 ../../jar2
-:: Assumes opencv and its dll file is in jar1 folder, where opencv is in jar1/jar and dll is in jar1/dll
+:: Assumes opencv and its dll file is in jar1 folder
 :: To clean: ./pack.bat clean
 
 ::Cleanup
@@ -18,9 +18,11 @@ set jarpath=%1
 
 ::Copy dependencies
 xcopy /y /i "%2" application\strengths\config
-xcopy /y /i "%3\dll" "application\OpenCV\opencv\build\lib"
+mkdir \application\OpenCV\opencv\build\lib
+mkdir \application\OpenCV\opencv\build\bin
+xcopy /y "%3\opencv_java455.dll" "application\OpenCV\opencv\build\lib\"
 (echo opencv_test) > trashcan\exclude.txt
-xcopy /y /i /exclude:trashcan\exclude.txt "%3\jar" "application\OpenCV\opencv\build\bin"
+xcopy /y /exclude:trashcan\exclude.txt "%3\opencv-455.jar" "application\OpenCV\opencv\build\bin\"
 :loop
 if [%4]==[] goto :done
 xcopy /y /i "%4" "application/dependencies"
