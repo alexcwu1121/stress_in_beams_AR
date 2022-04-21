@@ -71,6 +71,7 @@ public class Plane extends JPanel {
     Updates the colors of all GridSpaces in the grid then repaints the JFrame
     @param rotL The rotational vectors of one end of the beam
     @param rotR The rotational vectors of the other end of the beam
+    @param rotM The rotational vectors of the other center of the beam
     */
     public void planeUpdate(double rotL[], double rotR[], double rotM[]) {
 
@@ -79,38 +80,52 @@ public class Plane extends JPanel {
         // y-rot / firstpose - secondpose 
         double yStress = Math.toDegrees(rotL[1]) - Math.toDegrees(rotR[1]);
         double stressAngle = Math.toDegrees(Math.atan(yStress/zStress));
+        // flipped currently does nothing, its too unstable at the moment, if you uncomment 3 lines below the variable should work
+        boolean flipped = false;
+        //if (rotM[0] > 0) {
+        //    flipped = true;
+        //}
 
         //Deadzone 
         if(Math.abs(zStress) < 15 && Math.abs(yStress) < 15){
-            paintGrid(0,0);
+            paintGrid(0,0,false);
         }
         //Bending in the y-axis
         else if (Math.abs(stressAngle) >= 67.5){
-            paintGrid(yStress,0);
+            paintGrid(yStress,0,flipped);
         }
+        //for sectors in the 1st and 3rd quardrant, y and z both negative/positive
         else if (67.5 > stressAngle && stressAngle >= 22.5){
             if (yStress > 0 && zStress > 0){
-                paintGrid((yStress+zStress)/2,(yStress+zStress)/2);
+                paintGrid((yStress+zStress)/2,(yStress+zStress)/2,flipped);
             }
             else {
-                paintGrid((yStress+zStress)/2,(yStress+zStress)/2);
+                paintGrid((yStress+zStress)/2,(yStress+zStress)/2,flipped);
             }
         }
         //Bending in the z-axis
         else if(22.5 > stressAngle && stressAngle >= -22.5){
-            paintGrid(0,zStress);
+            paintGrid(0,zStress,flipped);
         }
+        //for sectors in the 2nd and 4th quardrant, y xor z negative
         else if(-22.5 > stressAngle && stressAngle > -67.5){
             if (zStress > 0){
-                paintGrid(-(-yStress+zStress)/2,(-yStress+zStress)/2);
+                paintGrid(-(-yStress+zStress)/2,(-yStress+zStress)/2,flipped);
             }
             else {
-                paintGrid((yStress-zStress)/2,-(yStress-zStress)/2);
+                paintGrid((yStress-zStress)/2,-(yStress-zStress)/2,flipped);
             }
         }
     }
 
-    public void paintGrid(double yStress, double zStress) {
+    /**
+    Updates the colors of all GridSpaces in the grid then repaints the JFrame
+    @param yStress The degree rotation of the y-axis between the end poses
+    @param zStress The degree rotation of the z-axis between the end poses
+    @param flip Wether or not the x-axis has a positive rotation
+    */
+    public void paintGrid(double yStress, double zStress, boolean flip) {
+        //If the x-axis has a positive rotation the other rotations flip, this boolean is to conteract that
         int xMiddle = xSpaces / 2;
         int yMiddle = ySpaces / 2;
         int magnifier = 4;
@@ -121,24 +136,24 @@ public class Plane extends JPanel {
                 int combinedColor = lColor - rColor;
                 if (combinedColor >= 0){
                     // BLUE / TENSION
-                    //if (Math.toDegrees(rotM[0]) >=0){
+                    if (flip){
                         //flipped
-                    //    boxes[i][j].setColor(Math.max(255 - Math.abs(combinedColor), 0), Math.max(255 - Math.abs(combinedColor), 0), 255);
-                    //}
-                    //else{
+                        boxes[i][j].setColor(Math.max(255 - Math.abs(combinedColor), 0), Math.max(255 - Math.abs(combinedColor), 0), 255);
+                    }
+                    else{
                         //orginial
                         boxes[i][j].setColor(255, Math.max(255 - combinedColor, 0), Math.max(255 - combinedColor, 0));
-                    //}
+                    }
                 } else {
                     // RED / COMPRESSION
-                    //if (Math.toDegrees(rotM[0]) >=0){
+                    if (flip){
                         //flipped
-                        //boxes[i][j].setColor(255, Math.max(255 - Math.abs(combinedColor), 0), Math.max(255 - Math.abs(combinedColor), 0));
-                    //}
-                    //else{
+                        boxes[i][j].setColor(255, Math.max(255 - Math.abs(combinedColor), 0), Math.max(255 - Math.abs(combinedColor), 0));
+                    }
+                    else{
                         //orginial
                         boxes[i][j].setColor(Math.max(255 - Math.abs(combinedColor), 0), Math.max(255 - Math.abs(combinedColor), 0), 255);
-                    //}
+                    }
                 }
             }
         }
