@@ -1,0 +1,8 @@
+# ignore class files
+**/*.class
+
+# ignore idea folder
+.idea/
+
+# ignore config generated json files
+src/config/*.json
