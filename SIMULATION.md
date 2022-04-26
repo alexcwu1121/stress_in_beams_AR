@@ -138,3 +138,18 @@ public class ExampleSimulation implements Simulation {
  ```
 
  ## Adding a Simulation
+
+ Adding a simulation so it is selectable when you run the software is pretty simple. Most the work for that is taken care of for you. On line 13 in [ConfigGenerator.java](https://github.com/alexcwu1121/stress_in_beams_AR/blob/master/src/config/ConfigGenerator.java) you add the new simulation to the list.
+
+Example:
+
+Before
+ ```java
+"[\"simulation.CompoundMarkerSimulation\",\"simulation.CoordinateTestSimulation\", \"simulation.CrossSimulation\", \"simulation.DividedSimulation\", \"simulation.SimpleSimulation\", \"simulation.MaskSimulation\", \"simulation.TensorSimulation\"]");
+ ```
+ After
+  ```java
+"[\"simulation.CompoundMarkerSimulation\",\"simulation.CoordinateTestSimulation\", \"simulation.CrossSimulation\", \"simulation.DividedSimulation\", \"simulation.SimpleSimulation\", \"simulation.MaskSimulation\", \"simulation.TensorSimulation\",\"simulation.ExampleSimulation\"]");
+ ```
+
+ For any more complex simulations that require more than the standard variables, I highly recommend looking at [TensorSim PR](https://github.com/alexcwu1121/stress_in_beams_AR/pull/30/files). This is the perfect example of a new simulation getting added.
