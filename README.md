@@ -29,3 +29,5 @@ To run the program (due to issues with WSL detecting video cameras on Windows, P
 This command is specifically for Powershell, where -Djava.library.path is in the quotes as it is misinterpreted by the compiler.
 
 The program will ask you to calibrate your camera on your first run. See [CALIBRATION.md](https://github.com/alexcwu1121/stress_in_beams_AR/blob/master/CALIBRATION.md).
+
+See [BEAM.md](https://github.com/alexcwu1121/stress_in_beams_AR/blob/master/BEAM.md) for information on making a beam, and see [SIMULATION.md](https://github.com/alexcwu1121/stress_in_beams_AR/blob/master/SIMULATION.md) for information on making a simulation.
