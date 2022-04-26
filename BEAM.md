@@ -9,3 +9,4 @@ Next, you will need to get a foam beam that bends easily. Getting your hands on 
 Once you have both of these you will need to mount the MultiMarkerBodies to the beam. In the example below, the flat piece that the MultiMarkerBodies are glued to were 3D printed specifically for this purpose. Then duct tape was used to strap the MultiMarkerBodies to beam.
 
 Example of complete beam:
+![Beam](https://user-images.githubusercontent.com/75342856/165336434-7d52f9af-62ea-4ac2-932e-d629ff291277.jpg)
